@@ -50,7 +50,9 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 - a clean reusable makefile
   CDOS 4.1 tools utilities on CCPM-86 2.0/CDOS 3.2
 - clean up code duplicates
-- more tools accumulations
+- more tools/experiments
+- sort out why cpmtools refuses to work with 320kb (for testing I use single face 160K
+  images). ibmpc-514ds does not seem to work
 
 ## Quick points on CP/M-86
 Although being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
