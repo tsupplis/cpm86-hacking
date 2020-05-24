@@ -58,9 +58,10 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 - explore further CP/M-86 Big Brothers (PCP/M 2.04 and CCP/M 3.1). At first glance, they
 are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interface of CP/M-86 but CCP/M-86 has a lot of quirks and PCP/M Keyboard configuration is a bit tricky (Fully IBM PC compatible?) .... to be explored
 - deliver a guide to rebuild CP/M-86 from its sources with all the patches, AT support and 2020 look and feel. It works well but publishing the fixes and the code may not be allowed. all sources of information and code to start were found on (http://www.cpm.z80.de/source.html). It just required a lot of effort to compare/consolidate code, annotations, patches and comparison with existing binary versions. A lot of fun.
+- try to pull/port a version of Emacs or VI on CP/M-86. I could not find one....
 
 ## Quick points on CP/M-86
-Although being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
+Despite being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
 - DR CB86 2.0 (http://www.cpm.z80.de/binary.html)
 - DR C86 1.32 (http://www.cpm.z80.de/binary.html)
 - Aztec C 3.2 (Although Aztec C 4.10 (ANSI) cross compilation from DOS is better) (https://www.aztecmuseum.ca/compilers.htm)
@@ -93,8 +94,7 @@ tinst) and is in english. Poly pascal is also in english but the message file an
 
 Macro assembler, C, Pascal, Structure Basic ... what else do we need?
 
-Cross Compilation can be done either using DOS emulation (emu2, pce) or using a hybrid
-OS
+Cross Compilation can be done either using DOS emulation (emu2, pce) or using a hybrid OS
 - Concurrent DOS 6.21 XM
 - DOS Plus 1.2
 
@@ -105,11 +105,11 @@ A few CP/M-86 emulators for DOS exist (ame86.exe, cpm86.exe) unfortunately their
 are not to be seen anywhere and they woulld need a bit of maintenance. only rudimentary
 programs work.
 
-Finally, Assembly using asm86 and gencmd can also be done but it needs to be done on CP/M environment (CP/M-80 or CPM-86 derivatives can be used)
+Finally, Assembly using asm86 and gencmd can also be done but it needs to be done on CP/M environments (CP/M-80 or CPM-86 derivatives can be used)
 
 It is a bit lacking on the tooling side though
-- VE+ 2.03 is really the only editor I found
+- VE+ 2.03 is really the only strong editor I found (There is also TED a basic editor that allows you to stay away from ED). 
 - Automation through submit is very very rudimentary (no dream of makefiles)
-- There is no real solid CP/M-86 emulation... But piggy backing on emu2 perhaps?
+- There is no real solid CP/M-86 emulation as mentioned... But piggy backing the INT E0H API end point on emu2 perhaps? after all the 2 CP/M-86 and DOS 1.1 APIs are pretty much aligned...
 
 Still it is a funny bit of discovery and archeology
