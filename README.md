@@ -30,6 +30,7 @@ Cross Linker: DOS -> CPM-86 & CDOS-286      1/2/86
 RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 ```
 - The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2)
+- mtools 4 and cpmtools 2.20
 
 ## PCE tools shortcuts
 - pcetime has no option, It displays and sets up the clock using
