@@ -9,12 +9,14 @@ pce emulator tools to CP/M-86
 - pceinit (a combination of clear screen pcetime and pcever as CP/M-86
   start up command
 
-All the tools are working on
+All the tools are working on 
 - CP/M-86 1.1
 - Concurrent CP/M 3.1
 - Concurrent DOS 3.2 to 6.21
 - Personal CP/M 2.04
 - DOS Plus 1.2
+
+Those OSes work Incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
 ## Tools used
 - CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html)
