@@ -6,7 +6,7 @@ pce emulator tools to CP/M-86
 - pceexit
 - pcever
 - pcemnt
-- pceinit (a combination of clear screan pcetime and pcever as CP/M-86
+- pceinit (a combination of clear screen pcetime and pcever as CP/M-86
   start up command
 
 All the tools are working on
