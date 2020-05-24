@@ -52,3 +52,17 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 - clean up code duplicates
 - more tools accumulations
 
+## Quick points on CP/M-86
+Although being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
+- DR cbasic 2.0
+- Aztec C 3.2
+- Turbo Pascal 3.01A and Poly Pascal (Turbo Pascal Sibling)
+- RASM86 Macro Assembler
+
+It is a bit lacking on the tooling side though
+- VE+ 2.03 is really the only editor I found
+- Automation through submit is very very rudimentary (no dream of makefiles)
+- There is no real solid CP/M-86 emulation... But piggy backing on emu2 perhaps?
+
+Still it is a funny bit of discovery and archeology
+
