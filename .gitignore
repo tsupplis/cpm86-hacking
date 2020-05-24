@@ -1,0 +1,10 @@
+Makefile
+.D*
+*.log
+*.cfg
+.*.swp
+*.obj
+*.img
+*.sym
+*.lst
+.vscode
