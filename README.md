@@ -10,24 +10,20 @@ pce emulator tools to CP/M-86
   start up command
 
 All the tools are working on
-- CP/M-86
+- CP/M-86 1.1
 - Concurrent CP/M 3.1
 - Concurrent DOS 3.2 to 6.21
 - Personal CP/M 2.04
-- DosPlus 1.2
+- DOS Plus 1.2
+
 
 ## Tools used
-- CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources 
-  - CP/M-86, CCP/M-86 and PCP/M-2.0 can be found on
-        - http://www.cpm.z80.de/binary.html
-        - http://www.cpm.z80.de/source.html
-  - DOS PLus 1.2 and Patched kernel can be found on 
-        - https://www.seasip.info/Cpm/dosplus.html
-- The Excellent PCE emulator
-        - http://www.hampa.ch/pce/pce-ibmpc.html
-- rasm86/linkcmd dos version from Digital Research
-- The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux
-        - https://github.com/dmsc/emu2
+- CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html)
+  - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
+  - DOS Plus 1.2 and Patched kernel can be found on (https://www.seasip.info/Cpm/dosplus.html)
+- The Excellent PCE emulator (http://www.hampa.ch/pce/pce-ibmpc.html)
+- rasm86/linkcmd, DOS version from Digital Research (http://www.cpm.z80.de/binary.html)
+- The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2)
 
 ## PCE tools shortcuts
 - pcetime has no option, It displays and sets up the clock using
@@ -35,6 +31,8 @@ All the tools are working on
     - Using System Variable Control Block on BDOS= 2.2
 - pcemnt needs to accomodate CCP uppercasing so an toggle character '^' is used to this effect:
     - /Mnt^/User/^JOhn/^test.img becomes /mnt/USERS/john/TEST.IMG
+
+![CP/M-86 1.1](images/cpm86.png)
 
 ## To dos
 - pcetime to adjust seconds on BDOS >=3.0?
