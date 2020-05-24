@@ -53,13 +53,62 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 - more tools/experiments
 - sort out why cpmtools refuses to work with 320kb (for testing I use single face 160K
   images). ibmpc-514ds does not seem to work
+- explore further CP/M-86 Big Brothers (PCP/M 2.04 and CCP/M 3.1). At first glance, they
+are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interface of CP/M-86 but CCP/M-86 has a lot of quirks and PCP/M Keyboard configuration is a bit tricky (Fully IBM PC compatible?) .... to be explored
+- deliver a guide to rebuild CP/M-86 from its sources with all the patches, AT support and 2020 look and feel. It works well but publishing the fixes and the code may not be allowed. all sources of information and code to start were found on (http://www.cpm.z80.de/source.html). It just required a lot of effort to compare/consolidate code, annotations, patches and comparison with existing binary versions. A lot of fun.
 
 ## Quick points on CP/M-86
 Although being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
-- DR cbasic 2.0
-- Aztec C 3.2
-- Turbo Pascal 3.01A and Poly Pascal (Turbo Pascal Sibling)
+- DR CB86 2.0
+- DR C86 1.32
+- Aztec C 3.2 (Although Aztec C 4.10 (ANSI) cross compilation from DOS is better)
+- Turbo Pascal 3.01A and Poly Pascal 3.1 (Turbo Pascal Sibling)
 - RASM86 Macro Assembler
+- Microsoft Basic and Personal Basic Interpreters
+- PL/M-86 (Only cross compilation from DOS)
+
+DR tools are available through (http://www.cpm.z80.de/binary.html) and many other sources.
+I found the last release of Turbo Pascal and Poly Pascal:
+- (https://rc700.dk/software.php?name=RC750_TurboPascal_v3.01a)
+- (https://rc700.dk/software.php?name=RC759_PolyPascal_v3.1) 
+
+But the files need to be extracted from disk images using cpmtools using the following definition:
+
+```
+diskdef rc75x
+  seclen 1024
+  tracks 154
+  sectrk 8
+  blocksize 2048
+  maxdir 512
+  boottrk 4
+  os 3
+end
+```
+
+Turbo Pascal 3.01A is the last releasse on CP/M-86 (Don't forget to configure it using
+tinst) and is in english. Poly pascal is also in english but the message file and the online help are in Danish. Not a big deal to translate them. Poly Pascal is really a twin, sibling or ancestor of Turbo Pascal. Kinda cool to play with it.
+
+
+Macro assembler, C, Pascal, Structure Baic ... what else do we need?
+
+Cross Compilation can be done either using DOS emulation (emu2, pce) or using a hybrid
+OS
+- Concurrent DOS 6.21 XM
+- DOS Plus 1.2
+
+Run all the tools above (Both in their DOS and CP/M version) and you can test directly
+the cmd binaries.
+
+A few CP/M-86 emulators for DOS exist (ame86, cpm86.exe
+- DOS Plus 1.2
+
+Run all the tools above (Both in their DOS and CP/M version) and you can test directly
+
+A few CP/M-86 emulators for DOS exist (ame86.exe, cpm86.exe) unfortunately their sources
+are not to be seen anywhere and they woulld need a bit of maintenance. only rudimentary
+programs work
+
 
 It is a bit lacking on the tooling side though
 - VE+ 2.03 is really the only editor I found
@@ -67,4 +116,3 @@ It is a bit lacking on the tooling side though
 - There is no real solid CP/M-86 emulation... But piggy backing on emu2 perhaps?
 
 Still it is a funny bit of discovery and archeology
-
