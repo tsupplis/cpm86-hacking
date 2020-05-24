@@ -31,7 +31,7 @@ Cross Linker: DOS -> CPM-86 & CDOS-286      1/2/86
 ```
 RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 ```
-- The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2)
+- The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2). This is an incredible way to bring dos command line development tools to a modern and up to date shell/make/whatever based dev environment. Another stunning emulator. Emu2 and PCE are an incredible pair.
 - mtools 4 and cpmtools 2.20
 
 ## PCE tools shortcuts
