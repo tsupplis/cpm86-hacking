@@ -61,12 +61,12 @@ are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interfac
 
 ## Quick points on CP/M-86
 Although being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
-- DR CB86 2.0
-- DR C86 1.32
-- Aztec C 3.2 (Although Aztec C 4.10 (ANSI) cross compilation from DOS is better)
+- DR CB86 2.0 (http://www.cpm.z80.de/binary.html)
+- DR C86 1.32 (http://www.cpm.z80.de/binary.html)
+- Aztec C 3.2 (Although Aztec C 4.10 (ANSI) cross compilation from DOS is better) (https://www.aztecmuseum.ca/compilers.htm)
 - Turbo Pascal 3.01A and Poly Pascal 3.1 (Turbo Pascal Sibling)
-- RASM86 Macro Assembler
-- Microsoft Basic and Personal Basic Interpreters
+- RASM86 Macro Assembler (http://www.cpm.z80.de/binary.html)
+- Microsoft Basic and Personal Basic Interpreters 
 - PL/M-86 (Only cross compilation from DOS)
 
 DR tools are available through (http://www.cpm.z80.de/binary.html) and many other sources.
@@ -91,26 +91,21 @@ end
 Turbo Pascal 3.01A is the last releasse on CP/M-86 (Don't forget to configure it using
 tinst) and is in english. Poly pascal is also in english but the message file and the online help are in Danish. Not a big deal to translate them. Poly Pascal is really a twin, sibling or ancestor of Turbo Pascal. Kinda cool to play with it.
 
-
-Macro assembler, C, Pascal, Structure Baic ... what else do we need?
+Macro assembler, C, Pascal, Structure Basic ... what else do we need?
 
 Cross Compilation can be done either using DOS emulation (emu2, pce) or using a hybrid
 OS
 - Concurrent DOS 6.21 XM
 - DOS Plus 1.2
 
-Run all the tools above (Both in their DOS and CP/M version) and you can test directly
+... run all the tools above (Both in their DOS and CP/M version) and you can test directly
 the cmd binaries.
-
-A few CP/M-86 emulators for DOS exist (ame86, cpm86.exe
-- DOS Plus 1.2
-
-Run all the tools above (Both in their DOS and CP/M version) and you can test directly
 
 A few CP/M-86 emulators for DOS exist (ame86.exe, cpm86.exe) unfortunately their sources
 are not to be seen anywhere and they woulld need a bit of maintenance. only rudimentary
-programs work
+programs work.
 
+Finally, Assembly using asm86 and gencmd can also be done but it needs to be done on CP/M environment (CP/M-80 or CPM-86 derivatives can be used)
 
 It is a bit lacking on the tooling side though
 - VE+ 2.03 is really the only editor I found
