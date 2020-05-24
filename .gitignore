@@ -2,6 +2,7 @@ Makefile
 .D*
 *.log
 *.cfg
+*.cmd
 .*.swp
 *.obj
 *.img
