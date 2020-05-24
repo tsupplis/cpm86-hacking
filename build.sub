@@ -1,0 +1,13 @@
+rasm86 pcetime.asm $pzsz
+link86 pcetime
+rasm86 pceinit.asm $pzsz
+link86 pceinit
+rasm86 pcever.asm $pzsz
+link86 pcever
+rasm86 pcemnt.asm $pzsz
+link86 pcemnt
+rasm86 cls.asm $pzsz
+link86 cls
+rasm86 ver.asm $pzsz
+link86 ver
+
