@@ -6,8 +6,10 @@ pce emulator tools to CP/M-86
 - pceexit
 - pcever
 - pcemnt
-- pceinit (a combination of clear screen pcetime and pcever as CP/M-86
+- pceinit (a combination of clear screen, pcetime and ver as CP/M-86)
   start up command
+- ver displays the BDOS version
+- cls clear screen
 
 All the tools are working on 
 - CP/M-86 1.1
