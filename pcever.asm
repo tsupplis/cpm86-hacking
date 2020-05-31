@@ -6,7 +6,6 @@ include pce.asm
 
                 lea     si, msg_hdr
                 call	print_str
-                mov     ax,10
 	            call	pce_hook_check
 	            jc	    not_pce
                 lea	    di,  buffer

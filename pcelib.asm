@@ -21,7 +21,9 @@ quit:
                 int     0E0h    
 
 delay:
-                mov     bx, 02h  
+                push    bx
+                push    di
+                mov     bx, 05h  
 delay_l2: 
                 mov     di, 0FFFFh  
 delay_l1: 
@@ -29,6 +31,8 @@ delay_l1:
                 jnz     delay_l1    
                 dec     bx 
                 jnz     delay_l2 
+                pop     di
+                pop     bx
                 ret                
 
 print_char:

@@ -8,7 +8,6 @@ include pce.asm
                 mov     es, cx
                 lea     si, msg_hdr
                 call	print_str
-                mov     ax, 10
 	            call	pce_hook_check
 	            jc	    not_pce  
                 mov	    si, 80h		

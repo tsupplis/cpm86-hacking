@@ -9,7 +9,6 @@ include pce.asm
                 call    print_str
                 mov     cx,ds
                 mov     es,cx
-                mov     ax,10
 	            call	pce_hook_check
 	            jc	    not_pce
                 mov	    ax, pce_hook_localtm

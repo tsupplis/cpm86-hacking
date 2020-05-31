@@ -6,10 +6,9 @@ include pce.asm
 
                 lea     si, msg_hdr
                 call	print_str
-                mov     ax,5
-                call    delay
 	            call	pce_hook_check
 	            jc	    not_pce
+                call    delay
 	            mov	    ax, pce_hook_abort
 	            call	pce_hook
 	            jc	    hook_err
@@ -31,7 +30,6 @@ include pcelib.asm
 msg_hdr         db      'Exiting PCE ...',13,10,0
 msg_notpce	    db      'Not running under PCE',13,10,0
 msg_hookerr 	db      'PCE Hook Error',13,10,0
-
                 
                 end
 
