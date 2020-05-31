@@ -18,6 +18,11 @@ All the tools are working on
 
 Those OSes work Incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
+![CP/M-86 1.1](images/cpm86.png)
+
+![CP/M-86 1.1 Apps](images/cpmapps.png)
+
+
 ## Tools used
 - CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html)
   - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
@@ -40,8 +45,6 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
     - Using System Variable Control Block through BDOS Function 31h (S_SYSVAR) on BDOS= 2.2
 - pcemnt needs to accomodate CCP uppercasing so an toggle character '^' is used to this effect:
     - /Mnt^/User/^JOhn/^test.img becomes /mnt/USERS/john/TEST.IMG
-
-![CP/M-86 1.1](images/cpm86.png)
 
 ## To dos
 - pcetime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
