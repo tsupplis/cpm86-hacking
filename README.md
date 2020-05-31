@@ -76,7 +76,7 @@ Despite being a very primitive OS (in some cases actually enjoyably primitive...
 - Microsoft Basic (http://www.retroarchive.org/cpm/lang/lang.htm) and Personal Basic Interpreters (http://www.cpm.z80.de/binary.html)
 - PL/M-86 (Only cross compilation from DOS)
 
-The big cool thing with this tiny OS is how small it is. A single person can play as a hobbyist with it. It makes The early sources of MS-DOS as attractive. MS-DOS 2.X is far more flexible and has a bigger ecosystem than CP/M-86. This makes it more of a challenge ;-) 
+The big cool thing with this tiny OS is how small it is. I never configure more than 128K on my PCE VM and a single person can play as a hobbyist with it. It makes The early sources of MS-DOS as attractive. MS-DOS 2.X is far more flexible and has a bigger ecosystem than CP/M-86. This makes it more of a challenge ;-) 
 
 DR tools are available through (http://www.cpm.z80.de/binary.html) and many other sources.
 I found the last release of Turbo Pascal and Poly Pascal on a very exhaustive danish site focused on the RC700 series computers who are by the way also emulated by PCE. They are not PC compatible but both pascal are generic and work on the IBM PC based CP/M-86 family.
@@ -114,9 +114,9 @@ programs work.
 
 Finally, Assembly using asm86 and gencmd can also be done but it needs to be done on CP/M environments (CP/M-80 or CPM-86 derivatives can be used)
 
-It is a bit lacking on the tooling side though
+It is a bit lacking on the tooling side though ... so I will port tools little by little for comfort sake.
 - VE+ 2.03 is really the only strong editor I found. (http://www.retroarchive.org/cpm/text/text.htm) (There is also TED a basic editor that allows you to stay away from ED). 
 - Automation through submit is very very rudimentary (no dream of makefiles)
 - There is no real solid CP/M-86 emulation as mentioned... But piggy backing the INT E0H API end point on emu2 perhaps? after all the 2 CP/M-86 and DOS 1.1 APIs are pretty much aligned...
 
-Still it is a funny bit of discovery and archeology
+Still it is a funny bit of discovery and archeology...
