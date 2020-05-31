@@ -39,7 +39,7 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 - The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2). This is an incredible way to bring dos command line development tools to a modern and up to date shell/make/whatever based dev environment. Another stunning emulator. Emu2 and PCE are an incredible pair.
 - mtools 4 and cpmtools 2.20
 
-There is of course the painful case of CP/M-86 only tools like gencmd and asm86. Till I find the sources and try to build DOS version for cross compilation, I am using the same technique but with zxcc thar provides a transparent shell integrated CP/M-80 3.1 emulation. ZXCC can be found on his author web site (https://www.seasip.info/Unix/Zxcc/). ASM86 and GENCMD are both available as CP/M .COM binaries. This side is by the way one of the best sources of information on CP/M. ZXCC initially focused on being a wrapper for Hitech-C is working faultlessly on all the dev tools I threw at it.
+There is of course the painful case of CP/M-86 only tools like gencmd and asm86. Till I find the sources and try to build DOS versions for cross compilation, I am using the same technique but with zxcc thar provides a transparent shell integrated CP/M-80 3.1 emulation. ZXCC can be found on his author web site (https://www.seasip.info/Unix/Zxcc/). ASM86 and GENCMD are both available as CP/M .COM binaries. This side is by the way one of the best sources of information on CP/M. ZXCC initially focused on being a wrapper for Hitech-C is working faultlessly on all the dev tools I threw at it.
 
 ## PCE tools shortcuts
 - pcetime has no option, It displays and sets up the clock using
@@ -49,6 +49,7 @@ There is of course the painful case of CP/M-86 only tools like gencmd and asm86.
     - /Mnt^/User/^JOhn/^test.img becomes /mnt/USERS/john/TEST.IMG
 
 ## To dos
+- build a full end to end functioning CP/M-86 dev environmet.
 - pcetime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
 - move to microsoft/IBM MIT licensed link & masm tools
 - provide DOS batch and CP/M submit for the build
@@ -74,6 +75,8 @@ Despite being a very primitive OS (in some cases actually enjoyably primitive...
 - RASM86 Macro Assembler (http://www.cpm.z80.de/binary.html)
 - Microsoft Basic (http://www.retroarchive.org/cpm/lang/lang.htm) and Personal Basic Interpreters (http://www.cpm.z80.de/binary.html)
 - PL/M-86 (Only cross compilation from DOS)
+
+The big cool thing with this tiny OS is how small it is. A single person can play as a hobbyist with it. It makes The early sources of MS-DOS as attractive. MS-DOS 2.X is far more flexible and has a bigger ecosystem than CP/M-86. This makes it more of a challenge ;-) 
 
 DR tools are available through (http://www.cpm.z80.de/binary.html) and many other sources.
 I found the last release of Turbo Pascal and Poly Pascal on a very exhaustive danish site focused on the RC700 series computers who are by the way also emulated by PCE. They are not PC compatible but both pascal are generic and work on the IBM PC based CP/M-86 family.
