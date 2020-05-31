@@ -39,6 +39,8 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 - The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2). This is an incredible way to bring dos command line development tools to a modern and up to date shell/make/whatever based dev environment. Another stunning emulator. Emu2 and PCE are an incredible pair.
 - mtools 4 and cpmtools 2.20
 
+There is of course the painful case of CP/M-86 only tools like gencmd and asm86. Till I find the sources and try to build DOS version for cross compilation, I am using the same technique but with zxcc thar provides a transparent shell integrated CP/M-80 3.1 emulation. ZXCC can be found on his author web site (https://www.seasip.info/Unix/Zxcc/). ASM86 and GENCMD are both available as CP/M .COM binaries. This side is by the way one of the best sources of information on CP/M. ZXCC initially focused on being a wrapper for Hitech-C is working faultlessly on all the dev tools I threw at it.
+
 ## PCE tools shortcuts
 - pcetime has no option, It displays and sets up the clock using
     - BDOS Function 68h (T_SET) if BDOS >= 3.0 (Dates from 01/01/1978)
