@@ -1,13 +1,18 @@
-rasm86 pcetime.asm $pzsz
-link86 pcetime
-rasm86 pceinit.asm $pzsz
-link86 pceinit
-rasm86 pcever.asm $pzsz
-link86 pcever
-rasm86 pcemnt.asm $pzsz
-link86 pcemnt
-rasm86 cls.asm $pzsz
-link86 cls
-rasm86 ver.asm $pzsz
-link86 ver
-
+rasm86 tod $$ pz sz
+link80 tod[$$sz]
+rasm86 ver $$ pz sz
+link80 ver[$$sz]
+rasm86 cls $$ pz sz
+link80 cls[$$sz]
+rasm86 pause $$ pz sz
+link80 pause[$$sz]
+rasm86 pcever $$ pz sz
+link80 pcever[$$sz]
+rasm86 pcetime $$ pz sz
+link80 pcetime[$$sz]
+rasm86 pcemnt $$ pz sz
+link80 pcemnt[$$sz]
+rasm86 pceinit $$ pz sz
+link80 pceinit[$$sz]
+rasm86 pceexit $$ pz sz
+link80 pceexit[$$sz]
