@@ -6,11 +6,10 @@ pce emulator tools to CP/M-86
 - pceexit
 - pcever
 - pcemnt
-- pceinit (a combination of clear screen, pcetime and ver as CP/M-86)
-  start up command
+- pceinit (a combination of clear screen, pcetime and ver as CP/M-86) start up command
 - ver displays the BDOS version
 - cls clear screen
-- tod replacement for CP/M-86 without the 78-99 year constraint (need to add leap year check)
+- tod replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years
 
 All the tools are working on 
 - CP/M-86 1.1
@@ -52,6 +51,8 @@ There is of course the painful case of CP/M-86 only tools like gencmd and asm86.
     - /Mnt^/User/^JOhn/^test.img becomes /mnt/USERS/john/TEST.IMG
 
 ## To dos
+- ~~y2k tod replacement~~
+- configuration information in pceinit as in CP/M-86 bdos/bios init screen
 - build a full end to end functioning CP/M-86 dev environmet.
 - pcetime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
 - move to microsoft/IBM MIT licensed link & masm tools

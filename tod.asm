@@ -208,7 +208,24 @@ check_date:
                 push    cx
                 push    dx
 
-                mov     al, byte ptr tmz_date+0   ;check month
+                mov     al, byte ptr tmz_date+6   ;check leap year
+                sub     al, '0'
+                xor     ah,ah
+                mov     bl,10
+                imul    bl
+                xor     bh, bh
+                mov     bl, byte ptr tmz_date+7   
+                sub     bl, '0'
+                add     ax, bx
+                or      ax, ax
+                jz      no_leap
+                and     ax, 3
+                jnz     no_leap
+                mov     bx, offset month_siz+2
+                mov     ax, 29
+                mov     [bx], ax
+no_leap:
+                mov     al, byte ptr tmz_date   ;check month
                 sub     al, '0'
                 xor     ah,ah
                 mov     bl,10
@@ -380,10 +397,11 @@ include pcelib.asm
                 dseg
                 org     100h
 month_siz       db      0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-msg_wrong_os    db      'Requires CP/M-86 2.2',13,10,0
-msg_wrong_fmt   db      'Invalid Date & Time Format',13,10,13,10
-                db      'Please retry using:',13,10,13,10
-                db      '   TOD MM/DD/YY HH:MM:SS',13,10,0
+msg_wrong_os    db      'Requires CP/M-86 1.1',13,10,0
+msg_wrong_fmt   db      'Invalid Date & Time Format',13,10
+                db      'Please retry using:',13,10
+                db      'X>TOD MM/DD/YY HH:MM:SS',13,10
+                db      'where YY is in range 00-99 for 2000 to 2099',13,10,0
 msg_nl          db      13,10,0
 tmz_date        db      '01/01/01'
 tmz_sep         db      9
