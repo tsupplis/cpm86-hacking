@@ -204,7 +204,92 @@ pt_end:
                 ret
 
 check_date:
+                push    bx
+                push    cx
+                push    dx
+
+                mov     al, byte ptr tmz_date+0   ;check month
+                sub     al, '0'
+                xor     ah,ah
+                mov     bl,10
+                imul    bl
+                xor     bh, bh
+                mov     bl, byte ptr tmz_date+1   
+                sub     bl, '0'
+                add     ax, bx
+                mov     dx, ax
+                cmp     ax, 12
+                ja      ckd_err
+                cmp     ax, 1
+                jb      ckd_err
+
+                mov     al, byte ptr tmz_date+3   ;check day
+                sub     al, '0'
+                xor     ah,ah
+                mov     bl,10
+                imul    bl
+                xor     bh, bh
+                mov     bl, byte ptr tmz_date+4  
+                sub     bl, '0'
+                add     ax, bx
+                mov     bx, offset month_siz
+                add     bx,dx
+                mov     cl, [bx]
+                xor     ch, ch
+                cmp     ax, cx
+                ja      ckd_err
+                cmp     ax, 1
+                jb      ckd_err
+                jmp     ck_time
+
+ckd_err:
+                jmp     ckt_err
+ck_time:
+                mov     al, byte ptr tmz_time   ;check hour
+                sub     al, '0'
+                xor     ah,ah
+                mov     bl,10
+                imul    bl
+                xor     bh, bh
+                mov     bl, byte ptr tmz_time+1   
+                sub     bl, '0'
+                add     ax, bx
+                cmp     ax, 23
+                ja      ckt_err
+
+                mov     al, byte ptr tmz_time+3   ;check minutes
+                sub     al, '0'
+                xor     ah,ah
+                mov     bl,10
+                imul    bl
+                xor     bh, bh
+                mov     bl, byte ptr tmz_time+4  
+                sub     bl, '0'
+                add     ax, bx
+                cmp     ax, 59
+                ja      ckt_err
+
+                mov     al, byte ptr tmz_time+6   ;check seconds
+                sub     al, '0'
+                xor     ah,ah
+                mov     bl,10
+                imul    bl
+                xor     bh, bh
+                mov     bl, byte ptr tmz_time+7 
+                sub     bl, '0'
+                add     ax, bx
+                cmp     ax, 59
+                ja      ckt_err
+
                 mov     ax,0
+                jmp     ckt_end
+ckt_err:
+                mov     ax,1
+                jmp     ckt_end
+ckt_end:
+                pop     dx
+                pop     cx
+                pop     bx
                 ret
 
 cpm_set_time:
@@ -294,6 +379,7 @@ include pcelib.asm
 
                 dseg
                 org     100h
+month_siz       db      0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 msg_wrong_os    db      'Requires CP/M-86 2.2',13,10,0
 msg_wrong_fmt   db      'Invalid Date & Time Format',13,10,13,10
                 db      'Please retry using:',13,10,13,10

@@ -10,6 +10,7 @@ pce emulator tools to CP/M-86
   start up command
 - ver displays the BDOS version
 - cls clear screen
+- tod replacement for CP/M-86 without the 78-99 year constraint (need to add leap year check)
 
 All the tools are working on 
 - CP/M-86 1.1
@@ -55,7 +56,6 @@ There is of course the painful case of CP/M-86 only tools like gencmd and asm86.
 - pcetime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
 - move to microsoft/IBM MIT licensed link & masm tools
 - provide DOS batch and CP/M submit for the build
-- add a TOD replacement for CP/M-86
 - study recompilation and patch of Date, Show and Dir and in the meantime regress test
 - a clean reusable makefile
   CDOS 4.1 tools utilities on CCPM-86 2.0/CDOS 3.2
