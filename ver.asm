@@ -5,7 +5,7 @@
                 mov     cx,ds
                 mov     es,cx
                 call    print_cpm_ver   
-                jmp     quit          
+                call    quit          
 
 print_cpm_ver:
                 push    si

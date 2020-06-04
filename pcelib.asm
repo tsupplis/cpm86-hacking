@@ -19,7 +19,8 @@ pce_hook:
 quit:           
                 xor     cx,cx 
                 int     0E0h    
-
+                ret
+                
 delay:
                 push    bx
                 push    di

@@ -23,19 +23,19 @@ include pce.asm
                 sub     al,29H
                 ja      cpm31_cpm
                 call    cpm_set_time
- 	            jmp	    quit
+ 	            call    quit
 cpm31_cpm:
                 call    cpm31_set_time
- 	            jmp	    quit
+ 	            call    quit
 
 not_pce:
 	            lea	    si, msg_notpce
                 call	print_str
-                jmp     quit
+                call    quit
 hook_err:
 	            lea	    si, msg_hookerr
                 call	print_str
-                jmp     quit
+                call    quit
 
 print_time:
                 push    bx

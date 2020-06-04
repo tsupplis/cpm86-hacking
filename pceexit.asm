@@ -13,15 +13,15 @@ include pce.asm
 	            call	pce_hook
 	            jc	    hook_err
 	            xor	    al, al
-	            jmp	    quit
+	            call    quit
 not_pce:
 	            lea	    si, msg_notpce
                 call	print_str
-                jmp     quit
+                call    quit
 hook_err:
 	            lea	    si, msg_hookerr
                 call	print_str
-                jmp     quit
+                call    quit
 
 include pcelib.asm
 
