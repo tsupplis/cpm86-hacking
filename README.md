@@ -2,14 +2,16 @@
 
 A couple of experiments for fun with CP/M-86 including a quick and dirty port of
 pce emulator tools to CP/M-86 
-- pcetime
-- pceexit
-- pcever
-- pcemnt
-- pceinit (a combination of clear screen, pcetime and ver as CP/M-86) start up command
+- tod replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years
 - ver displays the BDOS version
 - cls clear screen
-- tod replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years
+- pause submit tool waiting for a keystroke
+- pce tools
+  - pcetime
+  - pceexit
+  - pcever
+  - pcemnt
+  - pceinit (a combination of clear screen, pcetime and ver as CP/M-86) start up command
 
 All the tools are working on 
 - CP/M-86 1.1
