@@ -264,7 +264,7 @@ month_day       dw      000,031,059,090,120,151,181,212,243,273,304,334
 msg_hdr         db      'Requesting PCE time ...',13,10,0
 msg_notpce	    db      'Not running under PCE',13,10,0
 msg_hookerr 	db      'PCE Hook Error',13,10,0
-msg_cpm31       db      'cp/m 31 ...',13,10,0
+msg_cpm31       db      'CP/M 31 ...',13,10,0
 msg_nl          db      13,10,0
 tm_buffer       rs      256
 stamp_year      rw      1

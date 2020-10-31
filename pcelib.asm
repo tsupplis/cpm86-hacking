@@ -199,3 +199,34 @@ print_dec:
 	            call	print_uint16
 	            add	    sp, 6
 	            ret
+
+check_286_plus:
+                push    ax
+                pushf
+                ; ==========================================
+                ; === CHECK #1 =============================
+                ; ==========================================
+                ; Sets FLAGS to 0x0 and then immediately reads it back. On an 8086/80186, bits
+                ; 12-15 always come back set. On a 80286+ this is not the case.
+                ; 8086/80186 behavior: clc
+                ; 80286+ behavior: stc
+                xor ax,ax      ; AX=0x0
+                push ax
+                popf          ; pop 0x0 into FLAGS
+                pushf
+                pop ax         ; pop FLAGS into AX
+
+                and ax,0F000h  ; bits 12-13: IOPL, always 1 on 86/186
+                cmp ax,0F000h  ; bit 14: NT, always 1 on 86/186
+                               ; bit 15: Reserved, always 1 on 86/186, always 0 on 286+
+                jz check_186_minus
+                popf
+                stc
+                pop ax
+                ret
+check_186_minus:
+                popf
+                clc
+                pop ax
+                ret
+
