@@ -12,6 +12,9 @@ pce emulator tools to CP/M-86
   - pcever
   - pcemnt
   - pceinit (a combination of clear screen, pcetime and ver as CP/M-86) start up command
+- at class (286+) tools
+  - attime
+  - atinit
 
 All the tools are working on 
 - CP/M-86 1.1
