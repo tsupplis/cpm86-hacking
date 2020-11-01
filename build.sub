@@ -18,3 +18,5 @@ rasm86 pceexit $$ pz sz
 link80 pceexit[$$sz]
 rasm86 atinit $$ pz sz
 link80 atinit[$$sz]
+rasm86 attime $$ pz sz
+link80 attime[$$sz]
