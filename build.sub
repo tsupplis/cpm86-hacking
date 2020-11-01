@@ -16,3 +16,5 @@ rasm86 pceinit $$ pz sz
 link80 pceinit[$$sz]
 rasm86 pceexit $$ pz sz
 link80 pceexit[$$sz]
+rasm86 atinit $$ pz sz
+link80 atinit[$$sz]
