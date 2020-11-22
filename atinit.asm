@@ -123,6 +123,7 @@ decode_at_date:
                                     ; month
                 mov     al, dh
                 call    bcd_conv_byte
+                dec     al
                 mov	    byte ptr tm_buffer+3,   al
                                     ; day
                 mov     al, dl
