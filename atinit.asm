@@ -9,8 +9,8 @@ include pce.asm
                 call    print_str
                 mov     cx,ds
                 mov     es,cx
-                call    check_286_plus
-                jnc     int_86err
+                ;call    check_286_plus
+                ;jnc     int_86err
                 mov     ah, 02h
                 clc
                 int     01Ah

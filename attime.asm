@@ -6,8 +6,8 @@ include pce.asm
 
                 mov     cx,ds
                 mov     es,cx
-                call    check_286_plus
-                jnc     int_86err
+                ;call    check_286_plus
+                ;jnc     int_86err
                 lea     si, msg_hdr
                 call	print_str
                 mov     ah, 02h
