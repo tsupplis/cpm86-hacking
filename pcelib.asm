@@ -21,6 +21,59 @@ quit:
                 int     0E0h    
                 ret
                 
+clear_keys:
+                push    ax
+                push    cx
+                push    dx
+                mov     dx,0FFh
+                mov     cx,06h
+                int     0E0h
+                or      al, 0
+                jnz     clear_keys
+                pop     dx
+                pop     cx
+                pop     ax
+                ret
+                 
+in_key:
+                push    cx
+                push    dx
+                mov     dx,0FFh
+                mov     cx,06h
+                int     0E0h
+                pop     dx
+                pop     cx
+                ret 
+                
+wait_key:
+                push    cx
+                push    bx
+                push    dx
+                push    di
+                mov     bx, 01h  
+wait_key_l2: 
+                mov     di, 0FFFh  
+wait_key_l1: 
+                push    di
+                push    bx
+                mov     dx,0FFh
+                mov     cx,06h
+                int     0E0h
+                pop     bx
+                pop     di
+                or      ax, 0
+                jnz     wait_end
+                dec     di   
+                jnz     wait_key_l1    
+                dec     bx 
+                jnz     wait_key_l2 
+wait_end:
+                pop     di
+                pop     dx
+                pop     bx
+                pop     cx
+                ret                
+
 delay:
                 push    bx
                 push    di

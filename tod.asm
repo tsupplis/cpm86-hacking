@@ -20,10 +20,24 @@
                 call    cpm_set_time
                 cmp     ax,0
                 jnz     wrong_fmt
-just_show:
+just_show:  
+                call    clear_keys
+just_show_time:
                 call    cpm_show_time
+                mov     cl, byte ptr disp_loop
+                or      cl, 0
+                jz      loop_just_show
  	            call    quit
-
+loop_just_show:  
+                call    wait_key
+                or      ax, 0
+                jnz     loop_show_done
+	            lea	    si, msg_back
+                call	print_str
+                jmp     just_show_time
+loop_show_done:
+                call    clear_keys
+                call    quit
 wrong_os:
 	            lea	    si, msg_wrong_os
                 call	print_str
@@ -50,8 +64,13 @@ tail_loop:
                 cmp     al,00h
                 je      arg_noarg
 arg_args:
+                cmp     al, 'P'
+                je      arg_loop
                 mov     ax,1
                 jmp     arg_end
+arg_loop:       
+                mov     al, 0
+                mov     byte ptr disp_loop, al
 arg_noarg:
                 mov     ax,0
                 jmp     arg_end
@@ -403,6 +422,8 @@ msg_wrong_fmt   db      'Invalid Date & Time Format',13,10
                 db      'X>TOD MM/DD/YY HH:MM:SS',13,10
                 db      'where YY is in range 00-99 for 2000 to 2099',13,10,0
 msg_nl          db      13,10,0
+msg_back        db      8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8
+disp_loop       db      1
 tmz_date        db      '01/01/01'
 tmz_sep         db      9
 tmz_time        db      '01:01:01'
