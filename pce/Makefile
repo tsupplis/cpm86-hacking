@@ -27,5 +27,5 @@ baselib.a86: ../baselib.a86
 	$(RASM86) $< $$ pz sz
 
 clean:
-	$(RM) *.o *.h86 *.sym *.prn *.lst *.obj $(TOOLS)
+	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS)
 	$(RM) baselib.a86
