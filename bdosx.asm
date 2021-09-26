@@ -1,6 +1,6 @@
-/*
-  Licensed under the MIT license. See LICENSE file in the project root for details.
-*/
+;
+;  Licensed under the MIT license. See LICENSE file in the project root for details.
+;
 codeseg	segment	para public 'code'
 	assume	cs:codeseg
 ;
