@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 lockfile=`dirname $0`/ibmxt.lock
 graph=vga
 if [ ! -z "$1" ];then
