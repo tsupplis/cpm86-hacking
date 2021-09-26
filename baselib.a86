@@ -159,6 +159,56 @@ print_str_done:
             pop	    ax
             ret                
 
+parse_opt:
+            push	ax
+            push	bx
+            push	dx
+            mov     bh, 1h
+            cld
+            mov	    ah, 1
+parse_opt_skip:
+            jcxz	parse_opt_done
+            lodsb
+            call    to_lower
+            dec	    cx
+            cmp	    al, 32
+            jbe	    parse_opt_skip
+            xor	    ah, ah
+            cmp	    al, '"'
+            je	    parse_opt_quote
+parse_opt_next:
+            cmp     al, '^'
+            je      pon_nostore
+            stosb
+pon_nostore:
+            jcxz	parse_opt_done
+            lodsb
+            call    to_lower
+            dec	    cx
+            cmp	    al, 32
+            jbe	    parse_opt_done
+            jmp	    parse_opt_next
+parse_opt_quote:
+            jcxz	parse_opt_done
+            lodsb
+            call    to_lower
+            dec	    cx
+            cmp	    al, '"'
+            je	    parse_opt_done
+            cmp     al, '^'
+            je      parse_opt_quote
+            stosb
+            jmp	    parse_opt_quote
+
+parse_opt_done:
+            xor	    al, al
+            stosb			
+            shr	    ah, 1	
+            pop	    dx
+            pop	    bx
+            pop	    ax
+            ret
+
 to_lower:   
             cmp     al, '^'
             jne     to_lower_cnt
