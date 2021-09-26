@@ -1,5 +1,6 @@
-; :ts=8
-; Copyright (C) 1983 by Manx Software Systems
+/*
+  Licensed under the MIT license. See LICENSE file in the project root for details.
+*/
 codeseg	segment	para public 'code'
 	assume	cs:codeseg
 ;

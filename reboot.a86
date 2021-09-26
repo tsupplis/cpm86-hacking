@@ -1,34 +1,30 @@
-;     The contents of this file are subject to the Mozilla Public License
-;     Version 1.0 (the "License"); you may not use this file except in
-;     compliance with the License. You may obtain a copy of the License at
-;     http://www.mozilla.org/MPL/
 ;
-;     Software distributed under the License is distributed on an "AS IS"
-;     basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
-;     License for the specific language governing rights and limitations
-;     under the License.
+; Licensed under the MIT license. See LICENSE file in the project root for details.
+;
 
                 title   'Reboot'
 
+reset_flag      equ 1234h
+rombios_data    equ 40h
+
                 cseg     
-                org     100h
  
                 mov bx,5dh
                 mov ch,0bh
                 mov al,[bx]
-                cmp al,57h
-                jz jmp2
-                cmp al,77h
-                jz jmp2
-                mov ax,40h
+                cmp al,'W'
+                jz warmboot
+                cmp al,'w'
+                jz warmboot
+                mov ax,rombios_data
                 mov ds,ax
                 mov ax,0
-                jmp jmp1
-jmp2:
-                mov ax,40h
+                jmp boot
+warmboot:
+                mov ax,rombios_data
                 mov ds,ax
-                mov ax,1234h
-jmp1:
+                mov ax,reset_flag
+boot:
                 mov bx,72h
                 mov [bx],ax
                 xor ax,ax
@@ -39,6 +35,4 @@ jmp1:
                 inc bx
                 mov word [bx],0ffffh
                 int 6eh
-
-                dseg
                 end
