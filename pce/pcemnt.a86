@@ -84,7 +84,6 @@ include pcelib.a86
 include baselib.a86
 
                 dseg
-                org     100h
 
 msg_id		    db      'disk.id',0
 msg_insert	    db      'disk.insert',0

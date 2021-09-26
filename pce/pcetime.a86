@@ -29,7 +29,6 @@ include pcelib.a86
 include baselib.a86
 
             dseg
-            org     100h
                 
 month_siz   db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 month_day   dw      000,031,059,090,120,151,181,212,243,273,304,334

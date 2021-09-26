@@ -41,7 +41,6 @@ include pcelib.a86
 include baselib.a86
 
                 dseg
-                org     100h
 msg_hdr         db      'Exiting PCE ...',13,10,0
 msg_notpce	    db      'Not running under PCE',13,10,0
 msg_hookerr 	db      'PCE Hook Error',13,10,0
