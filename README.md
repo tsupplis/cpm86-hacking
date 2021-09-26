@@ -67,6 +67,8 @@ INF:      col=80     Switch to 80 columns
 
 All the C tools benefits from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
 
+## What CP/M-86?
+
 All the tools are working on 
 - CP/M-86 1.1 
 - Concurrent CP/M 3.1

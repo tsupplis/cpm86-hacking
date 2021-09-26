@@ -4,23 +4,26 @@ CFLAGS=+F -B +0 -D__CPM86__  -D__LEGACY__
 STRIP=aztec34_sqz
 LDFLAGS=-lm -lc86
 LD=aztec34_link
-BINEXT=.cmd
-LINKCMD=pcdev_linkcmd
+LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
-    atinit.cmd attime.cmd
+    atinit.cmd attime.cmd 
+PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
+    pce/pceinit.cmd
 
 all: binaries
 
-binaries: $(TOOLS)
+binaries: $(TOOLS) $(PCETOOLS)
 
-dist: hack-bin.zip
+dist: hack-bin.zip pce-bin.zip
 
-nix-hack.zip: binaries
-	rm -f nix-bin.zip
-	zip nix-bin.zip $(TOOLS) 
+hack-bin.zip pce-bin.zip: binaries
+	rm -f pce-bin.zip
+	zip pce-bin.zip $(PCETOOLS) 
+	rm -f hack-bin.zip
+	zip hack-bin.zip $(TOOLS) 
 
 ls.cmd: ls.o dirent.o bdosx.o debug.o
 	$(LD) -o $@ $^ $(LDFLAGS)
@@ -52,68 +55,57 @@ debug.c: debug.h
 
 rm.c: dirent.h
 
-ver.cmd: ver.obj
-	$(LINKCMD) $<  '[$$sz]'
-
-tod.cmd: tod.obj
-	$(LINKCMD) $<  '[$$sz]'
-
-attime.cmd: attime.obj
-	$(LINKCMD) $<  '[$$sz]'
-
-atinit.cmd: atinit.obj
-	$(LINKCMD) $<  '[$$sz]'
-
-clsansi.cmd: clsansi.obj
-	$(LINKCMD) $<  '[$$sz]'
-
-cls.cmd: cls.obj
-	$(LINKCMD) $<  '[$$sz]'
-
-pause.cmd: pause.obj
-	$(LINKCMD) $< '[$$sz]'
-
-reboot.cmd: reboot.obj
-	$(LINKCMD) $< '[$$sz]'
-
-%.obj: %.a86
-	$(RASM86) $< $$ pz sz
-
 tod.a86: baselib.a86
 
 ver.a86: baselib.a86
 
-.c.o:
+attime.a86: baselib.a86 atclock.a86
+
+atinit.a86: baselib.a86 atclock.a86
+
+%.cmd: %.obj
+	$(LINK86) $* '[$$sz]'
+
+%.obj: %.a86
+	$(RASM86) $< $$ pz sz
+
+%.o: %.c
 	$(CC) $(CFLAGS) $<
 	$(STRIP) $@
 
-clean:
-	$(RM) *.o *.h86 *.sym *.prn *.lst *.obj $(TOOLS)
+pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
+    pce/pceinit.cmd :
+	(cd pce;make all)
 
-cpmtest.img: $(TOOLS)
-	cpmrm -f ibmpc-514ss cpmtest.img 0:*.cmd
-	cpmrm -f ibmpc-514ss cpmtest.img 0:test.*
-	cpmrm -f ibmpc-514ss cpmtest.img 1:*
-	cpmrm -f ibmpc-514ss cpmtest.img 2:*
-	cpmcp -f ibmpc-514ss cpmtest.img rm.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img ls.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img write.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img more.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img cls.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img ver.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img tod.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img reboot.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img pause.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img dump.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img mode.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img atinit.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img attime.cmd 0:
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 0:
+clean:
+	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS)
+	(cd pce;make clean)
+
+
+cdostest.img: $(TOOLS) $(PCETOOLS) Makefile
+	cp cdosbase.img cdostest.img
+	-for i in $(PCETOOLS) $(TOOLS);do \
+	    mcopy -o -i cdostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
+    done
+	mcopy -o -i cdostest.img test.txt ::TEST.TXT
+	mcopy -o -i cdostest.img test.bin ::TEST.BIN
+	mdir -w -i cdostest.img ::*.*
+
+cpmtest.img: $(TOOLS) $(PCETOOLS) cpmbase.img Makefile test.bin test.txt
+	cp cpmbase.img cpmtest.img
+	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
+	cpmcp -f ibmpc-514ss cpmtest.img $(TOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img test.bin 0:
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 1:a
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 1:b
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 2:c
+	cpmcp -f ibmpc-514ss cpmtest.img test.txt 0:
+	cpmcp -f ibmpc-514ss cpmtest.img test.txt 1:testa
+	cpmcp -f ibmpc-514ss cpmtest.img test.txt 1:testb
+	cpmcp -f ibmpc-514ss cpmtest.img test.txt 2:testc
 	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
 
-test: cpmtest.img
+test: cpmtest
+
+cpmtest: cpmtest.img
 	./cpm86
+
+cdostest: cdostest.img
+	./cdos
