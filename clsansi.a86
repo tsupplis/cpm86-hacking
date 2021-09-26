@@ -11,17 +11,13 @@
             title   'Clear Screen'
 
             cseg     
-            org     100h
-            mov     dx,27
-            mov     cl,02h            
+            mov     dx, offset cls_hdr
+            mov     cl,9            
             int     0E0h    
-            mov     dx,'E'
-        mov     cl,02h            
-            int     0E0h    
-            jmp     quit          
-
-quit:                
             xor     cx,cx 
-            int     0E0h    
+            int     0E0h  
+
             dseg    
+            org     100h
+cls_hdr     db      27,'[2J',27,'[H$'
             end
