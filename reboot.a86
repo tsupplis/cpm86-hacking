@@ -5,7 +5,8 @@
                 title   'Reboot'
 
 reset_flag      equ 1234h
-rombios_data    equ 40h
+rombios_seg     equ 40h
+rombios_offs    equ 72h
 
                 cseg     
  
@@ -16,23 +17,19 @@ rombios_data    equ 40h
                 jz warmboot
                 cmp al,'w'
                 jz warmboot
-                mov ax,rombios_data
+                mov ax,rombios_seg
                 mov ds,ax
                 mov ax,0
                 jmp boot
 warmboot:
-                mov ax,rombios_data
+                mov ax,rombios_seg
                 mov ds,ax
                 mov ax,reset_flag
 boot:
-                mov bx,72h
-                mov [bx],ax
-                xor ax,ax
+                mov bx,rombios_offs
+                mov ax,cs
                 mov ds,ax
-                mov bx,1b8h
-                mov word [bx],0
-                inc bx
-                inc bx
-                mov word [bx],0ffffh
-                int 6eh
+                mov bx,offset reboot_vec
+                jmpf dword ptr [bx]
+reboot_vec      db   0,0,0ffh,0ffh
                 end
