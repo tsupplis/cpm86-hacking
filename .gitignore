@@ -6,6 +6,7 @@
 **/.*.swp
 **/*.obj
 **/*.o
+**/hack*.img
 **/cpmtest.img
 **/cdostest.img
 **/cpmhd.img
