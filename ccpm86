@@ -1,6 +1,6 @@
 #!/bin/sh
 lockfile=`dirname $0`/ibmxt.lock
-graph=vga
+graph=cga
 if [ ! -z "$1" ];then
     graph=$1
 fi
