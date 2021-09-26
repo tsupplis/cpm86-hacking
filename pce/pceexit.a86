@@ -1,0 +1,49 @@
+;    This program is free software; you can redistribute it and/or modify
+;    it under the terms of the GNU General Public License as published by
+;    the Free Software Foundation; either version 2 of the License, or
+;    (at your option) any later version.
+;
+;    This program is distributed in the hope that it will be useful,
+;    but WITHOUT ANY WARRANTY; without even the implied warranty of
+;    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;    GNU General Public License for more details.
+;
+;    You should have received a copy of the GNU General Public License along
+;    with this program; if not, write to the Free Software Foundation, Inc.,
+;    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+            title   'PCEEXIT - Leave Emulator '
+
+include pce.a86
+
+            cseg
+
+                lea     si, msg_hdr
+                call	print_str
+	            call	pce_hook_check
+	            jc	    not_pce
+                call    delay
+	            mov	    ax, pce_hook_abort
+	            call	pce_hook
+	            jc	    hook_err
+	            xor	    al, al
+	            call    quit
+not_pce:
+	            lea	    si, msg_notpce
+                call	print_str
+                call    quit
+hook_err:
+	            lea	    si, msg_hookerr
+                call	print_str
+                call    quit
+
+include pcelib.a86
+include baselib.a86
+
+                dseg
+                org     100h
+msg_hdr         db      'Exiting PCE ...',13,10,0
+msg_notpce	    db      'Not running under PCE',13,10,0
+msg_hookerr 	db      'PCE Hook Error',13,10,0
+                
+                end
