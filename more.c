@@ -37,12 +37,15 @@ int main(argc, argv)
 int main(int argc, char **argv)
 #endif
 {
-    int c, d, ctr = 0;
+    int c, d = 0;
     int process = 1;
     FILE *infp = 0;
     int flag_pause=1;
     char * infile=0;
     int i;
+    int col=0;
+    int ctr=0;
+    int space=0;
 
     i=1;
     while (i < argc) {
@@ -81,47 +84,63 @@ int main(int argc, char **argv)
 
 
     while (process) {
-        if (infile)
-            c = fgetc(infp);
-        else
-            c = getchar();
+        if(space) {
+            c=' ';
+            space--;
+        } else {
+            if (infile)
+                c = fgetc(infp);
+            else
+                c = getchar();
+            if(c==9) {
+                c=' ';space+=3;
+            } 
+        }
         if (c == EOF || c == 26)
             break;
 
-        putchar(c);
         if (c == '\n') {
+            putchar(c);
+            col=0;
             ctr++;
-            if (flag_pause) {
-                if (ctr > 22) {
-                    int wt = 1;
-                    printf("[More]");
-                    while (wt) {
-                        d = getch();
-                        switch (d) {
-                        case 'q':
-                        case 'Q':
-                            printf("\x08\x08\x08\x08\x08\x08      ");
-                            wt = 0;
-                            process = 0;
-                            break;
-                        case 3:
-                            printf("\x08\x08\x08\x08\x08\x08^C    ");
-                            process = 0;
-                            wt = 0;
-                            break;
-                        case 13:
-                            printf("\x08\x08\x08\x08\x08\x08      ");
-                            printf("\x08\x08\x08\x08\x08\x08");
-                            wt = 0;
-                            ctr = 22;
-                            break;
-                        case 32:
-                            printf("\x08\x08\x08\x08\x08\x08      ");
-                            printf("\x08\x08\x08\x08\x08\x08");
-                            wt = 0;
-                            ctr = 0;
-                            break;
-                        }
+        } else {
+            putchar(c);
+            col++;
+        }
+        if(col==80) {
+            col=col%80;
+            ctr++;
+        }
+        if (flag_pause) {
+            if (ctr > 22) {
+                int wt = 1;
+                printf("[More]");
+                while (wt) {
+                    d = getch();
+                    switch (d) {
+                    case 'q':
+                    case 'Q':
+                        printf("\x08\x08\x08\x08\x08\x08      ");
+                        wt = 0;
+                        process = 0;
+                        break;
+                    case 3:
+                        printf("\x08\x08\x08\x08\x08\x08^C    ");
+                        process = 0;
+                        wt = 0;
+                        break;
+                    case 13:
+                        printf("\x08\x08\x08\x08\x08\x08      ");
+                        printf("\x08\x08\x08\x08\x08\x08");
+                        wt = 0;
+                        ctr = 22;
+                        break;
+                    case 32:
+                        printf("\x08\x08\x08\x08\x08\x08      ");
+                        printf("\x08\x08\x08\x08\x08\x08");
+                        wt = 0;
+                        ctr = 0;
+                        break;
                     }
                 }
             } else {
@@ -135,7 +154,7 @@ int main(int argc, char **argv)
                     break;
                 }
             }
-        }
+        } 
     }
     if (infile) {
         fclose(infp);
