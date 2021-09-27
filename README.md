@@ -1,6 +1,6 @@
 # CP/M-86 hacking
 
-A couple of experiments for fun with CP/M-86 
+A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and derivatives on PC. But most of the tools work with the Just4Fun V20-MBC SBC.
 
 ## Tools Synopsis
 
@@ -44,7 +44,7 @@ INF:     -h for help
 INF:     -p pausing every page
 INF:     -r raw output
 ```
-- mode 
+- mode (CP/M-80 1.1 for XT only)
 ```
 INF: Usage: mode -h | option option ...
 INF:     -h for help
@@ -57,32 +57,40 @@ INF:      line=off   Hide status line
 INF:      col=40     Switch to 40 columns
 INF:      col=80     Switch to 80 columns
 ```
+- reboot: simple cold or warm reboot (PC only)
 - cls: clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
 - pause: submit tool waiting for a keystroke
-- tod replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years
+- tod (CP/M-86 1.1 for XT only) replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that.
 - ver displays the BDOS version
 - at clock tools
-    - attime sync up clock
-    - atinit sync up clock and clean screen, display cp/m version
+    - attime (CP/M-86 1.1 for XT only) sync up clock
+    - atinit (CP/M-86 1.1 for XT only) sync up clock and clean screen, display cp/m version
+- pce tools (PCE Emulator only)
+    - pcetime (CP/M-86 1.1 for XT only) sync up clock
+    - pceinit (CP/M-86 1.1 for XT only) sync up clock and clean screen, display cp/m version
+    - pcever 
+    - pceexit
+    - pcemnt
 
 All the C tools benefits from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
 
 ## What CP/M-86?
 
-All the tools are working on 
+Unless mentioned otherwise, all the tools are working on 
 - CP/M-86 1.1 
 - Concurrent CP/M 3.1
 - Concurrent DOS 3.2 to 6.21
 - Personal CP/M 2.04
 - DOS Plus 1.2
 
-Those OSes work Incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
+Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
 ![CP/M-86 1.1](images/cpm86.png)
 
 ![CP/M-86 1.1 Apps](images/cpmapps.png)
 
 ## PCE tools shortcuts
+
 - pcetime has no option, It displays and sets up the clock using
     - BDOS Function 68h (T_SET) if BDOS >= 3.0 (Dates from 01/01/1978)
     - Using System Variable Control Block through BDOS Function 31h (S_SYSVAR) on BDOS= 2.2
@@ -118,6 +126,7 @@ are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interfac
   - DOS Plus 1.2 and Patched kernel can be found on (https://www.seasip.info/Cpm/dosplus.html)
 - The Excellent PCE emulator (http://www.hampa.ch/pce/pce-ibmpc.html)
 - rasm86/linkcmd, DOS version from Digital Research (http://www.cpm.z80.de/binary.html)
+
 ```
 LINK86 Linkage Editor  02/Feb/87      Version 2.02
 Cross Linker: DOS -> CPM-86 & CDOS-286      1/2/86
@@ -127,6 +136,18 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 ```
 - The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2). This is an incredible way to bring dos command line development tools to a modern and up to date shell/make/whatever based dev environment. Another stunning emulator. Emu2 and PCE are an incredible pair.
 - mtools 4 and cpmtools 2.20
+
+A rudimentary development environment can be assembled by using the following steps:
+```
+(cd devtools;./fetch)
+export PATH=`pwd`/devtools/bin
+# now you use make
+make clean all
+```
+it pulls the following:
+- aztec 3.4 c compiler  (https://www.aztecmuseum.ca/az8634b.zip)
+- linkcmd and rasm86 (http://www.seasip.info/Cpm/software/dpgen.zip)
+- emu2 (https://github.com/dmsc/emu2)
 
 ## Quick points on CP/M-86
 Despite being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
@@ -138,7 +159,9 @@ Despite being a very primitive OS (in some cases actually enjoyably primitive...
 - Microsoft Basic (http://www.retroarchive.org/cpm/lang/lang.htm) and Personal Basic Interpreters (http://www.cpm.z80.de/binary.html)
 - PL/M-86 (Only cross compilation from DOS)
 
-The big cool thing with this tiny OS is how small it is. I never configure more than 128K on my PCE VM and a single person can play as a hobbyist with it. It makes The early sources of MS-DOS as attractive. MS-DOS 2.X is far more flexible and has a bigger ecosystem than CP/M-86. This makes it more of a challenge ;-) 
+The big cool thing with this tiny OS is how small it is. I never configure more than 128K on my PCE VM and a single person can play as a hobbyist with it. As mention earlier it works also super well with the Just4Fun V20-MBC SBC (https://hackaday.io/project/170924-v20-mbc-a-v20-8088-8080-cpu-homebrew-computer). Cool other thing: it is Y2K compliant with TOD replacement above and a small visual hack. Yep no date management ...
+
+It makes The early sources of MS-DOS as attractive. MS-DOS 2.X is far more flexible and has a bigger ecosystem than CP/M-86. This makes it more of a challenge ;-) 
 
 DR tools are available through (http://www.cpm.z80.de/binary.html) and many other sources.
 I found the last release of Turbo Pascal and Poly Pascal on a very exhaustive danish site focused on the RC700 series computers who are by the way also emulated by PCE. They are not PC compatible but both pascal are generic and work on the IBM PC based CP/M-86 family.
