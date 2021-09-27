@@ -108,7 +108,7 @@ Those OSes work Incredibly well on PCE on floppy and HD images. This emulator is
 - explore further CP/M-86 Big Brothers (PCP/M 2.04 and CCP/M 3.1). At first glance, they
 are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interface of CP/M-86 but CCP/M-86 has a lot of quirks and PCP/M Keyboard configuration is a bit tricky (Fully IBM PC compatible?) .... to be explored
 - deliver a guide to rebuild CP/M-86 from its sources with all the patches, AT support and 2020 look and feel. It works well but publishing the fixes and the code may not be allowed. all sources of information and code to start were found on (http://www.cpm.z80.de/source.html). It just required a lot of effort to compare/consolidate code, annotations, patches and comparison with existing binary versions. A lot of fun.
-- try to pull/port a version of Emacs or VI on CP/M-86. I could not find one....
+- try to pull/port a version of Emacs or VI on CP/M-86. I could not find one working out of the box (I am working on figuring out an elvis (https://github.com/udo-munk/stevie) and femacs in assembler ....
 
 
 ## Build Environment
@@ -132,7 +132,7 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 Despite being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
 - DR CB86 2.0 (http://www.cpm.z80.de/binary.html)
 - DR C86 1.32 (http://www.cpm.z80.de/binary.html)
-- Aztec C 3.2 (Although Aztec C 4.10 (ANSI) cross compilation from DOS is better) (https://www.aztecmuseum.ca/compilers.htm)
+- Aztec C 3.2 (Although Aztec C 3.4 or C 4.10 (ANSI) cross compilation from DOS is better) (https://www.aztecmuseum.ca/compilers.htm)
 - Turbo Pascal 3.01A and Poly Pascal 3.1 (Turbo Pascal Sibling)
 - RASM86 Macro Assembler (http://www.cpm.z80.de/binary.html)
 - Microsoft Basic (http://www.retroarchive.org/cpm/lang/lang.htm) and Personal Basic Interpreters (http://www.cpm.z80.de/binary.html)
@@ -177,7 +177,7 @@ programs work.
 Finally, Assembly using asm86 and gencmd can also be done but it needs to be done on CP/M environments (CP/M-80 or CPM-86 derivatives can be used)
 
 It is a bit lacking on the tooling side though ... so I will port tools little by little for comfort sake.
-- VE+ 2.03 is really the only strong editor I found. (http://www.retroarchive.org/cpm/text/text.htm) (There is also TED a basic editor that allows you to stay away from ED). 
+- VE+ 2.03 (or better VE+ 2.33a) is really the only strong editor I found. (http://www.retroarchive.org/cpm/text/text.htm) (There is also TED a basic editor that allows you to stay away from ED). 
 - Automation through submit is very very rudimentary (no dream of makefiles)
 - There is no real solid CP/M-86 emulation as mentioned... But piggy backing the INT E0H API end point on emu2 perhaps? after all the 2 CP/M-86 and DOS 1.1 APIs are pretty much aligned...
 
