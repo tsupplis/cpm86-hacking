@@ -11,13 +11,14 @@ if [ ! -d aztec34 ];then
 fi
 if [ ! -f pcdev/linkcmd.exe -o ! -f pcdev/rasm86.exe -o ! -f pcdev/linkexe.exe ]; then
     mkdir pcdev
-    mkdir dpgen
-    cd dpgen
-    wget http://www.seasip.info/Cpm/software/dpgen.zip
-    unzip -L dpgen.zip
+    mkdir tools
+    cd tools
+    wget http://www.cpm.z80.de/download/tools86.zip
+    unzip -L tools86.zip
+    unzip -L dos86pr2.zip
     cp linkcmd.exe rasm86.exe ../pcdev
     cp linkexe.exe ../pcdev
-    cd ..;rm -rf dpgen
+    cd ..;rm -rf tools
 fi
 cd ..
 if [ ! -d emu2 ];then
