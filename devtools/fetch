@@ -1,0 +1,27 @@
+#!/bin/bash
+root=`dirname $0`
+cd "$root"
+root=`pwd`
+mkdir -p share/pcdev
+cd share
+if [ ! -d aztec34 ];then
+    wget https://www.aztecmuseum.ca/az8634b.zip
+    unzip -L az8634b.zip
+    mv az8634b aztec34
+fi
+if [ ! -f pcdev/linkcmd.exe -o ! -f pcdev/rasm86.exe ]; then
+    mkdir pcdev
+    mkdir dpgen
+    cd dpgen
+    wget http://www.seasip.info/Cpm/software/dpgen.zip
+    unzip -L dpgen.zip
+    mv linkcmd.exe rasm86.exe ../pcdev
+    cd ..;rm -rf dpgen
+fi
+cd ..
+if [ ! -d emu2 ];then
+    git clone https://github.com/dmsc/emu2
+fi
+if [ ! -f bin/emu2 ];then
+    (cd emu2;make;cp emu2 ../bin)
+fi
