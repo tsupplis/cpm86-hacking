@@ -1,8 +1,10 @@
-# CP/M-86 hacking
+# CP/M-86 Hacking
+
+## Synpsis
 
 A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and derivatives on PC. But most of the tools work with the Just4Fun V20-MBC SBC.
 
-## Tools Synopsis
+## Tools 
 
 - ls: Directory listing
 ```
