@@ -121,10 +121,7 @@ are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interfac
 
 ## Build Environment
 - Makefile for DOS Aztec C cross compilers targetting CP/M-86.  (May require adaptation. emu2 is used to run dos compiler on unix/mac)
-- CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html)
-  - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
-  - DOS Plus 1.2 and Patched kernel can be found on (https://www.seasip.info/Cpm/dosplus.html)
-- The Excellent PCE emulator (http://www.hampa.ch/pce/pce-ibmpc.html)
+- aztec c compiler version 3.4
 - rasm86/linkcmd, DOS version from Digital Research (http://www.cpm.z80.de/binary.html)
 
 ```
@@ -148,6 +145,12 @@ it pulls the following:
 - aztec 3.4 c compiler  (https://www.aztecmuseum.ca/az8634b.zip)
 - linkcmd and rasm86 (http://www.seasip.info/Cpm/software/dpgen.zip)
 - emu2 (https://github.com/dmsc/emu2)
+
+## Test Environment
+- CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html)
+  - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
+  - DOS Plus 1.2 and Patched kernel can be found on (https://www.seasip.info/Cpm/dosplus.html)
+- The Excellent PCE emulator (http://www.hampa.ch/pce/pce-ibmpc.html)
 
 ## Quick points on CP/M-86
 Despite being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
