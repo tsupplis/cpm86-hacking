@@ -16,6 +16,7 @@ PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
 all: binaries
 
 binaries: $(TOOLS) $(PCETOOLS)
+	(cd pce;make binaries)
 
 dist: hack-bin.zip pce-bin.zip
 
@@ -82,7 +83,7 @@ clean:
 	(cd pce;make clean)
 
 
-cdostest.img: $(TOOLS) $(PCETOOLS) Makefile
+cdostest.img: $(TOOLS) $(PCETOOLS) Makefile test.bin test.txt
 	cp cdosbase.img cdostest.img
 	-for i in $(PCETOOLS) $(TOOLS);do \
 	    mcopy -o -i cdostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
@@ -91,7 +92,7 @@ cdostest.img: $(TOOLS) $(PCETOOLS) Makefile
 	mcopy -o -i cdostest.img test.bin ::TEST.BIN
 	mdir -w -i cdostest.img ::*.*
 
-cpmtest.img: $(TOOLS) $(PCETOOLS) cpmbase.img Makefile test.bin test.txt
+cpmtest.img: $(TOOLS) $(PCETOOLS) Makefile test.bin test.txt
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img $(TOOLS) 0:
@@ -102,10 +103,12 @@ cpmtest.img: $(TOOLS) $(PCETOOLS) cpmbase.img Makefile test.bin test.txt
 	cpmcp -f ibmpc-514ss cpmtest.img test.txt 2:testc
 	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
 
-test: cpmtest
+test: 
+
+sim: cpmtest
 
 cpmtest: cpmtest.img
-	./cpm86
+	@./cpm86
 
 cdostest: cdostest.img
-	./cdos
+	@./cdos

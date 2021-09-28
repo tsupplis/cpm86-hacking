@@ -22,6 +22,7 @@ include pce.a86
             mov     es,cx
             call    cls
             call    print_cpm_ver
+            call    print_hw
             lea     si, msg_rtc
             call    print_str
 
@@ -40,6 +41,64 @@ cls:
             pop     cx
             pop     bx
             pop     ax
+            ret
+
+print_hw:
+            push    si
+            push    ax
+            push    bx
+            push    cx
+            push    dx
+            lea     si, msg_hw_hdr
+            call    print_str  
+            lea     si, msg_hw_mem
+            call    print_str  
+            int 12h
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_hw_kb
+            call    print_str  
+            lea     si, msg_hw_87
+            call    print_str  
+            int     11h
+            push    ax
+            and     al,2
+            jz      no_87
+            lea     si, msg_hw_yes
+            jmp     done_87
+no_87:
+            lea     si, msg_hw_no
+done_87:
+            call    print_str  
+            lea     si, msg_hw_flp
+            call    print_str  
+            pop     ax
+            xor     ah,ah
+            and     al,0C0h
+            mov     cl,5
+            shr     al,cl
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_nl
+            call    print_str  
+            lea     si, msg_hw_dsk
+            call    print_str  
+            push    ds
+            mov     bx,40h
+            mov     ds,bx
+            mov     bx, 75h
+            mov     al, [bx]
+            pop     ds
+            xor     ah,ah
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_nl
+            call    print_str  
+            pop     dx
+            pop     cx
+            pop     bx
+            pop     ax  
+            pop     si
             ret
 
 print_cpm_ver:
@@ -90,6 +149,14 @@ msg_hookerr db      'No PCE RTC clock',13,10,0
 msg_rtc     db      'Date now: ',0
 msg_ver_cc  db      'Concurrent ',0
 msg_ver_hdr db      'CP/M-86 Version ',0
+msg_hw_hdr  db      'Hardware Configuration: ',13,10,0
+msg_hw_mem  db      ' - Memory: ',0
+msg_hw_87   db      ' - Math Coprocessor : ',0
+msg_hw_flp  db      ' - Floppy Drive(s): ',0
+msg_hw_dsk  db      ' - Hard Disk(s): ',0
+msg_hw_yes  db      'Yes',13,10,0
+msg_hw_no   db      'No',13,10,0
+msg_hw_kb   db      'Kb',13,10,0
 msg_nl      db      13,10,0
 tm_buffer   rs      256
 stamp_year  rw      1
