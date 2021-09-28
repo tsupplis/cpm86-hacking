@@ -57,7 +57,7 @@ INF:      cursor=off Hide cursor
 INF:      line=on    Show status line
 INF:      line=off   Hide status line
 INF:      status=    Set status line message 
-          (\s: space, \\: \, \u:upper, \l:lower
+          (\s: space, \\: \, \u:upper, \l:lower)
 INF:      col=40     Switch to 40 columns
 INF:      col=80     Switch to 80 columns
 INF:      mono       Switch to Mono

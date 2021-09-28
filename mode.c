@@ -199,7 +199,7 @@ _cmd_t cmds[]= {
     {"cursor=off", CURSOROFF, "Hide cursor", 0, 0 },
     {"line=on", LINEON, "Show status line", 0, 0 },
     {"line=off", LINEOFF, "Hide status line", 0, 0 },
-    {"status=", 0, "Set status line message \n          (\\s: space, \\\\: \\, \\u:upper, \\l:lower", status, 1 },
+    {"status=", 0, "Set status line message \n          (\\s: space, \\\\: \\, \\u:upper, \\l:lower)", status, 1 },
     {"col=40", COL40, "Switch to 40 columns", col40, 0 },
     {"col=80", COL80, "Switch to 80 columns", col80, 0 },
     {"mono", MONO, "Switch to Mono", 0, 0 },
