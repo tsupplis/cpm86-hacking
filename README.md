@@ -6,7 +6,7 @@ A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and
 
 ## Tools 
 
-- ls: Directory listing
+- LS: Directory listing
 ```
 INF: Usage: ls [-h] | [-a] [-p] [-s|-r] [-l|-b] filepat
 INF: where filepat is [user/]filespec with wildcard
@@ -18,7 +18,7 @@ INF:     -r for reverse alphabetic sorting
 INF:     -l for long listing
 INF:     -b for basic listing
 ```
-- rm: File delete
+- RM: File delete
 ```
 INF: Usage: rm [-h] | filepat
 INF: where filepat is [user/]filespec with wildcard
@@ -30,7 +30,7 @@ INF: Usage: more -h | [infile]
 INF: where infile is [user/]filespec
 INF:     -h for help
 ```
-- write: Equivalent of cat>file
+- WRITE: Equivalent of cat>file
 ```
 INF: Usage: write -h | [-a] filename
 INF: where filename is [user/]filespec
@@ -38,7 +38,7 @@ INF:     -h for help
 INF:     -a to happen to existing file
 ```
 (Ctrl-C or Ctrl-Z used to finish input)
-- dump: Hexadecimal dump
+- DUMP: Hexadecimal dump
 ```
 INF: Usage: dump -h | [-p][-r] [infile]
 INF: where infile is [user/]filespec
@@ -46,7 +46,7 @@ INF:     -h for help
 INF:     -p pausing every page
 INF:     -r raw output
 ```
-- mode (CP/M-80 1.1 for XT only)
+- MODE: Screen setup (CP/M-80 1.1 for PC/XT only)
 ```
 INF: Usage: mode -h | option option ...
 INF:     -h for help
@@ -66,22 +66,22 @@ INF:      fg=        Set foreground color (0-F)
 INF:      bg=        Set background color (0-F)
 INF:      scrdef     Default screen settings
 ```
-- reboot: simple cold or warm reboot (PC only)
-- cls: clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
-- pause: submit tool waiting for a keystroke
-- tod (CP/M-86 1.1 for XT only) replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool.
-- ver displays the BDOS version
-- at clock tools
-    - attime (CP/M-86 1.1 for XT only) sync up clock
-    - atinit (CP/M-86 1.1 for XT only) sync up clock and clean screen, display cp/m version
-- pce tools (PCE Emulator only)
-    - pcetime (CP/M-86 1.1 for XT only) sync up clock
-    - pceinit (CP/M-86 1.1 for XT only) sync up clock and clean screen, display cp/m version
-    - pcever 
-    - pceexit
-    - pcemnt
+- REBOOT: Simple cold or warm reboot (PC only)
+- CLS: Clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
+- PAUSE: submit tool waiting for a keystroke
+- TOD: Replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool. (CP/M-86 1.1 for PC/XT only)
+- VER: Displays the BDOS version
+- AT clock tools
+    - ATTIME: Sync up clock (CP/M-86 1.1 for PC/XT with an AT compatible clock only)
+    - ATINIT: Sync up clock and display boot banner (CP/M-86 1.1 for PC/XT with an AT compatible clock only)
+- PCE tools (PCE Emulator only)
+    - PCETIME: Sync up clock (CP/M-86 1.1 for PC/XT only)
+    - PCEINIT: Sync up clock and display boot banner (CP/M-86 1.1 for PC/XT only)
+    - PCEVER: Displays the Emulator version 
+    - PCEEXIT: Leaves the Emulator
+    - PCEMNT: Mount a disk image from the host
 
-atinit and pceinit tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
+ATINIT and PCEINIT tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
 
 ```
 CP/M-86 Version 2.2
