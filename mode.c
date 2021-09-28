@@ -6,13 +6,16 @@
 #include <ctype.h>
 
 
-#define CLS "\x1b\x45" 
-#define CURSOROFF "\x1b\x6E" 
-#define CURSORON "\x1b\x6D" 
-#define LINEOFF "\x1b\x30" 
-#define LINEON "\x1b\x31" 
-#define COL40 "\x1b\x30\x1b\x45" 
-#define COL80 "\x1b\x30\x1b\x31\x1b\x45" 
+#define CLS "\x1bE" 
+#define CURSOROFF "\x1bn" 
+#define CURSORON "\x1bm" 
+#define LINEOFF "\x1b0" 
+#define LINEON "\x1b1" 
+#define COL40 "\x1b0\x1b\xE" 
+#define COL80 "\x1b0\x1b1\x1bE" 
+#define SCRDEF "\x1bm\x1b0\x1b1\x1bq\x1bE" 
+#define MONO "\x1by"
+#define COLOR "\x1bx"
 
 typedef struct _cmd_t {
     char * name;
@@ -29,6 +32,7 @@ int col80(arg)
 int col80(char* arg)
 #endif
 {
+    fprintf(stdout,COLOR);
 #asm
     push ax
     push bx
@@ -100,6 +104,7 @@ int col40(arg)
 int col40(char* arg)
 #endif
 {
+    fprintf(stdout,COLOR);
 #asm
     push ax
     push bx
@@ -123,8 +128,11 @@ _cmd_t cmds[]= {
     {"line=off", LINEOFF, "Hide status line", 0, 0 },
     {"col=40", COL40, "Switch to 40 columns", col40, 0 },
     {"col=80", COL80, "Switch to 80 columns", col80, 0 },
+    {"mono", MONO, "Switch to Mono", 0, 0 },
+    {"color", COLOR, "Switch to Color", 0, 0 },
     {"fg=", 0, "Set foreground color (0-F)", fg, 1 },
     {"bg=", 0, "Set background color (0-F)", bg, 1 },
+    {"scrdef", SCRDEF, "Default screen settings", 0, 0 },
     {0,0,0,0}
 };
 
