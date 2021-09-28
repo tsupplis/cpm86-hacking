@@ -24,7 +24,7 @@ INF: Usage: rm [-h] | filepat
 INF: where filepat is [user/]filespec with wildcard
 INF:     -h for help
 ```
-- more: File content list with pause
+- MORE: File content list with pause
 ```
 INF: Usage: more -h | [infile]
 INF: where infile is [user/]filespec
