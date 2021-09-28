@@ -74,16 +74,12 @@ atinit.a86: baselib.a86 atclock.a86
 	$(CC) $(CFLAGS) $<
 	$(STRIP) $@
 
-pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
-    pce/pceinit.cmd :
-	(cd pce;make all)
-
 clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS)
 	(cd pce;make clean)
 
 
-cdostest.img: $(TOOLS) $(PCETOOLS) Makefile test.bin test.txt
+cdostest.img: binaries Makefile test.bin test.txt
 	cp cdosbase.img cdostest.img
 	-for i in $(PCETOOLS) $(TOOLS);do \
 	    mcopy -o -i cdostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
@@ -92,7 +88,7 @@ cdostest.img: $(TOOLS) $(PCETOOLS) Makefile test.bin test.txt
 	mcopy -o -i cdostest.img test.bin ::TEST.BIN
 	mdir -w -i cdostest.img ::*.*
 
-cpmtest.img: $(TOOLS) $(PCETOOLS) Makefile test.bin test.txt
+cpmtest.img: binaries Makefile test.bin test.txt
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img $(TOOLS) 0:
