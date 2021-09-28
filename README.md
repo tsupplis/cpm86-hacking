@@ -81,6 +81,18 @@ INF:      scrdef     Default screen settings
     - pceexit
     - pcemnt
 
+atinit and pceinit tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
+
+```
+CP/M-86 Version 2.2
+Hardware Configuration: 
+ - Memory: 640Kb
+ - Math Coprocessor : No
+ - Floppy Drive(s): 2
+ - Hard Disk(s): 1
+Date now: 2021-9-27 22:17:39.0
+```
+
 All the C tools (rm, ls, mode, more, write, dump) benefit from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
 
 ## What CP/M-86?
