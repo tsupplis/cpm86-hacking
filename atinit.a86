@@ -141,7 +141,7 @@ msg_ver_cc   db      'Concurrent ',0
 msg_ver_hdr  db      'CP/M-86 Version ',0
 msg_hw_hdr   db      'Hardware Configuration: ',13,10,0
 msg_hw_mem   db      ' - Memory: ',0
-msg_hw_87    db      ' - Math Coprocessor : ',0
+msg_hw_87    db      ' - Math Coprocessor: ',0
 msg_hw_flp   db      ' - Floppy Drive(s): ',0
 msg_hw_dsk   db      ' - Hard Disk(s): ',0
 msg_hw_yes   db      'Yes',13,10,0

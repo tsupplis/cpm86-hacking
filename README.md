@@ -87,7 +87,7 @@ ATINIT and PCEINIT tools provide a quick configuration dump equivalent to what C
 CP/M-86 Version 2.2
 Hardware Configuration: 
  - Memory: 640Kb
- - Math Coprocessor : No
+ - Math Coprocessor: No
  - Floppy Drive(s): 2
  - Hard Disk(s): 1
 Date now: 2021-9-27 22:17:39.0
