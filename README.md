@@ -69,7 +69,7 @@ INF:      scrdef     Default screen settings
 - reboot: simple cold or warm reboot (PC only)
 - cls: clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
 - pause: submit tool waiting for a keystroke
-- tod (CP/M-86 1.1 for XT only) replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that.
+- tod (CP/M-86 1.1 for XT only) replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool.
 - ver displays the BDOS version
 - at clock tools
     - attime (CP/M-86 1.1 for XT only) sync up clock
@@ -81,7 +81,7 @@ INF:      scrdef     Default screen settings
     - pceexit
     - pcemnt
 
-All the C tools benefits from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
+All the C tools (rm, ls, mode, more, write, dump) benefit from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
 
 ## What CP/M-86?
 
