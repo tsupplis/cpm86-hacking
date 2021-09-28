@@ -212,8 +212,8 @@ tinst) and is in english. Poly pascal is also in english but the message file an
 Macro assembler, C, Pascal, Structure Basic ... what else do we need?
 
 Cross Compilation can be done either using DOS emulation (emu2, pce) or using a hybrid OS
-- Concurrent DOS 6.21 XM
 - DOS Plus 1.2
+- Concurrent DOS 6.21 XM
 
 ... run all the tools above (Both in their DOS and CP/M version) and you can test directly the cmd binaries.
 
