@@ -38,8 +38,8 @@ write.cmd: write.o
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-mode.cmd: mode.o
-	$(LD) -o $@ $< $(LDFLAGS)
+mode.cmd: mode.o bdosx.o
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 more.cmd: more.o
 	$(LD) -o $@ $< $(LDFLAGS)
@@ -103,9 +103,7 @@ cpmtest.img: $(TOOLS) $(PCETOOLS) Makefile test.bin test.txt
 	cpmcp -f ibmpc-514ss cpmtest.img test.txt 2:testc
 	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
 
-test: 
-
-sim: cpmtest
+test: cpmtest
 
 cpmtest: cpmtest.img
 	@./cpm86
