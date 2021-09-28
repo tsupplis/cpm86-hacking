@@ -56,8 +56,15 @@ INF:      cursor=on  Show cursor
 INF:      cursor=off Hide cursor
 INF:      line=on    Show status line
 INF:      line=off   Hide status line
+INF:      status=    Set status line message 
+          (\s: space, \\: \, \u:upper, \l:lower
 INF:      col=40     Switch to 40 columns
 INF:      col=80     Switch to 80 columns
+INF:      mono       Switch to Mono
+INF:      color      Switch to Color
+INF:      fg=        Set foreground color (0-F)
+INF:      bg=        Set background color (0-F)
+INF:      scrdef     Default screen settings
 ```
 - reboot: simple cold or warm reboot (PC only)
 - cls: clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)

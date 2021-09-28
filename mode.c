@@ -26,6 +26,79 @@ typedef struct _cmd_t {
 } _cmd_t;
 
 #ifdef __LEGACY__
+int status(arg)
+    char* arg;
+#else
+int status(char* arg)
+#endif
+{
+    int i=0;
+    int es;
+    int bx;
+    int ax;
+    int segs[4];
+    int escape=0;
+    int upper=0;
+
+    segread(segs);
+    ax=bdosx(49,0,&es,&bx);
+    while(i<14) {
+        if(*arg=='\\') {
+            escape=1;
+            arg++;
+            continue;
+        }
+        if(*arg) {
+            char c;
+            c=*arg;
+            if(escape) {
+                escape=0;
+                switch(c) {
+                    case 'u':
+                    case 'U':
+                        upper=1;
+                        c=0;
+                        break;
+                    case 'l':
+                    case 'L':
+                        upper=0;
+                        c=0;
+                        break;
+                    case 's':
+                    case 'S':
+                        c=' ';
+                        break;
+                    case '\\':
+                        c=' ';
+                        break;
+                    default:
+                        c=0;
+                        break;
+                }
+            } 
+            if(!c) {
+                arg++;
+                continue;
+            }
+            if(c<' ') {
+                c=' ';
+            }
+            if(isalpha(c) && !upper) {
+                pokeb(bx+0x32+i,es,tolower(c));
+            } else {
+                pokeb(bx+0x32+i,es,c);
+            }
+            i++;
+            arg++;
+        } else {
+            pokeb(bx+0x32+i,es,' ');
+            i++;
+        }
+    }
+    return 0;
+}
+
+#ifdef __LEGACY__
 int col80(arg)
     char* arg;
 #else
@@ -126,6 +199,7 @@ _cmd_t cmds[]= {
     {"cursor=off", CURSOROFF, "Hide cursor", 0, 0 },
     {"line=on", LINEON, "Show status line", 0, 0 },
     {"line=off", LINEOFF, "Hide status line", 0, 0 },
+    {"status=", 0, "Set status line message \n          (\\s: space, \\\\: \\, \\u:upper, \\l:lower", status, 1 },
     {"col=40", COL40, "Switch to 40 columns", col40, 0 },
     {"col=80", COL80, "Switch to 80 columns", col80, 0 },
     {"mono", MONO, "Switch to Mono", 0, 0 },
