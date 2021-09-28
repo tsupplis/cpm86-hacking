@@ -19,6 +19,7 @@ typedef struct _cmd_t {
     char * vt_cmd;
     char * desc;
     int (*fn)();
+    int prefix;
 } _cmd_t;
 
 #ifdef __LEGACY__
@@ -45,6 +46,54 @@ int col80(char* arg)
 }
 
 #ifdef __LEGACY__
+int fg(arg)
+    char* arg;
+#else
+int fg(char* arg)
+#endif
+{
+    char fg=255;
+    if(strlen(arg)>1) {
+        return -1;
+    }
+    if(arg[0]>='0' && arg[0]<='9') {
+        fg=arg[0]-'0';       
+    } else if(arg[0]>='a' && arg[0]<='f') {
+        fg=arg[0]-'a'+10;       
+    } else if(arg[0]>='A' && arg[0]<='F') {
+        fg=arg[0]-'A'+10;       
+    } else {
+        return -1;
+    }
+    fprintf(stdout,"\x1bb%c",fg);
+    return 0;
+}
+
+#ifdef __LEGACY__
+int bg(arg)
+    char* arg;
+#else
+int bg(char* arg)
+#endif
+{
+    char bg=255;
+    if(strlen(arg)>1) {
+        return -1;
+    }
+    if(arg[0]>='0' && arg[0]<='9') {
+        bg=arg[0]-'0';       
+    } else if(arg[0]>='a' && arg[0]<='f') {
+        bg=arg[0]-'a'+10;       
+    } else if(arg[0]>='A' && arg[0]<='F') {
+        bg=arg[0]='A'+10;
+    } else {
+        return -1;
+    }
+    fprintf(stdout,"\x1bc%c",bg);
+    return 0;
+}
+
+#ifdef __LEGACY__
 int col40(arg)
     char* arg;
 #else
@@ -67,22 +116,25 @@ int col40(char* arg)
 }
 
 _cmd_t cmds[]= {
-    {"cls", CLS, "Clear screen",0 },
-    {"cursor=on", CURSORON, "Show cursor", 0 },
-    {"cursor=off", CURSOROFF, "Hide cursor", 0 },
-    {"line=on", LINEON, "Show status line", 0 },
-    {"line=off", LINEOFF, "Hide status line", 0 },
-    {"col=40", COL40, "Switch to 40 columns", col40 },
-    {"col=80", COL80, "Switch to 80 columns", col80 },
+    {"cls", CLS, "Clear screen",0, 0 },
+    {"cursor=on", CURSORON, "Show cursor", 0, 0 },
+    {"cursor=off", CURSOROFF, "Hide cursor", 0, 0 },
+    {"line=on", LINEON, "Show status line", 0, 0 },
+    {"line=off", LINEOFF, "Hide status line", 0, 0 },
+    {"col=40", COL40, "Switch to 40 columns", col40, 0 },
+    {"col=80", COL80, "Switch to 80 columns", col80, 0 },
+    {"fg=", 0, "Set foreground color (0-F)", fg, 1 },
+    {"bg=", 0, "Set background color (0-F)", bg, 1 },
     {0,0,0,0}
 };
 
 #ifdef __LEGACY__
-int strlowercmp (p1, p2)
+int strlowercmp (p1, p2, p)
     char *p1;
     char *p2;
+    int p;
 #else
-int strlowercmp (char *p1, char *p2)
+int strlowercmp (char *p1, char *p2,int p)
 #endif
 {
   unsigned char *s1 = (unsigned char *) p1;
@@ -94,7 +146,11 @@ int strlowercmp (char *p1, char *p2)
       c1 = (unsigned char) tolower(*s1++);
       c2 = (unsigned char) tolower(*s2++);
       if (c1 == '\0')
-        return c1 - c2;
+        if(p) {
+            return 0;
+        } else {
+            return c1 - c2;
+        }
     }
   while (c1 == c2);
 
@@ -127,14 +183,15 @@ int main(int argc, char **argv)
         }
         exit(0);
     }
+    freopen("con:", "w", stdout);
     while(arg<argc) {
         done=0;
         index=0;
         while(cmds[index].name) {
-            if(!strlowercmp(cmds[index].name,argv[arg])) {
+            if(!strlowercmp(cmds[index].name,argv[arg],cmds[index].prefix)) {
                 done=1;
                 if(cmds[index].fn) {
-                    if(cmds[index].fn(argv[arg])) {
+                    if(cmds[index].fn(argv[arg]+strlen(cmds[index].name))) {
                         fprintf(stderr, "ERR: Action(%s) failed\n",argv[arg]);
                         exit(-1);
                     }
