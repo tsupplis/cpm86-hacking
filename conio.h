@@ -18,6 +18,7 @@
 int kbhit();
 int getch();
 clrscr();
+crtreset();
 clreol();
 clreos();
 delline();
@@ -31,6 +32,7 @@ color();
 int kbhit();
 int getch();
 void clrscr();
+void crtreset();
 void clreol();
 void clreos();
 void delline();

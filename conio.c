@@ -13,6 +13,19 @@ int kbhit() {
 
 static char getch_buffer[GETCH_BUFLEN];
 
+#ifdef __LEGACY__
+int puts(str)
+    register char *str;
+#else
+int puts(register char *str)
+#endif
+{
+	while (*str)
+		if (putchar(*str++) == -1)
+			return -1;
+	return 0;
+}
+
 int getch()
 {
     int i,c,d;
@@ -36,12 +49,21 @@ int getch()
 }
 
 #ifdef __LEGACY__
+crtreset()
+#else
+void crtreset()
+#endif
+{
+    puts("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
+}
+
+#ifdef __LEGACY__
 clrscr()
 #else
 void clrscr()
 #endif
 {
-    bdos(9,"\x1bE$");
+    puts("\x1bE");
 }
 
 #ifdef __LEGACY__
@@ -50,7 +72,7 @@ clreos()
 void clreos()
 #endif
 {
-    bdos(9,"\x1bJ$");
+    puts("\x1bJ");
 }
 
 #ifdef __LEGACY__
@@ -59,7 +81,7 @@ clreol()
 void clreol()
 #endif
 {
-        bdos(9,"\x1bK$");
+        puts("\x1bK");
 }
 
 #ifdef __LEGACY__
@@ -68,7 +90,7 @@ delchar()
 void delchar()
 #endif
 {
-        bdos(9,"\x1bN$");
+        puts("\x1bN");
 }
 
 #ifdef __LEGACY__
@@ -77,7 +99,7 @@ insline()
 void insline()
 #endif
 {
-        bdos(9,"\x1bL$");
+        puts("\x1bL");
 }
 
 #ifdef __LEGACY__
@@ -86,7 +108,7 @@ delline()
 void delline()
 #endif
 {
-        bdos(9,"\x1bM$");
+        puts("\x1bM");
 }
 
 #ifdef __LEGACY__
@@ -98,10 +120,10 @@ void gotoxy(int x, int y)
 #endif
 {
     char msg[6];
-    strcpy(msg,"\x1BY..$");
+    strcpy(msg,"\x1BY..");
     msg[2]=x+32;
     msg[3]=y+32;
-    bdos(9,msg);
+    puts(msg);
 }
 
 #ifdef __LEGACY__
@@ -113,16 +135,16 @@ void cursor(int cmd)
 {
     switch(cmd) {
     case CURSOR_ON:
-        bdos(9,"\x1bm$");
+        puts("\x1bm");
         break;
     case CURSOR_OFF:
-        bdos(9,"\x1bn$");
+        puts("\x1bn");
         break;
     case CURSOR_SAVE:
-        bdos(9,"\x1bj$");
+        puts("\x1bj");
         break;
     case CURSOR_RESTORE:
-        bdos(9,"\x1bk$");
+        puts("\x1bk");
         break;
     }
 }
@@ -135,9 +157,9 @@ void statline(int on)
 #endif
 {
     if(on) {
-        bdos(9,"\x1b1$");
+        puts("\x1b1");
     } else {
-        bdos(9,"\x1b0$");
+        puts("\x1b0");
     }
 }
 
@@ -150,8 +172,8 @@ void color(int fg, int bg);
 #endif
 {
     char msg[8];
-    strcpy(msg,"\x1Bb.\x1Bc.$");
+    strcpy(msg,"\x1Bb.\x1Bc.");
     msg[2]=fg;
-    msg[4]=bg;
-    bdos(9,msg);
+    msg[5]=bg;
+    puts(msg);
 }

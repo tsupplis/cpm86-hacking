@@ -13,7 +13,7 @@
 #define LINEON "\x1b1" 
 #define COL40 "\x1b0\x1b\xE" 
 #define COL80 "\x1b0\x1b1\x1bE" 
-#define SCRDEF "\x1bm\x1b0\x1b1\x1bq\x1bE" 
+#define SCRDEF "\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu\x1bE" 
 #define MONO "\x1by"
 #define COLOR "\x1bx"
 

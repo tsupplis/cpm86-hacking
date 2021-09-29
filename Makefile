@@ -9,7 +9,7 @@ RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
-    atinit.cmd attime.cmd 
+    atinit.cmd attime.cmd ciotest.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
@@ -26,10 +26,13 @@ hack-bin.zip pce-bin.zip: binaries
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
 
-ls.cmd: ls.o dirent.o bdosx.o debug.o
+ls.cmd: ls.o dirent.o os.o debug.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
-rm.cmd: rm.o dirent.o bdosx.o debug.o
+ciotest.cmd: ciotest.o conio.o os.o debug.o
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+rm.cmd: rm.o dirent.o os.o debug.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 write.cmd: write.o
@@ -38,13 +41,13 @@ write.cmd: write.o
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-mode.cmd: mode.o bdosx.o
+mode.cmd: mode.o os.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 more.cmd: more.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-bdosx.o: bdosx.asm
+os.o: os.asm
 	$(AS) $<
 	$(STRIP) $@
 
