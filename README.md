@@ -62,8 +62,8 @@ INF:      col=40     Switch to 40 columns
 INF:      col=80     Switch to 80 columns
 INF:      mono       Switch to Mono
 INF:      color      Switch to Color
-INF:      fg=        Set foreground color (0-F)
-INF:      bg=        Set background color (0-F)
+INF:      fg=        Set foreground color (1-F)
+INF:      bg=        Set background color (1-F)
 INF:      scrdef     Default screen settings
 ```
 - REBOOT: Simple cold or warm reboot (PC only)

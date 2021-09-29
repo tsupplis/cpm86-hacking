@@ -14,14 +14,14 @@ int kbhit() {
 static char getch_buffer[GETCH_BUFLEN];
 
 #ifdef __LEGACY__
-int puts(str)
+int cputs(str)
     register char *str;
 #else
-int puts(register char *str)
+int cputs(register char *str)
 #endif
 {
 	while (*str)
-		if (putchar(*str++) == -1)
+		bdos(2,*str++);
 			return -1;
 	return 0;
 }
@@ -54,7 +54,7 @@ crtreset()
 void crtreset()
 #endif
 {
-    puts("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
+    cputs("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
 }
 
 #ifdef __LEGACY__
@@ -63,7 +63,7 @@ clrscr()
 void clrscr()
 #endif
 {
-    puts("\x1bE");
+    cputs("\x1bq\x1bE");
 }
 
 #ifdef __LEGACY__
@@ -72,7 +72,7 @@ clreos()
 void clreos()
 #endif
 {
-    puts("\x1bJ");
+    cputs("\x1bJ");
 }
 
 #ifdef __LEGACY__
@@ -81,7 +81,7 @@ clreol()
 void clreol()
 #endif
 {
-        puts("\x1bK");
+        cputs("\x1bK");
 }
 
 #ifdef __LEGACY__
@@ -90,7 +90,7 @@ delchar()
 void delchar()
 #endif
 {
-        puts("\x1bN");
+        cputs("\x1bN");
 }
 
 #ifdef __LEGACY__
@@ -99,7 +99,7 @@ insline()
 void insline()
 #endif
 {
-        puts("\x1bL");
+        cputs("\x1bL");
 }
 
 #ifdef __LEGACY__
@@ -108,7 +108,7 @@ delline()
 void delline()
 #endif
 {
-        puts("\x1bM");
+        cputs("\x1bM");
 }
 
 #ifdef __LEGACY__
@@ -119,11 +119,13 @@ gotoxy(x, y)
 void gotoxy(int x, int y)
 #endif
 {
-    char msg[6];
-    strcpy(msg,"\x1BY..");
+    char msg[5];
+    msg[0]=27;
+    msg[1]='Y';
     msg[2]=x+32;
     msg[3]=y+32;
-    puts(msg);
+    msg[4]=0;
+    cputs(msg);
 }
 
 #ifdef __LEGACY__
@@ -135,16 +137,16 @@ void cursor(int cmd)
 {
     switch(cmd) {
     case CURSOR_ON:
-        puts("\x1bm");
+        cputs("\x1bm");
         break;
     case CURSOR_OFF:
-        puts("\x1bn");
+        cputs("\x1bn");
         break;
     case CURSOR_SAVE:
-        puts("\x1bj");
+        cputs("\x1bj");
         break;
     case CURSOR_RESTORE:
-        puts("\x1bk");
+        cputs("\x1bk");
         break;
     }
 }
@@ -157,23 +159,25 @@ void statline(int on)
 #endif
 {
     if(on) {
-        puts("\x1b1");
+        cputs("\x1b1");
     } else {
-        puts("\x1b0");
+        cputs("\x1b0");
     }
 }
 
 #ifdef __LEGACY__
-color(fg,bg)
+textcolor(fg)
     int fg;
-    int bg;
 #else
-void color(int fg, int bg);
+void textcolor(int fg)
 #endif
 {
-    char msg[8];
-    strcpy(msg,"\x1Bb.\x1Bc.");
+    char msg[5];
+    if(fg>8) fg=8;
+    if(fg<1) fg=1;
+    msg[0]=27;
+    msg[1]='b';
     msg[2]=fg;
-    msg[5]=bg;
-    puts(msg);
+    msg[3]=0;
+    cputs(msg);
 }

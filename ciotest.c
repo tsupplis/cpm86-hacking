@@ -12,22 +12,34 @@ int main(int argc, char **argv)
 {
 	int i;
 	int c;
+    int j;
 
 	clrscr();
+    cursor(CURSOR_OFF);
 	statline(STATLINE_OFF);
     gotoxy(0,0);printf("(0,0)");
-    gotoxy(0,74);printf("(0,79)");
-    gotoxy(23,73);printf("(23,79");
+    gotoxy(0,73);printf("(0,78)");
+    gotoxy(23,72);printf("(23,78)");
     gotoxy(23,0);printf("(23,0)");
-        getch();
-	for(i=1;i<14;i++) {
+	for(i=0;i<9;i++) {
+	    textcolor(2);
 		gotoxy(3+i,1);
-        getch();
-		color(1+i%6+1,9);
-		printf("[%02d] Line Added ------------------------- ",i);
-        getch();
+		printf("[%02d] Line Added -------------------------",i+1);
+	    textcolor(4,9);
+		printf("o");
 	}
-    gotoxy(23,28);printf("[press a key to continue]");
+	c=getch();
+    for(j=1;j<9;j++){
+        for(i=0;i<9;i++) {
+            textcolor(j);
+            gotoxy(3+i,1);
+            printf("[%02d] Line Added -------------------------",i+1);
+        }
+        c=getch();
+	}
+	c=getch();
+	textcolor(4);
+    gotoxy(23,26);printf("[press a key to continue]");
 	c=getch();
     delline();
     crtreset();

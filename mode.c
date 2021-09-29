@@ -133,7 +133,7 @@ int fg(char* arg)
     if(strlen(arg)>1) {
         return -1;
     }
-    if(arg[0]>='0' && arg[0]<='9') {
+    if(arg[0]>='1' && arg[0]<='9') {
         fg=arg[0]-'0';       
     } else if(arg[0]>='a' && arg[0]<='f') {
         fg=arg[0]-'a'+10;       
@@ -204,8 +204,8 @@ _cmd_t cmds[]= {
     {"col=80", COL80, "Switch to 80 columns", col80, 0 },
     {"mono", MONO, "Switch to Mono", 0, 0 },
     {"color", COLOR, "Switch to Color", 0, 0 },
-    {"fg=", 0, "Set foreground color (0-F)", fg, 1 },
-    {"bg=", 0, "Set background color (0-F)", bg, 1 },
+    {"fg=", 0, "Set foreground color (1-F)", fg, 1 },
+    {"bg=", 0, "Set background color (1-F)", bg, 1 },
     {"scrdef", SCRDEF, "Default screen settings", 0, 0 },
     {0,0,0,0}
 };
