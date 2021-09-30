@@ -121,15 +121,9 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
 ## TODOs
 
 - cp equivalent
-- better submit files for aztec c on CP/M-86
-- build a full end to end functioning CP/M-86 dev environmet.
 - configuration information in pceinit as in CP/M-86 bdos/bios init screen
 - attime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
-- move to microsoft/IBM MIT licensed link & masm tools
-- provide DOS batch and CP/M submit for the build
 - study recompilation and patch of Date, Show and Dir and in the meantime regress test
-- a clean reusable makefile
-  CDOS 4.1 tools utilities on CCPM-86 2.0/CDOS 3.2
 - clean up code duplicates
 - more tools/experiments
 - sort out why cpmtools refuses to work with 320kb (for testing I use single face 160K
