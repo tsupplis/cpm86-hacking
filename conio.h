@@ -17,7 +17,7 @@
 #define CURSOR_SAVE    2
 #define CURSOR_RESTORE 3
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int kbhit();
 int getch();
 clrscr();

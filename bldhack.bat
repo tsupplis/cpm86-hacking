@@ -1,24 +1,24 @@
 @echo off
-cc -D__CPM86__ -D__LEGACY__ -ic: dump.c
+cc -D__CPM86__ -ic: dump.c
 sqz dump.o
 ln -o dump.cmd dump.o -lc
-cc -D__CPM86__ -D__LEGACY__ -ic: more.c
+cc -D__CPM86__ -ic: more.c
 sqz more
 ln -o mode.cmd more.o c:m.lib -lc
-cc -D__CPM86__ -D__LEGACY__ -ic: mode.c
+cc -D__CPM86__ -ic: mode.c
 sqz mode
 ln -o mode.cmd mode.o c:m.lib -lc
-cc -D__CPM86__ -D__LEGACY__ -ic: write.c
+cc -D__CPM86__ -ic: write.c
 sqz write.o
 ln -o write.cmd write.o -lc
-cc -D__CPM86__ -D__LEGACY__ -ic: dirent.c
+cc -D__CPM86__ -ic: dirent.c
 sqz dirent.o
-cc -D__CPM86__ -D__LEGACY__ -ic: debug.c
+cc -D__CPM86__ -ic: debug.c
 sqz debug.o
-cc -D__CPM86__ -D__LEGACY__ -ic: ls.c
+cc -D__CPM86__ -ic: ls.c
 sqz ls.o
 ln -o ls.cmd ls.o dirent.o debug.o -lc
-cc -D__CPM86__ -D__LEGACY__ -ic: rm.c
+cc -D__CPM86__ -ic: rm.c
 sqz rm.o
 ln -o rm.cmd rm.o dirent.o debug.o -lc
 rasm86 ver $ pz sz

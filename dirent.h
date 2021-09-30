@@ -27,7 +27,7 @@ typedef struct dpb_t {
 } dpb_t;
 
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int dirent_next();
 int dirent_first();
 int dirent_clear(); 
@@ -40,7 +40,7 @@ int dirent_load(char * path, dirent_t ** root,int *ouser, int *odrive, int sort_
         int all_extents);
 #endif
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 dpb_load();
 #else
 dpb_load(int drive, dpb_t*dpb);

@@ -5,7 +5,7 @@
   Licensed under the MIT license. See LICENSE file in the project root for details.
 */
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int keyb();
 int bdosx();
 #else
@@ -13,7 +13,7 @@ int keyb();
 int bdosx(int cx, int ax, int* es, int *bx);
 #endif
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 dpb_load();
 #else
 dpb_load(int drive, dpb_t*dpb);

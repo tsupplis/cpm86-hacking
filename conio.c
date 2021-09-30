@@ -13,7 +13,7 @@ int kbhit() {
 
 static char getch_buffer[GETCH_BUFLEN];
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int cputc(c)
     char c;
 #else
@@ -23,7 +23,7 @@ int cputc(char c)
 	return bdos(2,c);
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int cputs(str)
     char *str;
 #else
@@ -58,7 +58,7 @@ int getch()
     return c;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 crtreset()
 #else
 void crtreset()
@@ -67,7 +67,7 @@ void crtreset()
     cputs("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 clrscr()
 #else
 void clrscr()
@@ -76,7 +76,7 @@ void clrscr()
     cputs("\x1bq\x1bE");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 clreos()
 #else
 void clreos()
@@ -85,7 +85,7 @@ void clreos()
     cputs("\x1bJ");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 clreol()
 #else
 void clreol()
@@ -94,7 +94,7 @@ void clreol()
         cputs("\x1bK");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 delchar()
 #else
 void delchar()
@@ -103,7 +103,7 @@ void delchar()
         cputs("\x1bN");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 insline()
 #else
 void insline()
@@ -112,7 +112,7 @@ void insline()
         cputs("\x1bL");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 delline()
 #else
 void delline()
@@ -121,7 +121,7 @@ void delline()
         cputs("\x1bM");
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 gotoxy(x, y)
     int x;
     int y;
@@ -138,7 +138,7 @@ void gotoxy(int x, int y)
     cputs(msg);
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 cursor(cmd)
     int cmd;
 #else
@@ -161,7 +161,7 @@ void cursor(int cmd)
     }
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 wrapline(on)
     int on;
 #else
@@ -175,7 +175,7 @@ void wrapline(int on)
     }
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 statline(on)
     int on;
 #else
@@ -189,7 +189,7 @@ void statline(int on)
     }
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 textcolor(fg)
     int fg;
 #else

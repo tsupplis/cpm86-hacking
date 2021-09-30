@@ -3,7 +3,7 @@
 */
 
 #include <stdio.h>
-#ifndef __LEGACY__
+#ifdef __STDC__
 #include <stdlib.h>
 #else
 char *malloc();
@@ -17,7 +17,7 @@ char *malloc();
 #include "debug.h"
 #endif
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int dirent_next(fcb, root, last, all_extents) 
     char * fcb;
     dirent_t * root;
@@ -88,7 +88,7 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     return rc;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int dirent_first(fcb, root) 
     char * fcb;
     dirent_t ** root;
@@ -135,7 +135,7 @@ int dirent_first(char * fcb, dirent_t ** root)
 }
 
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 dirent_t* dirent_merge_sorted(lst1,lst2,sort_order) 
     dirent_t* lst1; 
     dirent_t* lst2; 
@@ -162,7 +162,7 @@ dirent_t* dirent_merge_sorted(dirent_t* lst1, dirent_t* lst2, int sort_order)
 	return result; 
 } 
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 dirent_split(source, front, back) 
     dirent_t* source; 
     dirent_t** front; 
@@ -189,7 +189,7 @@ void dirent_split(dirent_t* source, dirent_t** front, dirent_t** back)
 	entry2->next = 0; 
 } 
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 dirent_sort(root, sort_order)
     dirent_t** root; 
     int sort_order;
@@ -213,7 +213,7 @@ dirent_sort(dirent_t** root, int sort_order)
 	*root = dirent_merge_sorted(entry1, entry2, sort_order); 
 } 
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int dirent_clear(root) 
     dirent_t * root;
 #else
@@ -228,7 +228,7 @@ int dirent_clear(dirent_t * root)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int dirent_load(path, root, ouser, odrive, sort_order, all_extents) 
     char * path;
     dirent_t ** root;
@@ -295,7 +295,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     return rc;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 dpb_load(drive, dpb)
     int drive; 
     dpb_t* dpb; 

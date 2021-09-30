@@ -3,12 +3,12 @@
 */
 
 #include <stdio.h>
-#ifndef __LEGACY__
+#ifdef __STDC__
 #include <stdlib.h>
 #endif
 #include <dirent.h>
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int main(argc,argv)
     int argc;
     char **argv;

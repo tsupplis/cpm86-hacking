@@ -6,7 +6,7 @@
 #include <sgtty.h>
 
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 unsigned long dump_hex(fd, data, size, offset, raw) 
     FILE *fd;
     char *data;
@@ -84,7 +84,7 @@ int getch() {
 #define BUFLEN 1024
 char buffer[BUFLEN];
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int main(argc, argv) 
     int argc;
     char **argv;

@@ -1,7 +1,7 @@
 AS=aztec34_as
 CC=aztec34_cc
 AR=aztec34_lib
-CFLAGS=-I. +F -B +0 -D__CPM86__ -D__LEGACY__
+CFLAGS=-I. +F -B +0 -D__CPM86__ 
 STRIP=aztec34_sqz
 LDFLAGS=-lm -lc86
 LD=aztec34_link

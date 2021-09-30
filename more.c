@@ -21,7 +21,7 @@ int getch()
     return c;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int main(argc, argv) 
     int argc;
     char **argv;

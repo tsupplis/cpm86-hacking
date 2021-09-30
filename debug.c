@@ -3,12 +3,12 @@
 */
 
 #include <stdio.h>
-#ifndef __LEGACY__
+#ifdef __STDC__
 #include <stdlib.h>
 #endif
 #include "debug.h"
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 unsigned long debug_dump_hex(fd, data, size, offset, raw) 
     FILE *fd;
     char *data;

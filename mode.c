@@ -22,7 +22,7 @@ typedef struct _cmd_t {
     int prefix;
 } _cmd_t;
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int status(arg)
     char* arg;
 #else
@@ -95,7 +95,7 @@ int status(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int col80(arg)
     char* arg;
 #else
@@ -119,7 +119,7 @@ int col80(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int cls(arg)
     char* arg;
 #else
@@ -130,7 +130,7 @@ int cls(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int cursor_on(arg)
     char* arg;
 #else
@@ -141,7 +141,7 @@ int cursor_on(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int cursor_off(arg)
     char* arg;
 #else
@@ -152,7 +152,7 @@ int cursor_off(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int statline_on(arg)
     char* arg;
 #else
@@ -163,7 +163,7 @@ int statline_on(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int statline_off(arg)
     char* arg;
 #else
@@ -174,7 +174,7 @@ int statline_off(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int fg(arg)
     char* arg;
 #else
@@ -198,7 +198,7 @@ int fg(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int bg(arg)
     char* arg;
 #else
@@ -222,7 +222,7 @@ int bg(char* arg)
     return 0;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int col40(arg)
     char* arg;
 #else
@@ -262,7 +262,7 @@ _cmd_t cmds[]= {
     {0,0,0,0}
 };
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int strlowercmp (p1, p2, p)
     char *p1;
     char *p2;
@@ -291,7 +291,7 @@ int strlowercmp (char *p1, char *p2,int p)
   return c1 - c2;
 }
 
-#ifdef __LEGACY__
+#ifndef __STDC__
 int main(argc, argv) 
     int argc;
     char **argv;
