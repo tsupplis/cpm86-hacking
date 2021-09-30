@@ -6,6 +6,9 @@
   Licensed under the MIT license. See LICENSE file in the project root for details.
 */
 
+#define WRAPLINE_OFF 0
+#define WRAPLINE_ON  1
+
 #define STATLINE_OFF 0
 #define STATLINE_ON  1
 
@@ -26,6 +29,7 @@ insline();
 delchar();
 cursor();
 statline();
+wrapline();
 gotoxy();
 color();
 int cputs();
@@ -42,6 +46,7 @@ void insline();
 void delchar();
 void cursor(int on);
 void statline(int on);
+void wrapline(int on);
 void gotoxy(int x, int y);
 void textcolor(int fg);
 int cputs(char *);

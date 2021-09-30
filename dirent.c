@@ -8,7 +8,8 @@
 #else
 char *malloc();
 #endif
-#include "dirent.h"
+#include <os.h>
+#include <dirent.h>
 
 /*#define DEBUG*/
 

@@ -6,7 +6,7 @@
 #ifndef __LEGACY__
 #include <stdlib.h>
 #endif
-#include "dirent.h"
+#include <dirent.h>
 
 int getch() 
 {

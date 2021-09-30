@@ -162,6 +162,20 @@ void cursor(int cmd)
 }
 
 #ifdef __LEGACY__
+wrapline(on)
+    int on;
+#else
+void wrapline(int on)
+#endif
+{
+    if(on) {
+        cputs("\x1bv");
+    } else {
+        cputs("\x1bw");
+    }
+}
+
+#ifdef __LEGACY__
 statline(on)
     int on;
 #else

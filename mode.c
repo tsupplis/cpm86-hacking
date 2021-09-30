@@ -4,13 +4,10 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <conio.h>
+#include <os.h>
 
 
-#define CLS "\x1bE" 
-#define CURSOROFF "\x1bn" 
-#define CURSORON "\x1bm" 
-#define LINEOFF "\x1b0" 
-#define LINEON "\x1b1" 
 #define COL40 "\x1b0\x1b\xE" 
 #define COL80 "\x1b0\x1b1\x1bE" 
 #define SCRDEF "\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu\x1bE" 
@@ -123,6 +120,61 @@ int col80(char* arg)
 }
 
 #ifdef __LEGACY__
+int cls(arg)
+    char* arg;
+#else
+int cls(char* arg)
+#endif
+{
+    clrscr();
+    return 0;
+}
+
+#ifdef __LEGACY__
+int cursor_on(arg)
+    char* arg;
+#else
+int cursor_on(char* arg)
+#endif
+{
+    cursor(CURSOR_ON);
+    return 0;
+}
+
+#ifdef __LEGACY__
+int cursor_off(arg)
+    char* arg;
+#else
+int cursor_off(char* arg)
+#endif
+{
+    cursor(CURSOR_OFF);
+    return 0;
+}
+
+#ifdef __LEGACY__
+int statline_on(arg)
+    char* arg;
+#else
+int statline_on(char* arg)
+#endif
+{
+    statline(STATLINE_ON);
+    return 0;
+}
+
+#ifdef __LEGACY__
+int statline_off(arg)
+    char* arg;
+#else
+int statline_off(char* arg)
+#endif
+{
+    statline(STATLINE_OFF);
+    return 0;
+}
+
+#ifdef __LEGACY__
 int fg(arg)
     char* arg;
 #else
@@ -194,11 +246,11 @@ int col40(char* arg)
 }
 
 _cmd_t cmds[]= {
-    {"cls", CLS, "Clear screen",0, 0 },
-    {"cursor=on", CURSORON, "Show cursor", 0, 0 },
-    {"cursor=off", CURSOROFF, "Hide cursor", 0, 0 },
-    {"line=on", LINEON, "Show status line", 0, 0 },
-    {"line=off", LINEOFF, "Hide status line", 0, 0 },
+    {"cls", 0, "Clear screen",cls, 0 },
+    {"cursor=on", 0, "Show cursor", cursor_on, 0 },
+    {"cursor=off", 0, "Hide cursor", cursor_off, 0 },
+    {"line=on", 0, "Show status line", statline_on, 0 },
+    {"line=off", 0, "Hide status line", statline_off, 0 },
     {"status=", 0, "Set status line message \n          (\\s: space, \\\\: \\, \\u:upper, \\l:lower)", status, 1 },
     {"col=40", COL40, "Switch to 40 columns", col40, 0 },
     {"col=80", COL80, "Switch to 80 columns", col80, 0 },

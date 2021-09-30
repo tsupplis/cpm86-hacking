@@ -1,9 +1,10 @@
-AS=aztec_as
-CC=aztec_cc
-CFLAGS=+F -B +0 -D__CPM86__
-STRIP=aztec_sqz
+AS=aztec34_as
+CC=aztec34_cc
+AR=aztec34_lib
+CFLAGS=-I. +F -B +0 -D__CPM86__ -D__LEGACY__
+STRIP=aztec34_sqz
 LDFLAGS=-lm -lc86
-LD=aztec_link
+LD=aztec34_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
@@ -26,13 +27,13 @@ hack-bin.zip pce-bin.zip: binaries
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
 
-ls.cmd: ls.o dirent.o os.o debug.o
+ls.cmd: ls.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
-ciotest.cmd: ciotest.o conio.o os.o debug.o
+ciotest.cmd: ciotest.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
-rm.cmd: rm.o dirent.o os.o debug.o
+rm.cmd: rm.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 write.cmd: write.o
@@ -41,17 +42,21 @@ write.cmd: write.o
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-mode.cmd: mode.o os.o
+mode.cmd: mode.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 more.cmd: more.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
+util.lib: conio.o dirent.o debug.o os.o
+	rm -f $@
+	$(AR) $@ $^
+
 os.o: os.asm
 	$(AS) $<
 	$(STRIP) $@
 
-dir.c: dirent.h debug.h
+ls.c: dirent.h debug.h
 
 dirent.c: dirent.h debug.h
 
@@ -78,7 +83,7 @@ atinit.a86: baselib.a86 atclock.a86
 	$(STRIP) $@
 
 clean:
-	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS)
+	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS) util.lib
 	(cd pce;make clean)
 
 
