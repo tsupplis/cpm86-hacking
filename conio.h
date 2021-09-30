@@ -28,6 +28,8 @@ cursor();
 statline();
 gotoxy();
 color();
+int cputs();
+int cputc();
 #else
 int kbhit();
 int getch();
@@ -40,8 +42,10 @@ void insline();
 void delchar();
 void cursor(int on);
 void statline(int on);
-int gotoxy(int x, int y);
-void color(int fg, int bg);
+void gotoxy(int x, int y);
+void textcolor(int fg);
+int cputs(char *);
+int cputc(char);
 #endif
 
 #endif

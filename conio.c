@@ -14,15 +14,25 @@ int kbhit() {
 static char getch_buffer[GETCH_BUFLEN];
 
 #ifdef __LEGACY__
-int cputs(str)
-    register char *str;
+int cputc(c)
+    char c;
 #else
-int cputs(register char *str)
+int cputc(char c)
 #endif
 {
-	while (*str)
+	return bdos(2,c);
+}
+
+#ifdef __LEGACY__
+int cputs(str)
+    char *str;
+#else
+int cputs(char *str)
+#endif
+{
+	while (*str) {
 		bdos(2,*str++);
-			return -1;
+    }
 	return 0;
 }
 
@@ -172,12 +182,17 @@ textcolor(fg)
 void textcolor(int fg)
 #endif
 {
-    char msg[5];
-    if(fg>8) fg=8;
-    if(fg<1) fg=1;
+    unsigned char msg[8];
+    if(fg<1) {
+        return;
+    }
     msg[0]=27;
-    msg[1]='b';
-    msg[2]=fg;
-    msg[3]=0;
+    msg[1]='j';
+    msg[2]=27;
+    msg[3]='b';
+    msg[4]=((char)fg);
+    msg[5]=27;
+    msg[6]='k';
+    msg[7]=0;
     cputs(msg);
 }

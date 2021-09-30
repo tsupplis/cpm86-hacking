@@ -1,9 +1,9 @@
-AS=aztec34_as
-CC=aztec34_cc
-CFLAGS=+F -B +0 -D__CPM86__  -D__LEGACY__
-STRIP=aztec34_sqz
+AS=aztec_as
+CC=aztec_cc
+CFLAGS=+F -B +0 -D__CPM86__
+STRIP=aztec_sqz
 LDFLAGS=-lm -lc86
-LD=aztec34_link
+LD=aztec_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
@@ -15,7 +15,7 @@ PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
 
 all: binaries
 
-binaries: $(TOOLS) $(PCETOOLS)
+binaries: $(TOOLS) 
 	(cd pce;make binaries)
 
 dist: hack-bin.zip pce-bin.zip
@@ -91,7 +91,8 @@ cdostest.img: binaries Makefile test.bin test.txt
 	mcopy -o -i cdostest.img test.bin ::TEST.BIN
 	mdir -w -i cdostest.img ::*.*
 
-cpmtest.img: binaries Makefile test.bin test.txt
+cpmtest.img: $(TOOLS) Makefile test.bin test.txt
+	(cd pce;make binaries)
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img $(TOOLS) 0:
