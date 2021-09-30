@@ -154,17 +154,7 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 ```
 - The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2). This is an incredible way to bring dos command line development tools to a modern and up to date shell/make/whatever based dev environment. Another stunning emulator. Emu2 and PCE are an incredible pair.
 
-A rudimentary development environment can be assembled by using the following steps:
-```
-(cd devtools;./fetch)
-export PATH=`pwd`/devtools/bin
-# now you use make
-make clean all
-```
-it pulls the following:
-- aztec 3.4 c compiler  (https://www.aztecmuseum.ca/az8634b.zip)
-- linkcmd and rasm86 (http://www.cpm.z80.de/download/tools86.zip)
-- emu2 (https://github.com/dmsc/emu2)
+For a rudimentary, cross development environment, look at (https://github.com/tsupplis/cpm86-crossdev).
 
 ## Test Environment
 - CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html). The simple way to start however is probably (http://www.cpm.z80.de/download/144cpm86.zip)
