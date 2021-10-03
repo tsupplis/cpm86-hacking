@@ -71,6 +71,8 @@ INF:      scrdef     Default screen settings
 - PAUSE: submit tool waiting for a keystroke
 - TOD: Replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool. (CP/M-86 1.1 for PC/XT only)
 - VER: Displays the BDOS version
+- BALL: A simple CGA demo
+- GETCH: A simple keyboard scanner
 - AT clock tools
     - ATTIME: Sync up clock (CP/M-86 1.1 for PC/XT with an AT compatible clock only)
     - ATINIT: Sync up clock and display boot banner (CP/M-86 1.1 for PC/XT with an AT compatible clock only)

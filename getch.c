@@ -11,16 +11,20 @@ int main(int argc, char **argv)
 #endif
 {
 	int c;
+    freopen("con:", "r", stdin);
+    freopen("con:", "w", stdout);
+    fprintf (stderr,"INF: Keyboard Scanner. type letter 'q' to leave ...\n");
 	while(1) {
 		c=getch();
 		if(isprint(c)) {
-			printf("- %02xH (%3d) %c\n",c,c,c);
+			fprintf(stderr, "INF: 0x%02x [%-3d] -> %c\n",c,c,c);
 		} else if(c>=0 && c<' ') {
-			printf("- %02xH (%3d) ^%c\n",c,c,c+'A'-1);
+			fprintf(stderr, "INF: 0x%02x [%-3d] -> ^%c\n",c,c,c+'A'-1);
 		} else {
-			printf("- %02xH (%3d)\n",c,c);
+			fprintf(stderr, "INF: 0x%02x [%-3d]\n",c,c);
 		}
 		if(c=='q') {
+            fprintf (stderr,"INF: Bye ...\n");
 			break;
 		}
 	}
