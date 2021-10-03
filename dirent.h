@@ -13,20 +13,6 @@ typedef struct _dirent_t {
     struct _dirent_t * next;
 } dirent_t;
 
-typedef struct dpb_t {
-    unsigned int spt;
-    unsigned char bsh;
-    unsigned char blm;
-    unsigned char exm;
-    unsigned int dsm;
-    unsigned int drm;
-    unsigned char al0;
-    unsigned char al1;
-    unsigned int cks;
-    unsigned int off;
-} dpb_t;
-
-
 #ifndef __STDC__
 int dirent_next();
 int dirent_first();
@@ -39,13 +25,6 @@ int dirent_clear(dirent_t * root);
 int dirent_load(char * path, dirent_t ** root,int *ouser, int *odrive, int sort_order,
         int all_extents);
 #endif
-
-#ifndef __STDC__
-dpb_load();
-#else
-dpb_load(int drive, dpb_t*dpb);
-#endif
-
 
 #define dirent_is_sys(a) (a->entry[10]&~0x7F)
 #define dirent_is_ro(a) (a->entry[9]&~0x7F)

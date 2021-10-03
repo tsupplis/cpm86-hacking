@@ -5,12 +5,28 @@
   Licensed under the MIT license. See LICENSE file in the project root for details.
 */
 
+typedef struct dpb_t {
+    unsigned int spt;
+    unsigned char bsh;
+    unsigned char blm;
+    unsigned char exm;
+    unsigned int dsm;
+    unsigned int drm;
+    unsigned char al0;
+    unsigned char al1;
+    unsigned int cks;
+    unsigned int off;
+} dpb_t;
+
+
 #ifndef __STDC__
 int keyb();
 int bdosx();
+delay();
 #else
 int keyb();
 int bdosx(int cx, int ax, int* es, int *bx);
+void delay(unsigned int delay);
 #endif
 
 #ifndef __STDC__
@@ -18,9 +34,5 @@ dpb_load();
 #else
 dpb_load(int drive, dpb_t*dpb);
 #endif
-
-
-#define dirent_is_sys(a) (a->entry[10]&~0x7F)
-#define dirent_is_ro(a) (a->entry[9]&~0x7F)
 
 #endif
