@@ -10,11 +10,11 @@
 **/*.o
 **/hack*.img
 **/cpmtest.img
-**/cdostest.img
+**/dostest.img
 **/cpmhd.img
 **/ccpm86.img
 **/cpm86.img
-**/cdos.img
+**/dosplus.img
 **/*.sym
 **/*.lst
 **/*.map
