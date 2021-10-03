@@ -10,7 +10,7 @@ RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
@@ -26,6 +26,9 @@ hack-bin.zip pce-bin.zip: binaries
 	zip pce-bin.zip $(PCETOOLS) 
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
+
+getch.cmd: getch.o util.lib
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 ls.cmd: ls.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
@@ -121,4 +124,4 @@ cpmtest: cpmtest.img
 	@./cpm86
 
 dostest: dostest.img
-	@./cdos
+	@./dosplus
