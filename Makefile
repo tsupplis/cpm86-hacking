@@ -4,13 +4,13 @@ AR=aztec34_lib
 CFLAGS=-I. +F -B +0 -D__CPM86__ 
 STRIP=aztec34_sqz
 LDFLAGS=-lc86
-LD=aztec34_link
+LD=aztec_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
-    atinit.cmd attime.cmd ciotest.cmd
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
@@ -42,15 +42,22 @@ write.cmd: write.o
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
+ball.cmd: ball.o util.lib
+	$(LD) -o $@ $^ $(LDFLAGS)
+
 mode.cmd: mode.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 more.cmd: more.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-util.lib: conio.o dirent.o debug.o os.o
+util.lib: conio.o dirent.o debug.o os.o gfx.o
 	rm -f $@
 	$(AR) $@ $^
+
+gfx.o: gfx.asm
+	$(AS) $<
+	$(STRIP) $@
 
 os.o: os.asm
 	$(AS) $<
@@ -87,14 +94,14 @@ clean:
 	(cd pce;make clean)
 
 
-cdostest.img: binaries Makefile test.bin test.txt
-	cp cdosbase.img cdostest.img
+dostest.img: binaries Makefile test.bin test.txt
+	cp dosbase.img dostest.img
 	-for i in $(PCETOOLS) $(TOOLS);do \
-	    mcopy -o -i cdostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
+	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
     done
-	mcopy -o -i cdostest.img test.txt ::TEST.TXT
-	mcopy -o -i cdostest.img test.bin ::TEST.BIN
-	mdir -w -i cdostest.img ::*.*
+	mcopy -o -i dostest.img test.txt ::TEST.TXT
+	mcopy -o -i dostest.img test.bin ::TEST.BIN
+	mdir -w -i dostest.img ::*.*
 
 cpmtest.img: $(TOOLS) Makefile test.bin test.txt
 	(cd pce;make binaries)
@@ -113,5 +120,5 @@ test: cpmtest
 cpmtest: cpmtest.img
 	@./cpm86
 
-cdostest: cdostest.img
+dostest: dostest.img
 	@./cdos
