@@ -149,9 +149,6 @@ cursor(cmd)
 void cursor(int cmd)
 #endif
 {
-    if(osver()>0x22) {
-        return;
-    }
     switch(cmd) {
     case CURSOR_ON:
         cputs("\x1bm");
