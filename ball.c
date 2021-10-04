@@ -91,6 +91,7 @@ void ball_demo
     int y = BOX_Y+1;
     int xinc = 1;
     int yinc = 1;
+    int ver=osver();
 
     box(BOX_X, BOX_Y, BOX_WIDTH, BOX_HEIGHT);
     do {
@@ -104,10 +105,10 @@ void ball_demo
             yinc = -1;
         else if (y <= BOX_Y+BOX_THICKNESS)
             yinc = 1;
-        delay(1);
         draw_map(x, y, ball, BALL_WIDTH, BALL_HEIGHT);
+        delay(1);
     } while (!kbhit());
-    clrscr();
+    getch();
 }
 
 #ifndef __STDC__
@@ -123,6 +124,11 @@ int main(int argc, char **argv)
     int xinc = 1;
     int yinc = 1;
 
+
+    if(osver()==0x31) {
+        fprintf(stderr,"INF: No support for direct BIOS access on CCP/M 3.1\n");
+        exit(-1);
+    } 
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
     statline(STATLINE_OFF);
@@ -130,5 +136,6 @@ int main(int argc, char **argv)
     gfx_palette(CGA_PALETTE_GRY);
     ball_demo();
     gfx_mode(MODE_TEXT);
+    statline(STATLINE_ON);
     return 0;
 }

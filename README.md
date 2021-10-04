@@ -124,6 +124,8 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
 
 ## TODOs
 
+- dosplus weird cusor behaviour after using graphics
+- dosplus displays wrong hard disk number
 - cp equivalent
 - configuration information in pceinit as in CP/M-86 bdos/bios init screen
 - attime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
