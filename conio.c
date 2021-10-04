@@ -189,9 +189,6 @@ statline(on)
 void statline(int on)
 #endif
 {
-    if(osver()>0x22) {
-        return;
-    }
     if(on) {
         cputs("\x1b1");
     } else {
