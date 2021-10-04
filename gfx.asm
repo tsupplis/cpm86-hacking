@@ -9,10 +9,12 @@ gfx_palette_   proc    near
             push	bp
             mov 	bp,sp
             push    bx
+            push    dx
             mov     bx,word ptr 4[bp]
             xor     al,al
             mov     ah,0Bh
             int     10h
+            pop     dx
             pop     bx
             pop 	bp
             xor     ax,ax

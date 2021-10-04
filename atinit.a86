@@ -78,12 +78,12 @@ done_87:
             int     13h
             jc      drv_2
             mov     al,dl
-            xor     ah,ah
+            ;xor     ah,ah
             jmp     drv_3
 drv_2:
             xor     ax,ax
 drv_3:
-            mov     bx,10
+            mov     bx,16
             call    print_uint16
             lea     si, msg_nl
             call    print_str  
