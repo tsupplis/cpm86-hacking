@@ -161,6 +161,10 @@ int main(int argc, char **argv)
         dpb_t dpb;
         dpb_load(root->drive,&dpb);
         block_size=128<<dpb.bsh;
+#ifdef DEBUG
+        fprintf(stderr,"ERR: %u %u %u\n",block_size,(unsigned int)dpb.bsh,
+                (unsigned int)dpb.blm);
+#endif
     }
     if(flag_mode!=2) {
         fprintf(stdout,"Drive %d%c:\n",user, 'A'+drive-1);
@@ -192,7 +196,7 @@ int main(int argc, char **argv)
                     dirent_is_sys(cursor)?'S':'-',
                     dirent_is_ro(cursor)?'R':'-');
                 dirent_print_name(stdout,cursor,0);
-                fprintf(stdout," %4luK %4lu FCB(s)\n",size,cursor->fcbs);
+                fprintf(stdout," %4luK %4lu FCB(s) %4lu Block(s)\n",size,cursor->fcbs, cursor->blocks);
                 ctr++;
             } else if(flag_mode==2) {
                 dirent_print_name(stdout,cursor,1);

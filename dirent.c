@@ -39,16 +39,26 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     i=rc;
     f=(unsigned char*)(0x80+rc*32);
 #ifdef DEBUG
-    fprintf(stdout,"->fcb\n",rc);
-    debug_dump_hex(stdout, (unsigned char*)(fcb), 33, 0UL, 0);
-    fprintf(stdout,"->%d\n",rc);
-    debug_dump_hex(stdout, (unsigned char*)(0x80), 32*4, 0UL, 0);
+    fprintf(stderr,"->fcb\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
+    fprintf(stderr,"->%d\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(0x80), 32*4, 0L, 0);
     getchar();
 #endif
     cursor=root;
     while(cursor) {
         if(!memcmp(f+1,(cursor->entry)+1,11)) {
+            if(root->drive_blocks<=256) 
             {
+                int j;
+                char *blocks;
+                blocks=(char*)(f+16);
+                for(j=0;j<16;j++) {
+                    if(!blocks[j]) 
+                        break;
+                    cursor->blocks++;
+                }
+            } else {
                 int j;
                 int *blocks;
                 blocks=(int*)(f+16);
@@ -71,7 +81,17 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     memset(cursor,0,sizeof(dirent_t));
     memcpy(cursor->entry,f,12);
     cursor->drive=root->drive;
+    if(root->drive_blocks<=256) 
     {
+        int j;
+        char *blocks;
+        blocks=(char*)(f+16);
+        for(j=0;j<16;j++) {
+            if(!blocks[j]) 
+                break;
+            cursor->blocks++;
+        }
+    } else {
         int j;
         int *blocks;
         blocks=(int*)(f+16);
@@ -106,10 +126,10 @@ int dirent_first(char * fcb, dirent_t ** root)
     }
     f=(unsigned char*)(0x80+rc*32);
 #ifdef DEBUG
-    fprintf(stdout,"->fcb\n",rc);
-    debug_dump_hex(stdout, (unsigned char*)(fcb), 33, 0UL, 0);
-    fprintf(stdout,"->%d\n",rc);
-    debug_dump_hex(stdout, (unsigned char*)(0x80), 32*4, 0UL, 0);
+    fprintf(stderr,"->fcb\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
+    fprintf(stderr,"->%d\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(0x80), 32*4, 0L, 0);
     getchar();
 #endif
     root[0]=(dirent_t*)malloc(sizeof(dirent_t));
@@ -120,6 +140,26 @@ int dirent_first(char * fcb, dirent_t ** root)
     memcpy(root[0]->entry,f,12);
     root[0]->drive=fcb[0];
     {
+        dpb_t dpb;
+        dpb_load(root[0]->drive,&dpb);
+        root[0]->block_size=128<<dpb.bsh;
+        root[0]->drive_blocks=dpb.dsm+1;
+#ifdef DEBUG
+        fprintf(stderr,"->%lu %lu\n",root[0]->block_size,root[0]->drive_blocks);
+        getchar();
+#endif
+    }
+    if(root[0]->drive_blocks<=256) 
+    {
+        int j;
+        char *blocks;
+        blocks=(char*)(f+16);
+        for(j=0;j<16;j++) {
+            if(!blocks[j]) 
+                break;
+            root[0]->blocks++;
+        }
+    } else {
         int j;
         int *blocks;
         blocks=(int*)(f+16);
@@ -271,8 +311,8 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
         fcb[14]='?';
     }
 #ifdef DEBUG
-    fprintf(stdout,"->fcb\n",rc);
-    debug_dump_hex(stdout, (unsigned char*)(fcb), 33, 0UL, 0);
+    fprintf(stderr,"->fcb\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
     getchar();
 #endif
     
@@ -294,29 +334,3 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
         dirent_sort(root,sort_order);
     return rc;
 }
-
-#ifndef __STDC__
-dpb_load(drive, dpb)
-    int drive; 
-    dpb_t* dpb; 
-#else
-dpb_load(int drive, dpb_t*dpb) 
-#endif
-{
-    int i;
-    int es;
-    int bx;
-    int ax;
-    int segs[4];
-    int curdrive=bdos(25,0);
-    unsigned char *ptr=(unsigned char *)dpb;
-
-    bdos(14,drive-1);
-    segread(segs);
-    ax=bdosx(31,0,&es,&bx);
-    for(i=0;i<15;i++) 
-        ptr[i]=peekb(bx+i,es);
-    bdos(14,curdrive);
-}
-
-

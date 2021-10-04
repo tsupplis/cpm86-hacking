@@ -9,6 +9,8 @@ typedef struct _dirent_t {
     unsigned char entry[12+1];
     int drive;
     unsigned long blocks;
+    unsigned long drive_blocks;
+    unsigned long block_size;
     unsigned long fcbs;
     struct _dirent_t * next;
 } dirent_t;

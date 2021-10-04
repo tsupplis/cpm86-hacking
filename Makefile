@@ -54,7 +54,7 @@ mode.cmd: mode.o util.lib
 more.cmd: more.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-util.lib: conio.o dirent.o debug.o os.o gfx.o
+util.lib: conio.o dirent.o dpb.o debug.o os.o gfx.o
 	rm -f $@
 	$(AR) $@ $^
 
