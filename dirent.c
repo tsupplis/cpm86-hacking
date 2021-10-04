@@ -39,7 +39,7 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     i=rc;
     f=(unsigned char*)(0x80+rc*32);
 #ifdef DEBUG
-    fprintf(stderr,"->fcb\n",rc);
+    fprintf(stderr,"dirent_next->fcb\n",rc);
     debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
     fprintf(stderr,"->%d\n",rc);
     debug_dump_hex(stderr, (unsigned char*)(0x80), 32*4, 0L, 0);
@@ -48,8 +48,10 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     cursor=root;
     while(cursor) {
         if(!memcmp(f+1,(cursor->entry)+1,11)) {
-            if(root->drive_blocks<=256) 
-            {
+            if(root->is_fat) {
+                int * s=(int *)(f+28);
+                cursor->blocks=(*s+cursor->block_size-1)/cursor->block_size;
+            } else if(root->drive_blocks<=256) {
                 int j;
                 char *blocks;
                 blocks=(char*)(f+16);
@@ -81,8 +83,13 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     memset(cursor,0,sizeof(dirent_t));
     memcpy(cursor->entry,f,12);
     cursor->drive=root->drive;
-    if(root->drive_blocks<=256) 
-    {
+    cursor->block_size=root->block_size;
+    cursor->drive_blocks=root->drive_blocks;
+    cursor->is_fat=root->is_fat;
+    if(root->is_fat) {
+        int * s=(int *)(f+28);
+        cursor->blocks=(*s+cursor->block_size-1)/cursor->block_size;
+    } else if(root->drive_blocks<=256) {
         int j;
         char *blocks;
         blocks=(char*)(f+16);
@@ -118,6 +125,7 @@ int dirent_first(char * fcb, dirent_t ** root)
 {
     int rc=0;
     unsigned char* f=0;
+    int is_fat=dirent_is_fat(fcb[0]);
 
     rc=bdos(17,fcb);
     if(rc==255) {
@@ -126,7 +134,7 @@ int dirent_first(char * fcb, dirent_t ** root)
     }
     f=(unsigned char*)(0x80+rc*32);
 #ifdef DEBUG
-    fprintf(stderr,"->fcb\n",rc);
+    fprintf(stderr,"dirent_first->fcb\n",rc);
     debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
     fprintf(stderr,"->%d\n",rc);
     debug_dump_hex(stderr, (unsigned char*)(0x80), 32*4, 0L, 0);
@@ -139,17 +147,21 @@ int dirent_first(char * fcb, dirent_t ** root)
     memset(root[0],0,sizeof(dirent_t));
     memcpy(root[0]->entry,f,12);
     root[0]->drive=fcb[0];
+    root[0]->is_fat=is_fat;
     {
         dpb_t dpb;
         dpb_load(root[0]->drive,&dpb);
         root[0]->block_size=128<<dpb.bsh;
         root[0]->drive_blocks=dpb.dsm+1;
 #ifdef DEBUG
-        fprintf(stderr,"->%lu %lu\n",root[0]->block_size,root[0]->drive_blocks);
+        fprintf(stderr,"disk_info->%lu %lu\n",root[0]->block_size,root[0]->drive_blocks);
         getchar();
 #endif
     }
-    if(root[0]->drive_blocks<=256) 
+    if(root[0]->is_fat) {
+        int * s=(int *)(f+28);
+        root[0]->blocks=(*s+root[0]->block_size-1)/root[0]->block_size;
+    } else if(root[0]->drive_blocks<=256) 
     {
         int j;
         char *blocks;
@@ -269,6 +281,48 @@ int dirent_clear(dirent_t * root)
 }
 
 #ifndef __STDC__
+int dirent_is_fat(drive) 
+    int drive;
+#else
+int dirent_is_fat(int drive)
+#endif
+{
+    char fcb[40];
+    int rc=0;
+    unsigned char* f=0;
+    int curdrive=bdos(25,0);
+        
+    bdos(14,drive-1);
+
+    fcbinit("",fcb);
+    memset(fcb,0,sizeof(fcb));
+    fcb[0]=drive;
+    memset(fcb,'?',12);
+#ifdef DEBUG
+    fprintf(stderr,"dirent_is_fat->curdrive %u\n",drive);
+    fprintf(stderr,"dirent_is_fat->newdrive %u\n",drive);
+    fprintf(stderr,"dirent_is_fat->fcb\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
+#endif
+    rc=bdos(17,fcb);
+    if(rc==255) {
+        bdos(14,curdrive);
+        return 0;
+    }
+    bdos(14,curdrive);
+    f=(unsigned char*)(0x80+rc*32);
+ #ifdef DEBUG
+    fprintf(stderr,"->%d\n",rc);
+    debug_dump_hex(stderr, (unsigned char*)(0x80), 32*4, 0L, 0);
+    getchar();
+#endif
+    if(f[0x0F]==0x80 && f[0]==' ') {
+        return 1;
+    }
+    return 0;
+}
+
+#ifndef __STDC__
 int dirent_load(path, root, ouser, odrive, sort_order, all_extents) 
     char * path;
     dirent_t ** root;
@@ -311,7 +365,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
         fcb[14]='?';
     }
 #ifdef DEBUG
-    fprintf(stderr,"->fcb\n",rc);
+    fprintf(stderr,"dirent_load->fcb\n");
     debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
     getchar();
 #endif
@@ -329,6 +383,9 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     if(rc==255) {
         rc=0;
     }
+#ifdef DEBUG
+    fprintf(stderr,"dirent_load->done\n",rc);
+#endif
     rstusr();
     if(sort_order) 
         dirent_sort(root,sort_order);
