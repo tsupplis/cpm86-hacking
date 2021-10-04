@@ -27,7 +27,7 @@ delay();
 #else
 int keyb();
 int osver();
-int bdosx(int cx, int ax, int* es, int *bx);
+int bdosx(int cx, int dx, int* es, int *bx);
 void delay(unsigned int delay);
 #endif
 
