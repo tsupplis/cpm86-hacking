@@ -315,7 +315,7 @@ dpb_load(int drive, dpb_t*dpb)
     segread(segs);
     ax=bdosx(31,0,&es,&bx);
     for(i=0;i<15;i++) 
-        ptr[i]=peekb(bx+2,es);
+        ptr[i]=peekb(bx+i,es);
     bdos(14,curdrive);
 }
 
