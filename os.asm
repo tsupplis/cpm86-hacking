@@ -8,6 +8,7 @@ codeseg	segment	para public 'code'
 delay_	proc	near
         push	bp
         mov 	bp,sp
+        push    es
         push	di
         push	si
         push    bx
@@ -40,6 +41,7 @@ delay_end:
         pop     bx
         pop	    si
         pop 	di
+        pop 	es
         pop 	bp
         xor     ax,ax
         ret
@@ -49,6 +51,7 @@ delay_	endp
 bdosx_	proc	near
         push	bp
         mov 	bp,sp
+        push	es
         push	di
         push	si
         push    bx
@@ -59,13 +62,14 @@ bdosx_	proc	near
         mov     cx,bx
         mov 	bx,word ptr 10[bp]
         mov     word ptr [bx],cx
-        mov 	bx,word ptr 8[bp]
         mov     cx,es
+        mov 	bx,word ptr 8[bp]
         mov     word ptr [bx],cx
         pop     cx
         pop     bx
         pop	    si
         pop 	di
+        pop 	es
         pop 	bp
         and     ax,255
         ret
@@ -73,13 +77,14 @@ bdosx_	endp
 
 	        public	osver_
 osver_  	proc	near
-            push    ds
             push	bp
+            mov 	bp,sp
+            push    ds
+            push	es
             push	di
             push	si
             push    bx
             push    cx
-            mov 	bp,sp
             mov     cx,0Ch
             int     0E0h
             xor     ah,ah
@@ -87,28 +92,29 @@ osver_  	proc	near
             pop     bx
             pop	    si
             pop 	di
-            pop     bp
+            pop     es
             pop     ds
+            pop     bp
             ret
 osver_      endp
 
 	        public	bioskey_
 bioskey_	proc	near
-            push    ds
             push	bp
             mov 	bp,sp
+            push    ds
             mov     ah, 0
             int     16h
-            pop     bp
             pop     ds
+            pop     bp
             ret
 bioskey_    endp
 
 	    public	pckey_
 pckey_	proc	near
-        push    ds
         push	bp
         mov 	bp,sp
+        push    ds
         push    bx
         cli
         xor     ax,ax
@@ -126,8 +132,8 @@ pckey_	proc	near
         pop     ax
         sti
         pop     bx
-        pop     bp
         pop     ds
+        pop     bp
         ret
 pckey_   endp
 
