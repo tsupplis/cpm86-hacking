@@ -303,6 +303,10 @@ int main(int argc, char **argv)
     int done=0;
     int arg=1;
 
+    if(osver()>0x22) {
+        fprintf(stderr, "ERR: Requires CP/M-86 1.1\n");
+        exit(-1);
+    }
     if(argc<2) {
         exit(0);
     }

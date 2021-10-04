@@ -13,6 +13,19 @@ delay_	proc	near
         push    bx
         push    cx
         push    dx
+        mov     cx,0Ch
+        int     0E0h
+        sub     al,22H
+        jz      delay_bios
+        mov     bl, 3
+        mov     al, byte ptr 4[bp]
+        mul     bl
+        mov     dx,ax
+        ;mov     dx, word ptr 4[bp]
+        mov     cx,8Dh
+        int     0E0h
+        jmp     delay_end
+delay_bios:
         mov     ah, 00h
         int     01Ah
         add     dx, word ptr 4[bp]
@@ -21,6 +34,7 @@ delay_lp:
         int     01Ah
         cmp     dx, bx
         jl      delay_lp
+delay_end:
         pop     dx
         pop     cx
         pop     bx
@@ -41,7 +55,7 @@ bdosx_	proc	near
         push    cx
         mov 	cx,word ptr 4[bp]
         mov 	dx,word ptr 6[bp]
-        int 	224
+        int 	0E0h
         mov     cx,bx
         mov 	bx,word ptr 10[bp]
         mov     word ptr [bx],cx
@@ -56,6 +70,27 @@ bdosx_	proc	near
         and     ax,255
         ret
 bdosx_	endp
+
+	        public	osver_
+osver_  	proc	near
+            push    ds
+            push	bp
+            push	di
+            push	si
+            push    bx
+            push    cx
+            mov 	bp,sp
+            mov     cx,0Ch
+            int     0E0h
+            xor     ah,ah
+            pop     cx
+            pop     bx
+            pop	    si
+            pop 	di
+            pop     bp
+            pop     ds
+            ret
+osver_      endp
 
 	        public	bioskey_
 bioskey_	proc	near

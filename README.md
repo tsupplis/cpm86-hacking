@@ -46,7 +46,7 @@ INF:     -h for help
 INF:     -p pausing every page
 INF:     -r raw output
 ```
-- MODE: Screen setup (CP/M-80 1.1 for PC/XT only)
+- MODE: Screen setup (CP/M-86 1.1 for PC/XT only)
 ```
 INF: Usage: mode -h | option option ...
 INF:     -h for help
@@ -71,14 +71,14 @@ INF:      scrdef     Default screen settings
 - PAUSE: submit tool waiting for a keystroke
 - TOD: Replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool. (CP/M-86 1.1 for PC/XT only)
 - VER: Displays the BDOS version
-- BALL: A simple CGA demo
+- BALL: A simple CGA demo (CP/M-86 1.1 for PC/XT only)
 - GETCH: A simple keyboard scanner
 - AT clock tools
-    - ATTIME: Sync up clock (CP/M-86 1.1 for PC/XT with an AT compatible clock only)
-    - ATINIT: Sync up clock and display boot banner (CP/M-86 1.1 for PC/XT with an AT compatible clock only)
+    - ATTIME: Sync up clock (PC/XT with an AT compatible clock only)
+    - ATINIT: Sync up clock and display boot banner (PC/XT with an AT compatible clock only)
 - PCE tools (PCE Emulator only)
-    - PCETIME: Sync up clock (CP/M-86 1.1 for PC/XT only)
-    - PCEINIT: Sync up clock and display boot banner (CP/M-86 1.1 for PC/XT only)
+    - PCETIME: Sync up clock
+    - PCEINIT: Sync up clock and display boot banner 
     - PCEVER: Displays the Emulator version 
     - PCEEXIT: Leaves the Emulator
     - PCEMNT: Mount a disk image from the host
@@ -101,10 +101,12 @@ All the C tools (rm, ls, mode, more, write, dump) benefit from the file specific
 
 Unless mentioned otherwise, all the tools are working on 
 - CP/M-86 1.1 
-- Concurrent CP/M 3.1
-- Concurrent DOS 3.2 to 6.21
-- Personal CP/M 2.04
 - DOS Plus 1.2
+- Personal CP/M 2.04
+- Concurrent DOS 3.2 to 6.21
+
+For the following OSes, only the files tools work well. Interacting with the bios is generally prohibited (ATINIT/ATTIME and PCEINIT/PCETIME)
+- Concurrent CP/M 3.1
 
 Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 

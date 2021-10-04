@@ -106,7 +106,11 @@ dostest.img: binaries Makefile test.bin test.txt
 	mcopy -o -i dostest.img test.bin ::TEST.BIN
 	mdir -w -i dostest.img ::*.*
 
-cpmtest.img: $(TOOLS) Makefile test.bin test.txt
+ccpmtest.img: cpmtest.img startup.0
+	cp cpmtest.img ccpmtest.img
+	cpmcp -f ibmpc-514ss ccpmtest.img startup.0 0:
+
+cpmtest.img: $(TOOLS) Makefile test.bin test.txt 
 	(cd pce;make binaries)
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
@@ -119,6 +123,9 @@ cpmtest.img: $(TOOLS) Makefile test.bin test.txt
 	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
 
 test: cpmtest
+
+ccpmtest: ccpmtest.img
+	@./ccpm86
 
 cpmtest: cpmtest.img
 	@./cpm86

@@ -64,6 +64,10 @@ crtreset()
 void crtreset()
 #endif
 {
+    if(osver()>0x22) {
+        cputs("\x1bm\x1bq\x1bt\x1bu");
+        return;
+    }
     cputs("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
 }
 
@@ -145,6 +149,9 @@ cursor(cmd)
 void cursor(int cmd)
 #endif
 {
+    if(osver()>0x22) {
+        return;
+    }
     switch(cmd) {
     case CURSOR_ON:
         cputs("\x1bm");
@@ -182,6 +189,9 @@ statline(on)
 void statline(int on)
 #endif
 {
+    if(osver()>0x22) {
+        return;
+    }
     if(on) {
         cputs("\x1b1");
     } else {
