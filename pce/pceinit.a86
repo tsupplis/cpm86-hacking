@@ -22,7 +22,12 @@ include pce.a86
             mov     es,cx
             call    cls
             call    print_cpm_ver
+            mov     cx,0Ch
+            int     0E0h
+            sub     al,22H
+            ja      hw_end
             call    print_hw
+hw_end:
             lea     si, msg_rtc
             call    print_str
 
