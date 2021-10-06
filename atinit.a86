@@ -8,11 +8,11 @@
 
             mov     cx,ds
             mov     es,cx
-            call    cls
+            ;call    cls
             call    print_cpm_ver
             mov     cx,0Ch
             int     0E0h
-            sub     al,22H
+            sub     al,50H
             ja      hw_end
             call    print_hw
 hw_end:
@@ -37,11 +37,12 @@ cls:
             ret
 
 print_hw:
-            push    si
             push    ax
             push    bx
             push    cx
             push    dx
+            push    es
+            push    si
             lea     si, msg_hw_hdr
             call    print_str  
             lea     si, msg_hw_mem
@@ -54,6 +55,8 @@ print_hw:
             lea     si, msg_hw_87
             call    print_str  
             int     11h
+ 	        add	    ax,0040h
+	        and	    ax,0fff3h
             push    ax
             and     al,2
             jz      no_87
@@ -67,36 +70,26 @@ done_87:
             call    print_str  
             pop     ax
             xor     ah,ah
-            mov     cl,5
+            mov     cl,6
             shr     al,cl
-            and     al,03h
-            dec     al
+            and     al,07h
             mov     bx,10
             call    print_uint16
             lea     si, msg_nl
             call    print_str  
             lea     si, msg_hw_dsk
             call    print_str  
-            xor     ax,ax
-            mov     ah,08h
-            mov     dl,80h
-            int     13h
-            jc      drv_2
-            mov     al,dl
-            xor     ah,ah
-            jmp     drv_3
-drv_2:
-            xor     ax,ax
-drv_3:
-            mov     bx,16
+            call    disk_count
+            mov     bx,10
             call    print_uint16
             lea     si, msg_nl
             call    print_str  
+            pop     si
+            pop     es
             pop     dx
             pop     cx
             pop     bx
             pop     ax  
-            pop     si
             ret
 
 print_cpm_ver:
@@ -123,6 +116,7 @@ print_ver_base:
             call    print_uint16
             mov     al,'.'
             call    print_char
+            xor     ah,ah
             mov     al,dl
             and     al,0Fh
             call    print_uint16

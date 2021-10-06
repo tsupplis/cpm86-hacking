@@ -36,6 +36,7 @@ print_ver_base:
             mov     al,'.'
             call    print_char
             mov     al,dl
+            xor     ah,ah
             and     al,0Fh
             call    print_uint16
             lea     si, msg_nl
