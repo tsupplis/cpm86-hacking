@@ -77,7 +77,7 @@ int main(int argc, char **argv)
             if(((cursor->entry[j])&0x7F)==' ') {
                 continue;
             }
-            path[offset++]=cursor->entry[j];
+            path[offset++]=cursor->entry[j]&0x7F;
         }
         for(j=9;j<12;j++) {
             if(((cursor->entry[j])&0x7F)==' ') {
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
                 dot=1;
                 path[offset++]='.';
             }
-            path[offset++]=cursor->entry[j];
+            path[offset++]=cursor->entry[j]&0x7F;
         }
         path[offset]=0; 
         
