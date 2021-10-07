@@ -125,7 +125,7 @@ int dirent_first(char * fcb, dirent_t ** root)
 {
     int rc=0;
     unsigned char* f=0;
-    int is_fat=dirent_is_fat(fcb[0]);
+    int is_fat=dirent_is_fat(fcb[0]-1);
 
     rc=bdos(17,fcb);
     if(rc==255) {
@@ -146,7 +146,7 @@ int dirent_first(char * fcb, dirent_t ** root)
     }
     memset(root[0],0,sizeof(dirent_t));
     memcpy(root[0]->entry,f,12);
-    root[0]->drive=fcb[0];
+    root[0]->drive=fcb[0]-1;
     root[0]->is_fat=is_fat;
     {
         dpb_t dpb;
@@ -290,13 +290,12 @@ int dirent_is_fat(int drive)
     char fcb[40];
     int rc=0;
     unsigned char* f=0;
-    int curdrive=bdos(25,0);
+    int curdrive=getcurdrv();
         
-    bdos(14,drive-1);
+    setcurdrv(drive);
 
     fcbinit("",fcb);
     memset(fcb,0,sizeof(fcb));
-    fcb[0]=drive;
     memset(fcb,'?',12);
 #ifdef DEBUG
     fprintf(stderr,"dirent_is_fat->curdrive %u\n",drive);
@@ -305,11 +304,10 @@ int dirent_is_fat(int drive)
     debug_dump_hex(stderr, (unsigned char*)(fcb), 33, 0L, 0);
 #endif
     rc=bdos(17,fcb);
+    setcurdrv(curdrive);
     if(rc==255) {
-        bdos(14,curdrive);
         return 0;
     }
-    bdos(14,curdrive);
     f=(unsigned char*)(0x80+rc*32);
  #ifdef DEBUG
     fprintf(stderr,"->%d\n",rc);
@@ -349,10 +347,10 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
         *ouser=user;
     }
     if(fcb[0]==0) {
-        fcb[0]=bdos(25,0)+1;
+        fcb[0]=getcurdrv()+1;
     }
     if(odrive) {
-        *odrive=fcb[0];
+        *odrive=fcb[0]-1;
     }
     if(fcb[1]==' ') {
         int i;

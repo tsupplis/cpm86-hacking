@@ -23,15 +23,15 @@ dpb_load(int drive, dpb_t*dpb)
     int bx;
     int ax;
     int segs[4];
-    int curdrive=bdos(25,0);
+    int curdrive=getcurdrv();
     unsigned char *ptr=(unsigned char *)dpb;
 
-    bdos(14,drive-1);
+    setcurdrv(drive);
     segread(segs);
     ax=bdosx(31,0,&es,&bx);
     for(i=0;i<15;i++) 
         ptr[i]=peekb(bx+i,es);
-    bdos(14,curdrive);
+    setcurdrv(curdrive);
 }
 
 

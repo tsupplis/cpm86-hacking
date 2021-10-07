@@ -10,7 +10,7 @@ RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd sysvar.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
@@ -26,6 +26,9 @@ hack-bin.zip pce-bin.zip: binaries
 	zip pce-bin.zip $(PCETOOLS) 
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
+
+sysvar.cmd: sysvar.o util.lib
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 getch.cmd: getch.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)

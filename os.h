@@ -22,11 +22,17 @@ typedef struct dpb_t {
 #ifndef __STDC__
 int keyb();
 int osver();
+int getcurdrv();
+int setcurdrv();
+int getccpdrv();
 int bdosx();
 delay();
 #else
 int keyb();
 int osver();
+int getcurdrv();
+int setcurdrv(int drv);
+int getccpdrv();
 int bdosx(int cx, int dx, int* es, int *bx);
 void delay(unsigned int delay);
 #endif

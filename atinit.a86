@@ -8,7 +8,7 @@
 
             mov     cx,ds
             mov     es,cx
-            ;call    cls
+            call    cls
             call    print_cpm_ver
             mov     cx,0Ch
             int     0E0h
@@ -69,8 +69,9 @@ done_87:
             lea     si, msg_hw_flp
             call    print_str  
             pop     ax
+            push    ax
             xor     ah,ah
-            mov     cl,6
+            mov     cl,06h
             shr     al,cl
             and     al,07h
             mov     bx,10
@@ -79,7 +80,41 @@ done_87:
             call    print_str  
             lea     si, msg_hw_dsk
             call    print_str  
+            mov     cx,0Ch
+            int     0E0h
+            cmp     al,41H
+            jz      disk_bdos_41
             call    disk_count
+            jmp     disk_print
+disk_bdos_41:
+            push    ds
+            mov     cx,40h
+            mov     bx,75h
+            mov     ds,cx
+            mov     ax,[bx]
+            pop     ds
+disk_print:
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_nl
+            call    print_str  
+            lea     si, msg_hw_par
+            call    print_str  
+            pop     ax
+            push    ax
+            mov     cl,0Eh
+            shr     ax,cl
+            and     al,03h
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_nl
+            call    print_str  
+            lea     si, msg_hw_ser
+            call    print_str  
+            pop     ax
+            mov     cl,09h
+            shr     ax,cl
+            and     al,07h
             mov     bx,10
             call    print_uint16
             lea     si, msg_nl
@@ -146,6 +181,8 @@ msg_hw_mem   db      ' - Memory: ',0
 msg_hw_87    db      ' - Math Coprocessor: ',0
 msg_hw_flp   db      ' - Floppy Drive(s): ',0
 msg_hw_dsk   db      ' - Hard Disk(s): ',0
+msg_hw_par   db      ' - Parallel Port(s): ',0
+msg_hw_ser   db      ' - Serial Port(s): ',0
 msg_hw_yes   db      'Yes',13,10,0
 msg_hw_no    db      'No',13,10,0
 msg_hw_kb    db      'Kb',13,10,0
