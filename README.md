@@ -66,7 +66,7 @@ INF:      status=      Set status line message
 INF:      fg=          Set foreground color (1-F)
 INF:      bg=          Set background color (1-F)
 ```
-For the status, (\\s: space, \\\\: \\, \\u:upper, \\l:lower)
+For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - REBOOT: Simple cold or warm reboot (PC only)
 - CLS: Clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
 - PAUSE: submit tool waiting for a keystroke
