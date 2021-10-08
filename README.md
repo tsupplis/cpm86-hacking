@@ -130,13 +130,9 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
 
 ## TODOs
 
-- dosplus weird cusor behaviour after using graphics. the secret lies in understanding what happens behind mode.com CO80.
-- dosplus displays wrong hard disk number on INT 13h Function 08. using BDOS 32h, we can retrieve the real int 13h. that would allow correct calculation....
-- support dosplus in mode.cmd and gfx (status line, cursor ...)
 - add support for a getenv from cpp disk env file
 - transparently support vt100/vt52/bios in conio
 - find a solution to gfx in ccp/m-86 3.1?
-- cp equivalent
 - attime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
 - study, recompilation/rewrite and patch of Date, Show and Dir and in the meantime regress test
 - clean up code duplicates
