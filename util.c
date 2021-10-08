@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <ctype.h>
-#include <os.h>
+#include <util.h>
 
 #ifdef __STDC__
 #include <stdlib.h>
 #include <string.h>
-#else
-char *malloc();
 #endif
 
 /*#define DEBUG_LOW */
@@ -350,12 +348,12 @@ static int lef(char * path)
 }
 
 #ifndef __STDC__
-static int strlowercmp (p1, p2, p)
+int strlowercmp (p1, p2, p)
     char *p1;
     char *p2;
     int p;
 #else
-static int strlowercmp (char *p1, char *p2,int p)
+int strlowercmp (char *p1, char *p2,int p)
 #endif
 {
   unsigned char *s1 = (unsigned char *) p1;

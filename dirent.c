@@ -5,10 +5,8 @@
 #include <stdio.h>
 #ifdef __STDC__
 #include <stdlib.h>
-#else
-char *malloc();
 #endif
-#include <os.h>
+#include <util.h>
 #include <dirent.h>
 
 /*#define DEBUG*/

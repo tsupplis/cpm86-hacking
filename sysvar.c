@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <conio.h>
-#include <os.h>
+#include <util.h>
 
 static unsigned char scb_pb[255+2];
 
@@ -19,7 +19,7 @@ int ccpm_sysvar(p)
 
     memset(scb_pb,0,sizeof(scb_pb));
     scb_pb[0]=p;
-    ax=bdosx(49,scb_pb,&es,&bx);
+    ax=bdosx(49,(int)scb_pb,&es,&bx);
     fprintf(stderr,"%04x\n",bx);
     for(i=0;i<32;i++) {
         fprintf(stderr,"%02x ",scb_pb[i]);
@@ -65,9 +65,10 @@ int main(int argc, char **argv)
     fprintf(stderr,"\n");
     fprintf(stderr,"curdrv %u\n",getcurdrv());
     fprintf(stderr,"ccpdrv %u\n",getccpdrv());
-    fprintf(stderr,"\x1b[=4h\n");
-    fprintf(stderr,"\x1b[=0h\n");
-    fprintf(stderr,"\x1b[=3h\n");
+    {
+        char *v=getenv("a");
+        fprintf(stderr,"A=%s",v?v:"NULL");
+    }
     exit(0);
 }
 

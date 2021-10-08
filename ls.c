@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #endif
 #include <dirent.h>
-#include <os.h>
+#include <util.h>
 
 int getch() 
 {

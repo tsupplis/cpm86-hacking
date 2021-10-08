@@ -3,7 +3,7 @@
 */
 #include <stdio.h>
 #include <conio.h>
-#include <os.h>
+#include <util.h>
 #include <gfx.h>
 
 #define BALL_WIDTH 8

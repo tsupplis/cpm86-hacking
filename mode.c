@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <conio.h>
-#include <os.h>
+#include <util.h>
 
 
 #define COL40 "\x1b0\x1b\xE" 
@@ -266,34 +266,6 @@ _cmd_t cmds[]= {
     {0,0,0,0}
 };
 
-#ifndef __STDC__
-static int strlowercmp (p1, p2, p)
-    char *p1;
-    char *p2;
-    int p;
-#else
-static int strlowercmp (char *p1, char *p2,int p)
-#endif
-{
-  unsigned char *s1 = (unsigned char *) p1;
-  unsigned char *s2 = (unsigned char *) p2;
-  unsigned char c1, c2;
-
-  do
-    {
-      c1 = (unsigned char) tolower(*s1++);
-      c2 = (unsigned char) tolower(*s2++);
-      if (c1 == '\0')
-        if(p) {
-            return 0;
-        } else {
-            return c1 - c2;
-        }
-    }
-  while (c1 == c2);
-
-  return c1 - c2;
-}
 
 #ifndef __STDC__
 int main(argc, argv) 

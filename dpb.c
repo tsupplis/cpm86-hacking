@@ -8,7 +8,7 @@
 #else
 char *malloc();
 #endif
-#include <os.h>
+#include <util.h>
 
 #ifndef __STDC__
 dpb_load(drive, dpb)
