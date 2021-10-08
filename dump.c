@@ -105,6 +105,7 @@ int main(int argc, char **argv)
     while (i < argc) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-H")) {
             fprintf(stderr, "INF: Usage: dump -h | [-p][-r] [infile]\n");
+            fprintf(stderr, "INF: Hexa file dump utility\n");
             fprintf(stderr, "INF: where infile is [user/]filespec\n");
             fprintf(stderr, "INF:     -h for help\n");
             fprintf(stderr, "INF:     -p pausing every page\n");

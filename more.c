@@ -43,6 +43,7 @@ int main(int argc, char **argv)
     while (i < argc) {
         if (!strcmp(argv[i], "-h") || !strcmp(argv[i], "-H")) {
             fprintf(stderr, "INF: Usage: more -h | [infile]\n");
+            fprintf(stderr, "INF: File paging utility\n");
             fprintf(stderr, "INF: where infile is [user/]filespec\n");
             fprintf(stderr, "INF:     -h for help\n");
             exit(0);

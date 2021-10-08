@@ -87,6 +87,7 @@ int main(int argc, char **argv)
     while(i<argc) {
         if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"-H")) {
             fprintf(stderr,"INF: Usage: ls [-h] | [-a] [-p] [-s|-r] [-l|-b] filepat\n");
+            fprintf(stderr,"INF: File listing utility\n");
             fprintf(stderr,"INF: where filepat is [user/]filespec with wildcard\n");
             fprintf(stderr,"INF:     -h for help\n");
             fprintf(stderr,"INF:     -a for all files (including system)\n");

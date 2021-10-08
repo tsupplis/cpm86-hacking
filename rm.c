@@ -26,6 +26,7 @@ int main(int argc, char **argv)
     while(i<argc) {
         if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"-H")) {
             fprintf(stderr,"INF: Usage: rm [-h] | filepat\n");
+            fprintf(stderr,"INF: File delete utility \n");
             fprintf(stderr,"INF: where filepat is [user/]filespec with wildcard\n");
             fprintf(stderr,"INF:     -h for help\n");
             exit(0);

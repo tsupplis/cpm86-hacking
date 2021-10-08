@@ -312,6 +312,7 @@ int main(int argc, char **argv)
     }
     if(!strcmp(argv[1],"-h")||!strcmp(argv[1],"-H")) {
         fprintf(stderr, "INF: Usage: mode -h | option option ...\n");
+        fprintf(stderr, "INF: Console configuration utility\n");
         fprintf(stderr, "INF:     -h for help\n");
         fprintf(stderr, "INF: and options:\n");
         index=0;

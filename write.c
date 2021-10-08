@@ -57,6 +57,7 @@ int main(int argc, char **argv)
     }
     if(!strcmp("-h",argv[arg_offset]) || !strcmp("-H",argv[arg_offset])) {
         fprintf(stderr,"INF: Usage: write -h | [-a] filename\n");
+        fprintf(stderr,"INF: File write/create utility\n");
         fprintf(stderr,"INF: where filename is [user/]filespec\n");
         fprintf(stderr,"INF:     -h for help\n");
         fprintf(stderr,"INF:     -a to happen to existing file\n");

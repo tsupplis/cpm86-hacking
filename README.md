@@ -9,6 +9,7 @@ A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and
 - LS: Directory listing
 ```
 INF: Usage: ls [-h] | [-a] [-p] [-s|-r] [-l|-b] filepat
+INF: File listing utility
 INF: where filepat is [user/]filespec with wildcard
 INF:     -h for help
 INF:     -a for all files (including system)
@@ -21,18 +22,21 @@ INF:     -b for basic listing
 - RM: File delete
 ```
 INF: Usage: rm [-h] | filepat
+INF: File delete utility 
 INF: where filepat is [user/]filespec with wildcard
 INF:     -h for help
 ```
 - MORE: File content list with pause
 ```
 INF: Usage: more -h | [infile]
+INF: File paging utility
 INF: where infile is [user/]filespec
 INF:     -h for help
 ```
 - WRITE: Equivalent of cat>file
 ```
 INF: Usage: write -h | [-a] filename
+INF: File write/create utility
 INF: where filename is [user/]filespec
 INF:     -h for help
 INF:     -a to happen to existing file
@@ -41,6 +45,7 @@ INF:     -a to happen to existing file
 - DUMP: Hexadecimal dump
 ```
 INF: Usage: dump -h | [-p][-r] [infile]
+INF: Hexa file dump utility
 INF: where infile is [user/]filespec
 INF:     -h for help
 INF:     -p pausing every page
@@ -49,6 +54,7 @@ INF:     -r raw output
 - MODE: Screen setup (CP/M-86 1.1 for PC/XT only)
 ```
 INF: Usage: mode -h | option option ...
+INF: Console configuration utility
 INF:     -h for help
 INF: and options:
 INF:      cls        Clear screen
