@@ -251,6 +251,9 @@ statline(on)
 void statline(int on)
 #endif
 {
+    if(osver()>0x22) {
+        return;
+    }
     if(on) {
         cputs("\x1b1");
     } else {
@@ -296,6 +299,9 @@ void setstatus(char* arg)
     int escape=0;
     int upper=0;
 
+    if(osver()>0x22) {
+        return;
+    }
     segread(segs);
     ax=bdosx(49,0,&es,&bx);
     while(i<14) {
