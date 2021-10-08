@@ -98,6 +98,8 @@ Hardware Configuration:
  - Math Coprocessor: No
  - Floppy Drive(s): 2
  - Hard Disk(s): 1
+ - Parallel Port(s): 1
+ - Serial Port(s): 2
 Date now: 2021-9-27 22:17:39.0
 ```
 
@@ -127,23 +129,6 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
     - Using System Variable Control Block through BDOS Function 31h (S_SYSVAR) on BDOS= 2.2
 - pcemnt needs to accomodate CCP uppercasing so an toggle character '^' is used to this effect:
     - /Mnt^/User/^JOhn/^test.img becomes /mnt/USERS/john/TEST.IMG
-
-## TODOs
-
-- add support for a getenv from cpp disk env file
-- transparently support vt100/vt52/bios in conio
-- find a solution to gfx in ccp/m-86 3.1?
-- attime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
-- study, recompilation/rewrite and patch of Date, Show and Dir and in the meantime regress test
-- clean up code duplicates
-- more tools/experiments
-- sort out why cpmtools refuses to work with 320kb (for testing I use single face 160K
-  images). ibmpc-514ds does not seem to work
-- explore further CP/M-86 Big Brothers (PCP/M 2.04 and CCP/M 3.1). At first glance, they
-are giving you better CP/M-Plus like experience than the rough CP/M 2.2 interface of CP/M-86 but CCP/M-86 has a lot of quirks and PCP/M Keyboard configuration is a bit tricky (Fully IBM PC compatible?) .... to be explored
-- deliver a guide to rebuild CP/M-86 from its sources with all the patches, AT support and 2020 look and feel. It works well but publishing the fixes and the code may not be allowed. all sources of information and code to start were found on (http://www.cpm.z80.de/source.html). It just required a lot of effort to compare/consolidate code, annotations, patches and comparison with existing binary versions. A lot of fun.
-- try to pull/port a version of Emacs or VI on CP/M-86. I could not find one working out of the box (I am working on figuring out an elvis (https://github.com/udo-munk/stevie) and femacs in assembler ....
-
 
 ## Build Environment
 - Makefile for DOS Aztec C cross compilers targetting CP/M-86.  (May require adaptation. emu2 is used to run dos compiler on unix/mac)
