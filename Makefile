@@ -105,13 +105,13 @@ clean:
 	(cd pce;make clean)
 
 
-dostest.img: binaries Makefile test.bin test.txt
+dostest.img: binaries Makefile test.txt env.dat
 	cp dosbase.img dostest.img
 	-for i in $(PCETOOLS) $(TOOLS);do \
 	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
     done
 	mcopy -o -i dostest.img test.txt ::TEST.TXT
-	mcopy -o -i dostest.img test.bin ::TEST.BIN
+	mcopy -o -i dostest.img env.dat ::ENV.DAT
 	mdir -w -i dostest.img ::*.*
 
 ccpmtest.img: cpmtest.img startup.0

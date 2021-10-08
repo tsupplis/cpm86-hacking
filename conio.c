@@ -3,7 +3,8 @@
 */
 
 #include <stdio.h>
-#include "conio.h"
+#include <ctype.h>
+#include <conio.h>
 
 int kbhit() {   
     return bdos(6,254);
@@ -65,10 +66,10 @@ void crtreset()
 #endif
 {
     if(osver()>0x22) {
-        cputs("\x1bm\x1bq\x1bt\x1bu");
-        return;
+        cputs("\x1be\x1bz");
+    } else {
+        cputs("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
     }
-    cputs("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
 }
 
 #ifndef __STDC__
@@ -77,7 +78,7 @@ clrscr()
 void clrscr()
 #endif
 {
-    cputs("\x1bq\x1bE");
+    cputs("\x1bE");
 }
 
 #ifndef __STDC__
@@ -151,10 +152,16 @@ void cursor(int cmd)
 {
     switch(cmd) {
     case CURSOR_ON:
-        cputs("\x1bm");
+        if(osver()>0x22)
+            cputs("\x1be");
+        else
+            cputs("\x1bm");
         break;
     case CURSOR_OFF:
-        cputs("\x1bn");
+        if(osver()>0x22)
+            cputs("\x1bf");
+        else
+            cputs("\x1bn");
         break;
     case CURSOR_SAVE:
         cputs("\x1bj");
@@ -176,6 +183,64 @@ void wrapline(int on)
         cputs("\x1bv");
     } else {
         cputs("\x1bw");
+    }
+}
+
+#ifndef __STDC__
+scrmode(m)
+    int m;
+#else
+void scrmode(int m)
+#endif
+{
+    if(osver()>0x22) {
+        return;
+    }
+    switch(m) {
+    case SCRMODE_DEFAULT:
+        crtreset();
+        clrscr();
+        break;
+    case SCRMODE_COL80:
+#asm
+        push ax
+        push bx
+        push cx
+        push dx
+        mov al, 3
+        mov ah, 0
+        int 10h
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+#endasm
+        statline(STATLINE_OFF);
+        statline(STATLINE_ON);
+        clrscr();
+        break;
+    case SCRMODE_COL40:
+#asm
+        push ax
+        push bx
+        push cx
+        push dx
+        mov ax, 0
+        int 10h
+        pop dx
+        pop cx
+        pop bx
+        pop ax
+#endasm
+        statline(STATLINE_OFF);
+        clrscr();
+        break;
+    case SCRMODE_MONO:
+        cputs("\x1by");
+        break;
+    case SCRMODE_COLOR:
+        cputs("\x1bx");
+        break;
     }
 }
 
@@ -213,4 +278,77 @@ void textcolor(int fg)
     msg[6]='k';
     msg[7]=0;
     cputs((char*)msg);
+}
+
+
+#ifndef __STDC__
+setstatus(arg)
+    char* arg;
+#else
+void setstatus(char* arg)
+#endif
+{
+    int i=0;
+    int es;
+    int bx;
+    int ax;
+    int segs[4];
+    int escape=0;
+    int upper=0;
+
+    segread(segs);
+    ax=bdosx(49,0,&es,&bx);
+    while(i<14) {
+        if(*arg=='\\') {
+            escape=1;
+            arg++;
+            continue;
+        }
+        if(*arg) {
+            char c;
+            c=*arg;
+            if(escape) {
+                escape=0;
+                switch(c) {
+                    case 'u':
+                    case 'U':
+                        upper=1;
+                        c=0;
+                        break;
+                    case 'l':
+                    case 'L':
+                        upper=0;
+                        c=0;
+                        break;
+                    case 's':
+                    case 'S':
+                        c=' ';
+                        break;
+                    case '\\':
+                        c=' ';
+                        break;
+                    default:
+                        c=0;
+                        break;
+                }
+            } 
+            if(!c) {
+                arg++;
+                continue;
+            }
+            if(c<' ') {
+                c=' ';
+            }
+            if(isalpha(c) && !upper) {
+                pokeb(bx+0x32+i,es,tolower(c));
+            } else {
+                pokeb(bx+0x32+i,es,c);
+            }
+            i++;
+            arg++;
+        } else {
+            pokeb(bx+0x32+i,es,' ');
+            i++;
+        }
+    }
 }

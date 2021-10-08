@@ -17,6 +17,12 @@
 #define CURSOR_SAVE    2
 #define CURSOR_RESTORE 3
 
+#define SCRMODE_DEFAULT 0 
+#define SCRMODE_COL80   1
+#define SCRMODE_COL40   2
+#define SCRMODE_MONO    4
+#define SCRMODE_COLOR   8
+
 #ifndef __STDC__
 int kbhit();
 int getch();
@@ -31,9 +37,11 @@ cursor();
 statline();
 wrapline();
 gotoxy();
-color();
+textcolor();
+setstatus();
 int cputs();
 int cputc();
+scrmode();
 #else
 int kbhit();
 int getch();
@@ -49,8 +57,10 @@ void statline(int on);
 void wrapline(int on);
 void gotoxy(int x, int y);
 void textcolor(int fg);
+void setstatus(char * s);
 int cputs(char *);
 int cputc(char);
+void scrmode(int);
 #endif
 
 #endif

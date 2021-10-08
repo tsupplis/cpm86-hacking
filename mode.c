@@ -8,12 +8,6 @@
 #include <util.h>
 
 
-#define COL40 "\x1b0\x1b\xE" 
-#define COL80 "\x1b0\x1b1\x1bE" 
-#define SCRDEF "\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu\x1bE" 
-#define MONO "\x1by"
-#define COLOR "\x1bx"
-
 typedef struct _cmd_t {
     char * name;
     char * vt_cmd;
@@ -24,6 +18,7 @@ typedef struct _cmd_t {
     int (*fn)(char *);
 #endif
     int prefix;
+    int cpm86;
 } _cmd_t;
 
 #ifndef __STDC__
@@ -33,96 +28,31 @@ int status(arg)
 int status(char* arg)
 #endif
 {
-    int i=0;
-    int es;
-    int bx;
-    int ax;
-    int segs[4];
-    int escape=0;
-    int upper=0;
-
-    segread(segs);
-    ax=bdosx(49,0,&es,&bx);
-    while(i<14) {
-        if(*arg=='\\') {
-            escape=1;
-            arg++;
-            continue;
-        }
-        if(*arg) {
-            char c;
-            c=*arg;
-            if(escape) {
-                escape=0;
-                switch(c) {
-                    case 'u':
-                    case 'U':
-                        upper=1;
-                        c=0;
-                        break;
-                    case 'l':
-                    case 'L':
-                        upper=0;
-                        c=0;
-                        break;
-                    case 's':
-                    case 'S':
-                        c=' ';
-                        break;
-                    case '\\':
-                        c=' ';
-                        break;
-                    default:
-                        c=0;
-                        break;
-                }
-            } 
-            if(!c) {
-                arg++;
-                continue;
-            }
-            if(c<' ') {
-                c=' ';
-            }
-            if(isalpha(c) && !upper) {
-                pokeb(bx+0x32+i,es,tolower(c));
-            } else {
-                pokeb(bx+0x32+i,es,c);
-            }
-            i++;
-            arg++;
-        } else {
-            pokeb(bx+0x32+i,es,' ');
-            i++;
-        }
-    }
-    return 0;
+    setstatus(arg);
 }
 
 #ifndef __STDC__
-int col80(arg)
+int set_mode(arg)
     char* arg;
 #else
-int col80(char* arg)
+int set_mode(char* arg)
 #endif
 {
-    fprintf(stdout,COLOR);
-#asm
-    push ax
-    push bx
-    push cx
-    push dx
-    mov al, 3
-    mov ah, 0
-    int 16
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-#endasm
+    if(!strlowercmp("default",arg)) {
+        scrmode(SCRMODE_DEFAULT);
+    } else if(!strlowercmp("col80",arg)) {
+        scrmode(SCRMODE_COL80);
+    } else if(!strlowercmp("col40",arg)) {
+        scrmode(SCRMODE_COL40);
+    } else if(!strlowercmp("color",arg)) {
+        scrmode(SCRMODE_COLOR);
+    } else if(!strlowercmp("mono",arg)) {
+        scrmode(SCRMODE_MONO);
+    } else {
+        return -1;
+    }
     return 0;
 }
-
 #ifndef __STDC__
 int cls(arg)
     char* arg;
@@ -226,43 +156,16 @@ int bg(char* arg)
     return 0;
 }
 
-#ifndef __STDC__
-int col40(arg)
-    char* arg;
-#else
-int col40(char* arg)
-#endif
-{
-    fprintf(stdout,COLOR);
-#asm
-    push ax
-    push bx
-    push cx
-    push dx
-    mov ax, 0
-    int 16
-    pop dx
-    pop cx
-    pop bx
-    pop ax
-#endasm
-    return 0;
-}
-
 _cmd_t cmds[]= {
-    {"cls", 0, "Clear screen",cls, 0 },
-    {"cursor=on", 0, "Show cursor", cursor_on, 0 },
-    {"cursor=off", 0, "Hide cursor", cursor_off, 0 },
-    {"line=on", 0, "Show status line", statline_on, 0 },
-    {"line=off", 0, "Hide status line", statline_off, 0 },
-    {"status=", 0, "Set status line message \n          (\\s: space, \\\\: \\, \\u:upper, \\l:lower)", status, 1 },
-    {"col=40", COL40, "Switch to 40 columns", col40, 0 },
-    {"col=80", COL80, "Switch to 80 columns", col80, 0 },
-    {"mono", MONO, "Switch to Mono", 0, 0 },
-    {"color", COLOR, "Switch to Color", 0, 0 },
-    {"fg=", 0, "Set foreground color (1-F)", fg, 1 },
-    {"bg=", 0, "Set background color (1-F)", bg, 1 },
-    {"scrdef", SCRDEF, "Default screen settings", 0, 0 },
+    {"cls", 0, "Clear screen",cls, 0, 0x2000},
+    {"cursor=on", 0, "Show cursor", cursor_on, 0 , 0x2000},
+    {"cursor=off", 0, "Hide cursor", cursor_off, 0, 0x2000},
+    {"statln=on", 0, "Show status line", statline_on, 0, 0x22},
+    {"statln=off", 0, "Hide status line", statline_off, 0, 0x22},
+    {"status=", 0, "Set status line message", status, 1, 0x22},
+    {"scr=", 0, "Set screen mode (default,col80,col40,mono,color)", set_mode, 1, 0x22},
+    {"fg=", 0, "Set foreground color (1-F)", fg, 1, 0x2000},
+    {"bg=", 0, "Set background color (1-F)", bg, 1, 0x2000},
     {0,0,0,0}
 };
 
@@ -278,11 +181,8 @@ int main(int argc, char **argv)
     int index=0;
     int done=0;
     int arg=1;
+    int os=osver();
 
-    if(osver()>0x22) {
-        fprintf(stderr, "ERR: Requires CP/M-86 1.1\n");
-        exit(-1);
-    }
     if(argc<2) {
         exit(0);
     }
@@ -293,7 +193,11 @@ int main(int argc, char **argv)
         fprintf(stderr, "INF: and options:\n");
         index=0;
         while(cmds[index].name) {
-            fprintf(stderr, "INF:      %-10s %s\n",cmds[index].name,cmds[index].desc);
+            if(os>cmds[index].cpm86) {
+                index++;
+                continue;
+            }
+            fprintf(stderr, "INF:      %-10s   %s\n",cmds[index].name,cmds[index].desc);
             index++;
         }
         exit(0);
@@ -304,6 +208,10 @@ int main(int argc, char **argv)
         index=0;
         while(cmds[index].name) {
             if(!strlowercmp(cmds[index].name,argv[arg],cmds[index].prefix)) {
+                if(os>cmds[index].cpm86) {
+                    index++;
+                    continue;
+                }
                 done=1;
                 if(cmds[index].fn) {
                     if(cmds[index].fn(argv[arg]+strlen(cmds[index].name))) {
