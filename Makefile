@@ -8,7 +8,7 @@ LD=aztec_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
-TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
+TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd cp.cmd \
     clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd sysvar.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
@@ -37,6 +37,9 @@ ls.cmd: ls.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 ciotest.cmd: ciotest.o util.lib
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+cp.cmd: cp.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 rm.cmd: rm.o util.lib
