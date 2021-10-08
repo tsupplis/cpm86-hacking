@@ -65,6 +65,9 @@ int main(int argc, char **argv)
     fprintf(stderr,"\n");
     fprintf(stderr,"curdrv %u\n",getcurdrv());
     fprintf(stderr,"ccpdrv %u\n",getccpdrv());
+    fprintf(stderr,"\x1b[=4h\n");
+    fprintf(stderr,"\x1b[=0h\n");
+    fprintf(stderr,"\x1b[=3h\n");
     exit(0);
 }
 

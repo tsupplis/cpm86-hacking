@@ -57,7 +57,7 @@ mode.cmd: mode.o util.lib
 more.cmd: more.o
 	$(LD) -o $@ $< $(LDFLAGS)
 
-util.lib: conio.o dirent.o dpb.o debug.o os.o gfx.o
+util.lib: conio.o dirent.o dpb.o debug.o os.o gfx.o getenv.o
 	rm -f $@
 	$(AR) $@ $^
 
@@ -97,6 +97,7 @@ atinit.a86: baselib.a86 atclock.a86
 
 clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS) util.lib
+	$(RM) cpmtest.img ccpmtest.img dostest.img
 	(cd pce;make clean)
 
 
