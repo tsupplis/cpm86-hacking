@@ -95,7 +95,7 @@ clreol()
 void clreol()
 #endif
 {
-        cputs("\x1bK");
+    cputs("\x1bK");
 }
 
 #ifndef __STDC__
@@ -104,7 +104,7 @@ delchar()
 void delchar()
 #endif
 {
-        cputs("\x1bN");
+    cputs("\x1bN");
 }
 
 #ifndef __STDC__
@@ -113,7 +113,7 @@ insline()
 void insline()
 #endif
 {
-        cputs("\x1bL");
+    cputs("\x1bL");
 }
 
 #ifndef __STDC__
@@ -122,7 +122,7 @@ delline()
 void delline()
 #endif
 {
-        cputs("\x1bM");
+    cputs("\x1bM");
 }
 
 #ifndef __STDC__
@@ -208,9 +208,9 @@ void textcolor(int fg)
     msg[1]='j';
     msg[2]=27;
     msg[3]='b';
-    msg[4]=((char)fg);
+    msg[4]=((unsigned char)fg);
     msg[5]=27;
     msg[6]='k';
     msg[7]=0;
-    cputs(msg);
+    cputs((char*)msg);
 }

@@ -84,7 +84,7 @@ void box(int x, int y, int width, int height)
 #ifndef __STDC__
 ball_demo()
 #else
-void ball_demo
+void ball_demo()
 #endif
 {
     int x = BOX_X+1;

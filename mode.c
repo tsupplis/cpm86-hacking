@@ -18,7 +18,11 @@ typedef struct _cmd_t {
     char * name;
     char * vt_cmd;
     char * desc;
+#ifndef __STDC__
     int (*fn)();
+#else
+    int (*fn)(char *);
+#endif
     int prefix;
 } _cmd_t;
 
