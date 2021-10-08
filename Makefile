@@ -9,14 +9,15 @@ LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd cp.cmd \
-    clsansi.cmd cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd sysvar.cmd
+    cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd
+EXTRAS=clsansi.cmd sysvar.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
 all: binaries
 
-binaries: $(TOOLS) 
+binaries: $(TOOLS) $(EXTRAS)
 	(cd pce;make binaries)
 
 dist: hack-bin.zip pce-bin.zip
@@ -117,16 +118,13 @@ ccpmtest.img: cpmtest.img startup.0
 	cp cpmtest.img ccpmtest.img
 	cpmcp -f ibmpc-514ss ccpmtest.img startup.0 0:
 
-cpmtest.img: $(TOOLS) Makefile test.bin test.txt 
+cpmtest.img: $(TOOLS) $(EXTRAS) Makefile test.txt 
 	(cd pce;make binaries)
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img $(TOOLS) 0:
-	cpmcp -f ibmpc-514ss cpmtest.img test.bin 0:
+	cpmcp -f ibmpc-514ss cpmtest.img $(EXTRAS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img test.txt 0:
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 1:testa
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 1:testb
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 2:testc
 	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
 
 test: cpmtest
