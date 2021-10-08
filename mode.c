@@ -267,12 +267,12 @@ _cmd_t cmds[]= {
 };
 
 #ifndef __STDC__
-int strlowercmp (p1, p2, p)
+static int strlowercmp (p1, p2, p)
     char *p1;
     char *p2;
     int p;
 #else
-int strlowercmp (char *p1, char *p2,int p)
+static int strlowercmp (char *p1, char *p2,int p)
 #endif
 {
   unsigned char *s1 = (unsigned char *) p1;

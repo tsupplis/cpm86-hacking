@@ -118,13 +118,14 @@ ccpmtest.img: cpmtest.img startup.0
 	cp cpmtest.img ccpmtest.img
 	cpmcp -f ibmpc-514ss ccpmtest.img startup.0 0:
 
-cpmtest.img: $(TOOLS) $(EXTRAS) Makefile test.txt 
+cpmtest.img: $(TOOLS) $(EXTRAS) Makefile test.txt env.dat
 	(cd pce;make binaries)
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img $(TOOLS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img $(EXTRAS) 0:
 	cpmcp -f ibmpc-514ss cpmtest.img test.txt 0:
+	cpmcp -f ibmpc-514ss cpmtest.img env.dat 0:
 	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
 
 test: cpmtest
