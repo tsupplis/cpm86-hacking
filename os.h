@@ -26,6 +26,7 @@ int getcurdrv();
 int setcurdrv();
 int getccpdrv();
 int bdosx();
+char * getenv();
 delay();
 #else
 int keyb();
@@ -34,6 +35,7 @@ int getcurdrv();
 int setcurdrv(int drv);
 int getccpdrv();
 int bdosx(int cx, int dx, int* es, int *bx);
+char * getenv(char * var);
 void delay(unsigned int delay);
 #endif
 
