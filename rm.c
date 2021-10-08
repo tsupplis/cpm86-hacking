@@ -72,7 +72,7 @@ int main(int argc, char **argv)
         int j=0;
         int dot=0;
         char path[20+1];
-        sprintf(path,"%d/%c:",(int)(cursor->entry[0]),cursor->drive+'A'-1);
+        sprintf(path,"%d/%c:",(int)(cursor->entry[0]),cursor->drive+'A');
         offset=strlen(path);
         for(j=1;j<9;j++) {
             if(((cursor->entry[j])&0x7F)==' ') {
