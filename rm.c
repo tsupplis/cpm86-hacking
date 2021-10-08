@@ -103,6 +103,6 @@ int main(int argc, char **argv)
         }
         
         cursor=cursor->next;
-   }
-   exit(0);
+    }
+    exit(0);
 }
