@@ -82,11 +82,11 @@ done_87:
             call    print_str  
             mov     cx,0Ch
             int     0E0h
-            cmp     al,41H
-            jz      disk_bdos_41
+            cmp     ax,1041H
+            jz      disk_dosplus
             call    disk_count
             jmp     disk_print
-disk_bdos_41:
+disk_dosplus:
             push    ds
             mov     cx,40h
             mov     bx,75h

@@ -124,12 +124,11 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
 
 ## TODOs
 
-- dosplus weird cusor behaviour after using graphics
-- dosplus displays wrong hard disk number on INT 13h Function 08
+- dosplus weird cusor behaviour after using graphics. the secret lies in understanding what happens behind mode.com CO80.
+- dosplus displays wrong hard disk number on INT 13h Function 08. using BDOS 32h, we can retrieve the real int 13h. that would allow correct calculation....
 - cp equivalent
-- configuration information in pceinit as in CP/M-86 bdos/bios init screen
 - attime to adjust seconds on BDOS >=3.0? T_SET resets the seconds to 0 on invokation
-- study recompilation and patch of Date, Show and Dir and in the meantime regress test
+- study, recompilation/rewrite and patch of Date, Show and Dir and in the meantime regress test
 - clean up code duplicates
 - more tools/experiments
 - sort out why cpmtools refuses to work with 320kb (for testing I use single face 160K
