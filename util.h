@@ -26,7 +26,7 @@ int getcurdrv();
 int setcurdrv();
 int getccpdrv();
 int bdosx();
-int strlowercmp();
+int istrcmp();
 char * getenv();
 delay();
 typedef unsigned int size_t;
@@ -37,7 +37,7 @@ int getcurdrv();
 int setcurdrv(int drv);
 int getccpdrv();
 int bdosx(int cx, int dx, int* es, int *bx);
-int strlowercmp (char *p1, char *p2,int p)
+int istrcmp (char *p1, char *p2,int p);
 void delay(unsigned int delay);
 char *getenv(const char *name);
 #endif

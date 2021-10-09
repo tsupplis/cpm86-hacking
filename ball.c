@@ -137,5 +137,6 @@ int main(int argc, char **argv)
     ball_demo();
     gfx_mode(MODE_TEXT);
     statline(STATLINE_ON);
+    clrscr();
     return 0;
 }

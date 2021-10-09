@@ -348,12 +348,12 @@ static int lef(char * path)
 }
 
 #ifndef __STDC__
-int strlowercmp (p1, p2, p)
+int istrcmp (p1, p2, p)
     char *p1;
     char *p2;
     int p;
 #else
-int strlowercmp (char *p1, char *p2,int p)
+int istrcmp (char *p1, char *p2,int p)
 #endif
 {
   unsigned char *s1 = (unsigned char *) p1;
@@ -401,7 +401,7 @@ char* getenv(const char *v)
     cursor=entries;
     while(cursor) {
         cursor=cursor->next;
-        if(!strlowercmp(cursor->var,v,0)) {
+        if(!istrcmp(cursor->var,(char*)v,0)) {
             return cursor->val;
         }
     }

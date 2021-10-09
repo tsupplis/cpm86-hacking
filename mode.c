@@ -38,15 +38,15 @@ int set_mode(arg)
 int set_mode(char* arg)
 #endif
 {
-    if(!strlowercmp("default",arg)) {
+    if(!istrcmp("default",arg,0)) {
         scrmode(SCRMODE_DEFAULT);
-    } else if(!strlowercmp("col80",arg)) {
+    } else if(!istrcmp("col80",arg,0)) {
         scrmode(SCRMODE_COL80);
-    } else if(!strlowercmp("col40",arg)) {
+    } else if(!istrcmp("col40",arg,0)) {
         scrmode(SCRMODE_COL40);
-    } else if(!strlowercmp("color",arg)) {
+    } else if(!istrcmp("color",arg,0)) {
         scrmode(SCRMODE_COLOR);
-    } else if(!strlowercmp("mono",arg)) {
+    } else if(!istrcmp("mono",arg,0)) {
         scrmode(SCRMODE_MONO);
     } else {
         return -1;
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
         done=0;
         index=0;
         while(cmds[index].name) {
-            if(!strlowercmp(cmds[index].name,argv[arg],cmds[index].prefix)) {
+            if(!istrcmp(cmds[index].name,argv[arg],cmds[index].prefix)) {
                 if(os>cmds[index].cpm86) {
                     index++;
                     continue;

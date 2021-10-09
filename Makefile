@@ -11,7 +11,7 @@ RASM86=pcdev_rasm86
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd cp.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd
-EXTRAS=clsansi.cmd sysvar.cmd
+EXTRAS=clsansi.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
@@ -27,9 +27,6 @@ hack-bin.zip pce-bin.zip: binaries
 	zip pce-bin.zip $(PCETOOLS) 
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
-
-sysvar.cmd: sysvar.o util.lib
-	$(LD) -o $@ $^ $(LDFLAGS)
 
 getch.cmd: getch.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
@@ -107,7 +104,7 @@ clean:
 
 dostest.img: binaries Makefile test.txt env.dat
 	cp dosbase.img dostest.img
-	-for i in $(PCETOOLS) $(TOOLS);do \
+	-for i in $(PCETOOLS) $(TOOLS) $(EXTRAS);do \
 	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
     done
 	mcopy -o -i dostest.img test.txt ::TEST.TXT

@@ -182,7 +182,6 @@ osver_  	proc	near
             push    cx
             mov     cx,0Ch
             int     0E0h
-            xor     ah,ah
             pop     cx
             pop     bx
             pop	    si
