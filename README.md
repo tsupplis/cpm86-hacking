@@ -21,10 +21,12 @@ INF:     -b for basic listing
 ```
 - RM: File delete
 ```
-INF: Usage: rm [-h] | filepat
+INF: Usage: rm [-h] | [-a][-i] filepat
 INF: File delete utility 
 INF: where filepat is [user/]filespec with wildcard
 INF:     -h for help
+INF:     -a to include both dir and sys files 
+INF:     -i for user validation per file 
 ```
 - MORE: File content list with pause
 ```

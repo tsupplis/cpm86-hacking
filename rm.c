@@ -8,6 +8,24 @@
 #endif
 #include <dirent.h>
 
+int getch() 
+{
+    int i, c, d;
+    static int s = 0;
+
+    if (s > 0) {
+        c = s;
+        s = 0;
+        return c;
+    }
+    while (!(c = bdos(6, 255)))
+        ;
+    while (d = bdos(6, 255))
+        ;
+    return c;
+}
+
+
 #ifndef __STDC__
 int main(argc,argv)
     int argc;
@@ -17,26 +35,40 @@ int main(int argc, char **argv)
 #endif
 {
     int i;
+
     dirent_t * root;
     dirent_t * cursor;
     int rc; 
     char * pat=0;
+    int ask=0;
+    int all=0;
+    FILE *conout;
 
     i=1;
     while(i<argc) {
         if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"-H")) {
-            fprintf(stderr,"INF: Usage: rm [-h] | filepat\n");
+            fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i] filepat\n");
             fprintf(stderr,"INF: File delete utility \n");
             fprintf(stderr,"INF: where filepat is [user/]filespec with wildcard\n");
             fprintf(stderr,"INF:     -h for help\n");
+            fprintf(stderr,"INF:     -a to include both dir and sys files \n");
+            fprintf(stderr,"INF:     -i for user validation per file \n");
             exit(0);
         }
         if(argv[i][0]=='-') {
             int j=1;
             while(argv[i][j]) {
                 switch(argv[i][j]) {  
+                case 'i':
+                case 'I':
+                    ask=1;
+                    break;
+                case 'a':
+                case 'A':
+                    all=1;
+                    break;
                 default:
-                    fprintf(stderr,"INF: Usage: rm [-h] | filespec\n");
+                    fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i] filespec\n");
                     fprintf(stderr,"ERR: Wrong parameters\n");
                     exit(0);
                     break;
@@ -50,8 +82,9 @@ int main(int argc, char **argv)
         break;
     }
  
+
     if(!pat) {
-        fprintf(stderr,"INF: Usage: rm [-h] | filespec\n");
+        fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i] filepat\n");
         fprintf(stderr,"ERR: Wrong parameters (no filespec)\n");
         exit(-1);
     }
@@ -66,6 +99,13 @@ int main(int argc, char **argv)
         }
     } 
  
+    if(ask) {
+        freopen("con:", "r", stdin);
+        freopen("con:", "w", stdout);
+        conout=stdout;
+    } else {
+        conout=stderr;
+    }
     cursor=root;
     while(cursor) {
         int offset=0;
@@ -92,17 +132,49 @@ int main(int argc, char **argv)
         }
         path[offset]=0; 
         
+        if(dirent_is_sys(cursor) && !all) {
+            cursor=cursor->next;
+            continue;
+        }
         if(dirent_is_ro(cursor)) {
-            fprintf(stderr,"INF: Deleting %s, RO, Skipping\n",path);
+            fprintf(conout,"INF: Deleting %s, RO, Skipping\n",path);
         } else {
-            fprintf(stderr,"INF: Deleting %s ",path);
-            if(unlink(path)) {
-                fprintf(stderr," Failed\n",path);
+            int delete=1;
+            fprintf(conout,"INF: Deleting %s ",path);
+            if(ask) {
+                int c;
+                
+                fprintf(conout,"(Y/N)");
+                while(1) {
+                    c=getch();
+                    if(c=='y'||c=='Y') {
+                        fprintf(stdout,"\x08\x08\x08\x08\x08     ");
+                        fprintf(stdout,"\x08\x08\x08\x08\x08");
+                        delete=1;
+                        break;
+                    }
+                    if(c=='n'||c=='N') {
+                        fprintf(stdout,"\x08\x08\x08\x08\x08Skipping\n");
+                        delete=0;
+                        break;
+                    }
+                    if(c==3) {
+                        fprintf(stdout,"\x08\x08\x08\x08\x08     ");
+                        fprintf(stdout,"\x08\x08\x08\x08\x08^C");
+                        exit(0);
+                        break;
+                    }
+                }
             } else {
-                fprintf(stderr," OK\n",path);
+            }
+            if(delete) {
+                if(unlink(path)) {
+                    fprintf(conout,"Failed\n",path);
+                } else {
+                    fprintf(conout,"OK\n",path);
+                }
             }
         }
-        
         cursor=cursor->next;
     }
     exit(0);
