@@ -1,14 +1,14 @@
 AS=aztec34_as
 CC=aztec34_cc
 AR=aztec34_lib
-CFLAGS=-I. +F -B +0 -D__CPM86__ 
+CFLAGS=-I. -B +0 -D__CPM86__ 
 STRIP=aztec34_sqz
 LDFLAGS=-lc86
 LD=aztec34_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
-TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd cp.cmd \
+TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd
 EXTRAS=clsansi.cmd

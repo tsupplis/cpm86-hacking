@@ -196,10 +196,10 @@ dirent_t* dirent_merge_sorted(dirent_t* lst1, dirent_t* lst2, int sort_order)
 { 
 	dirent_t* result = 0; 
 
-	if (lst1 == 0) 
-		return (lst2); 
-	else if (lst2 == 0) 
-		return (lst1); 
+	if (!lst1) 
+		return lst2; 
+	else if (!lst2) 
+		return lst1; 
 
 	if(memcmp(lst1->entry+1,lst2->entry+1,11)*sort_order<0) { 
 		result = lst1; 
@@ -221,22 +221,20 @@ dirent_split(source, front, back)
 void dirent_split(dirent_t* source, dirent_t** front, dirent_t** back) 
 #endif
 { 
-	dirent_t* entry1; 
-	dirent_t* entry2; 
-	entry2 = source; 
-	entry1 = source->next; 
+	dirent_t* slow = source;
+	dirent_t* fast = source->next;
 
-	while (entry1 != 0) { 
-		entry1 = entry1->next; 
-		if (entry1 != 0) { 
-			entry2 = entry2->next; 
-			entry1 = entry1->next; 
-		} 
+	while (fast && fast->next) { 
+		fast = fast->next; 
+		if (fast) { 
+			slow = slow->next; 
+			fast = fast->next; 
+		}  
 	} 
 
 	*front = source; 
-	*back = entry2->next; 
-	entry2->next = 0; 
+	*back = slow->next; 
+	slow->next = 0; 
 } 
 
 #ifndef __STDC__
@@ -251,14 +249,14 @@ dirent_sort(dirent_t** root, int sort_order)
 	dirent_t* entry1; 
 	dirent_t* entry2; 
 
-	if ((head == NULL) || (head->next == NULL)) { 
+	if ((head == 0) || (head->next == 0)) { 
 		return; 
 	} 
 
 	dirent_split(head, &entry1, &entry2); 
 
-	dirent_sort(&entry1, sort_order); 
-	dirent_sort(&entry2, sort_order); 
+	if(entry1 && entry1->next) dirent_sort(&entry1, sort_order); 
+	if(entry2 && entry2->next) dirent_sort(&entry2, sort_order); 
 
 	*root = dirent_merge_sorted(entry1, entry2, sort_order); 
 } 
