@@ -243,11 +243,6 @@ disk_count:
         mov     ax,80h
         call    disk_count_dsk
         xor     ah,ah
-        mov     cx,ax
-        mov     ax,81h
-        call    disk_count_dsk
-        xor     ah,ah
-        add     ax,cx
         pop     cx
         ret
 
