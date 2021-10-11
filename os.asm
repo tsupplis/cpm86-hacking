@@ -49,7 +49,7 @@ getccpdrv_	proc	near
         ja      ccpdrv_nsv
         mov     cx,31h
         int     0E0h
-        add     bx, 11h
+        add     bx, 17h
         xor     ah, ah
         mov     al, es:[bx] 
         jmp     ccpdrv_end 
