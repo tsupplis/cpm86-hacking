@@ -335,6 +335,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     dirent_t * last=0;
     unsigned long count=0;
 
+    memset(fcb,0,sizeof(fcb));
     user=fcbinit(path,fcb);
     if(user==255) {
         user=getusr();
@@ -385,3 +386,17 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
         dirent_sort(root,sort_order);
     return rc;
 }
+
+#ifndef __STDC__
+int dirent_fcb(fcb, d) 
+    char * fcb;
+    dirent_t * d;
+#else
+int dirent_fcb(char * fcb, dirent_t * d)
+#endif
+{
+    int stat=d->entry[0];
+    memcpy(fcb+1,d->entry+1,11);
+    fcb[0]=d->drive+1;
+    return stat;
+} 

@@ -52,4 +52,12 @@ dpb_load(int drive, dpb_t*dpb);
 char *malloc();
 #endif
 
+#define fcb_is_sys(fcb) (fcb[10]&~0x7F)
+#define fcb_is_ro(fcb) (fcb[9]&~0x7F)
+#define fcb_set_sys(fcb) (fcb[10]|=0x80)
+#define fcb_set_ro(fcb) (fcb[9]|=0x80)
+#define fcb_clear_sys(fcb) (fcb[10]&=0x7F)
+#define fcb_clear_ro(fcb) (fcb[9]&=0x7F)
+
+
 #endif

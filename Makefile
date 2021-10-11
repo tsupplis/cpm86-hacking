@@ -9,7 +9,7 @@ LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
-    cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd \
+    cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd
 EXTRAS=clsansi.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
@@ -38,6 +38,9 @@ ciotest.cmd: ciotest.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 cp.cmd: cp.o util.lib
+	$(LD) -o $@ $^ $(LDFLAGS)
+
+touch.cmd: touch.o
 	$(LD) -o $@ $^ $(LDFLAGS)
 
 rm.cmd: rm.o util.lib

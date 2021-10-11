@@ -27,6 +27,7 @@ INF: where filepat is [user/]filespec with wildcard
 INF:     -h for help
 INF:     -a to include both dir and sys files 
 INF:     -i for user validation per file 
+INF:     -f force file deletion even if read only 
 ```
 - MORE: File content list with pause
 ```
@@ -67,6 +68,12 @@ INF:      statln=off   Hide status line
 INF:      status=      Set status line message 
 INF:      fg=          Set foreground color (1-F)
 INF:      bg=          Set background color (1-F)
+```
+- TOUCH: Empty file creation
+```
+INF: Usage: touch [-h] | filespec
+INF: Empty file creation utility 
+INF:     -h for help
 ```
 For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - REBOOT: Simple cold or warm reboot (PC only)

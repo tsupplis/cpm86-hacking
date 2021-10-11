@@ -22,6 +22,7 @@ int dirent_first();
 int dirent_clear(); 
 int dirent_load();
 int dirent_is_fat();
+int dirent_fcb();
 #else
 int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents);
 int dirent_first(char * fcb, dirent_t ** root);
@@ -29,6 +30,7 @@ int dirent_clear(dirent_t * root);
 int dirent_load(char * path, dirent_t ** root,int *ouser, int *odrive, int sort_order,
         int all_extents);
 int dirent_is_fat(int drive);
+int dirent_fcb(char *fcb,dirent_t *d);
 
 #endif
 

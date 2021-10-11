@@ -6,6 +6,7 @@
 #ifdef __STDC__
 #include <stdlib.h>
 #endif
+#include <util.h>
 #include <dirent.h>
 
 int getch() 
@@ -42,17 +43,19 @@ int main(int argc, char **argv)
     char * pat=0;
     int ask=0;
     int all=0;
+    int force=0;
     FILE *conout;
 
     i=1;
     while(i<argc) {
         if(!strcmp(argv[i],"-h") || !strcmp(argv[i],"-H")) {
-            fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i] filepat\n");
+            fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i][-f] filepat\n");
             fprintf(stderr,"INF: File delete utility \n");
             fprintf(stderr,"INF: where filepat is [user/]filespec with wildcard\n");
             fprintf(stderr,"INF:     -h for help\n");
             fprintf(stderr,"INF:     -a to include both dir and sys files \n");
             fprintf(stderr,"INF:     -i for user validation per file \n");
+            fprintf(stderr,"INF:     -f force file deletion even if read only \n");
             exit(0);
         }
         if(argv[i][0]=='-') {
@@ -63,12 +66,16 @@ int main(int argc, char **argv)
                 case 'I':
                     ask=1;
                     break;
+                case 'f':
+                case 'F':
+                    force=1;
+                    break;
                 case 'a':
                 case 'A':
                     all=1;
                     break;
                 default:
-                    fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i] filespec\n");
+                    fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i][-f] filespec\n");
                     fprintf(stderr,"ERR: Wrong parameters\n");
                     exit(0);
                     break;
@@ -84,7 +91,7 @@ int main(int argc, char **argv)
  
 
     if(!pat) {
-        fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i] filepat\n");
+        fprintf(stderr,"INF: Usage: rm [-h] | [-a][-i][-f] filepat\n");
         fprintf(stderr,"ERR: Wrong parameters (no filespec)\n");
         exit(-1);
     }
@@ -137,8 +144,25 @@ int main(int argc, char **argv)
             continue;
         }
         if(dirent_is_ro(cursor)) {
-            fprintf(conout,"INF: Deleting %s, RO, Skipping\n",path);
-        } else {
+            if(force) {
+                char ro_fcb[40];
+                int ou;
+                int u;
+                memset(ro_fcb,0,sizeof(ro_fcb));
+                ou=getusr();
+                u=dirent_fcb(ro_fcb,cursor);
+                fprintf(stderr,"DBG %d\n",u);
+                fcb_clear_ro(ro_fcb);
+                setusr(u);
+                debug_dump_hex(stderr, (unsigned char*)(ro_fcb), 33, 0L, 0);
+                bdos(30,ro_fcb);
+                setusr(ou);;
+            } else {
+                cursor=cursor->next;
+                continue;
+            }
+        } 
+        {
             int delete=1;
             fprintf(conout,"INF: Deleting %s ",path);
             if(ask) {
