@@ -18,7 +18,7 @@ typedef struct _entry_t {
     struct _entry_t * next;
 } entry_t;
 
-static entry_t * entries=0;
+static entry_t * le_entries=0;
 static int loaded=0;
 
 #define STATE_INIT      0
@@ -290,7 +290,7 @@ static int lef(char * path)
     entry_t * current;
     char *var=lef_var;    
     char *val=lef_val;    
-    current=entries;
+    current=le_entries;
 
     fp=fopen(path, "r");
     if(!fp) {
@@ -308,7 +308,7 @@ static int lef(char * path)
         case STATE_NL:
             current=new_entry(current,var,val);
             if(current) {
-                entries=current;
+                le_entries=current;
             } else {
                 loop=0;
                 break;
@@ -334,7 +334,7 @@ static int lef(char * path)
         case STATE_EOF:
             current=new_entry(current,var,val);
             if(current) {
-                entries=current;
+                le_entries=current;
             }
             loop=0;
             break;
@@ -376,6 +376,43 @@ int istrcmp (char *p1, char *p2,int p)
   return c1 - c2;
 }
 
+
+#ifndef __STDC__
+static le()
+#else
+static void le()
+#endif
+{
+    if(!loaded) {
+        char path[20];
+    
+        strcpy(path,"0/?:ENV.DAT");
+
+        path[2]=getccpdrv()+'A';
+        loaded=!lef(path);
+        path[2]=getcurdrv()+'A';
+        loaded=!lef(path);
+        loaded=1;
+    }
+}
+
+#ifndef __STDC__
+printenv(fp)
+    FILE *fp;
+#else
+void printenv(FILE * fp)
+#endif
+{
+    entry_t * cursor;
+
+    le();
+    cursor=le_entries;
+    while(cursor) {
+        fprintf(fp,"%s=%s\n",cursor->var,cursor->val);
+        cursor=cursor->next;
+    }
+}
+
 #ifndef __STDC__
 char* getenv(v)
     char *v;
@@ -385,25 +422,13 @@ char* getenv(const char *v)
 {
     entry_t * cursor;
 
-    if(!loaded) {
-        char path[20];
-    
-        strcpy(path,"0/?:ENV.DAT");
-
-        path[2]=getcurdrv()+'A';
-        loaded=!lef(path);
-        if(!loaded) {
-            path[2]=getccpdrv()+'A';
-            loaded=!lef(path);
-        }
-        loaded=1;
-    }
-    cursor=entries;
+    le();
+    cursor=le_entries;
     while(cursor) {
-        cursor=cursor->next;
         if(!istrcmp(cursor->var,(char*)v,0)) {
             return cursor->val;
         }
+        cursor=cursor->next;
     }
     return 0;
 }

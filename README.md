@@ -75,6 +75,12 @@ INF: Usage: touch [-h] | filespec
 INF: Empty file creation utility 
 INF:     -h for help
 ```
+- PRINTENV: Print Environment Variables
+```
+INF: Usage: printenv [-h]
+INF: Display environment variables 
+INF:     -h for help
+```
 For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - REBOOT: Simple cold or warm reboot (PC only)
 - CLS: Clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
