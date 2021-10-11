@@ -415,6 +415,7 @@ id_err:
 id_end:
                 ret
 
+include tinylib.a86
 include baselib.a86
 
                 dseg

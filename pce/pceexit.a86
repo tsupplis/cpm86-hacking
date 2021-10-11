@@ -38,6 +38,7 @@ hook_err:
                 call    quit
 
 include pcelib.a86
+include tinylib.a86
 include baselib.a86
 
                 dseg

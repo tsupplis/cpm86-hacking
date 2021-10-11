@@ -85,15 +85,15 @@ debug.c: debug.h
 
 rm.c: dirent.h
 
-tod.a86: baselib.a86
+tod.a86: baselib.a86 tinylib.a86
 
 ver.a86: tinylib.a86
 
-attime.a86: baselib.a86 atclock.a86
+attime.a86: baselib.a86 tinylib.a86 atclock.a86
 
 mem.a86: tinylib.a86
 
-atinit.a86: baselib.a86 atclock.a86
+atinit.a86: baselib.a86 tinylib.a86 atclock.a86
 
 %.cmd: %.obj
 	$(LINK86) $* '[$$sz]'

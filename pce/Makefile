@@ -7,15 +7,18 @@ all: binaries
 
 binaries: $(TOOLS)
 
-pceinit.obj: pceinit.a86 pce.a86 pcelib.a86 baselib.a86
+pceinit.obj: pceinit.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 
-pcetime.obj: pcetime.a86 pce.a86 pcelib.a86 baselib.a86
+pcetime.obj: pcetime.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 
-pcemnt.obj: pcemnt.a86 pce.a86 pcelib.a86 baselib.a86
+pcemnt.obj: pcemnt.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 
-pceexit.obj: pceexit.a86 pce.a86 pcelib.a86 baselib.a86
+pceexit.obj: pceexit.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 
-pcever.obj: pcever.a86 pce.a86 pcelib.a86 baselib.a86
+pcever.obj: pcever.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
+
+tinylib.a86: ../tinylib.a86
+	cp $< $@
 
 baselib.a86: ../baselib.a86
 	cp $< $@

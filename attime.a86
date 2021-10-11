@@ -13,6 +13,7 @@
 
 include atclock.a86
 
+include tinylib.a86
 include baselib.a86
 
                 dseg

@@ -189,6 +189,7 @@ print_ver_base:
             ret
 
 include pcelib.a86
+include tinylib.a86
 include baselib.a86
 
              dseg

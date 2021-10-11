@@ -26,6 +26,7 @@ include pce.a86
 
 include pceclock.a86
 include pcelib.a86
+include tinylib.a86
 include baselib.a86
 
             dseg
