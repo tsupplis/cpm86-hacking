@@ -88,7 +88,7 @@ For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - TOD: Replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool. (CP/M-86 1.1 for PC/XT only)
 - VER: Displays the BDOS version
 - MEM: Displays the available and system memory
-- BALL: A simple CGA demo (CP/M-86 1.1 for PC/XT only)
+- BALL: A simple CGA demo (CP/M-86 1.1 for PC/XT only) (take on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip)
 - GETCH: A simple keyboard scanner
 - AT clock tools
     - ATTIME: Sync up clock (PC/XT with an AT compatible clock only)
