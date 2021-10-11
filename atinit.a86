@@ -52,6 +52,18 @@ print_hw:
             call    print_uint16
             lea     si, msg_hw_kb
             call    print_str  
+            lea     si, msg_hw_amem
+            call    print_str  
+            mov     dx,offset mcb
+            mov     cl,35h
+            int     0E0h
+            mov     ax, word ptr mlen
+            mov     cl,6
+            shr     ax, cl
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_hw_kb
+            call    print_str  
             lea     si, msg_hw_87
             call    print_str  
             int     11h
@@ -167,31 +179,35 @@ print_ver_base:
 
 include baselib.a86
 
-             dseg
+            dseg
 
-month_siz    db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-month_day    dw      000,031,059,090,120,151,181,212,243,273,304,334
-msg_interr   db      'AT BIOS interrupt error ...',13,10,0
-msg_86err    db      'Not an AT class system ...',13,10,0
-msg_rtc      db      'Date now: ',0
-msg_ver_cc   db      'Concurrent ',0
-msg_ver_hdr  db      'CP/M-86 Version ',0
-msg_hw_hdr   db      'Hardware Configuration: ',13,10,0
-msg_hw_mem   db      ' - Memory: ',0
-msg_hw_87    db      ' - Math Coprocessor: ',0
-msg_hw_flp   db      ' - Floppy Drive(s): ',0
-msg_hw_dsk   db      ' - Hard Disk(s): ',0
-msg_hw_par   db      ' - Parallel Port(s): ',0
-msg_hw_ser   db      ' - Serial Port(s): ',0
-msg_hw_yes   db      'Yes',13,10,0
-msg_hw_no    db      'No',13,10,0
-msg_hw_kb    db      'Kb',13,10,0
-msg_nl       db      13,10,0
-tm_buffer    rs      256
-stamp_year   rw      1
-stamp_hours  rb      1
-stamp_mins   rb      1
-stamp_secs   rb      1
-             db      0
+mcb         dw     0
+mlen        dw     65534
+mext        db     0
+month_siz   db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+month_day   dw      000,031,059,090,120,151,181,212,243,273,304,334
+msg_interr  db      'AT BIOS interrupt error ...',13,10,0
+msg_86err   db      'Not an AT class system ...',13,10,0
+msg_rtc     db      'Date now: ',0
+msg_ver_cc  db      'Concurrent ',0
+msg_ver_hdr db      'CP/M-86 Version ',0
+msg_hw_hdr  db      'Hardware Configuration: ',13,10,0
+msg_hw_mem  db      ' - System Memory: ',0
+msg_hw_amem db      ' - Available Memory: ',0
+msg_hw_87   db      ' - Math Coprocessor: ',0
+msg_hw_flp  db      ' - Floppy Drive(s): ',0
+msg_hw_dsk  db      ' - Hard Disk(s): ',0
+msg_hw_par  db      ' - Parallel Port(s): ',0
+msg_hw_ser  db      ' - Serial Port(s): ',0
+msg_hw_yes  db      'Yes',13,10,0
+msg_hw_no   db      'No',13,10,0
+msg_hw_kb   db      'Kb',13,10,0
+msg_nl      db      13,10,0
+tm_buffer   rs      256
+stamp_year  rw      1
+stamp_hours rb      1
+stamp_mins  rb      1
+stamp_secs  rb      1
+            db      0
 
-             end
+            end

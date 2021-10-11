@@ -1,0 +1,38 @@
+;
+; Licensed under the MIT license. See LICENSE file in the project root for details.
+;
+
+            title   'Memory'
+
+            cseg
+
+            mov     cx,ds
+            mov     es,cx
+            mov     dx,offset mcb
+            mov     cl,35h
+            int     0E0h
+            mov     ax, word ptr mlen
+            mov     cl,6
+            shr     ax, cl
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_sep
+            call    print_str  
+            int     12h
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_nl
+            call    print_str  
+            call    quit
+
+include tinylib.a86
+
+            dseg
+
+mcb         dw     0
+mlen        dw     65534
+mext        db     0
+msg_sep     db     'K/',0
+msg_nl      db     'K',13,10,0
+
+            end

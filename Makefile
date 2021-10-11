@@ -10,7 +10,8 @@ RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd printenv.cmd
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd printenv.cmd \
+    mem.cmd
 EXTRAS=clsansi.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
@@ -86,9 +87,11 @@ rm.c: dirent.h
 
 tod.a86: baselib.a86
 
-ver.a86: baselib.a86
+ver.a86: tinylib.a86
 
 attime.a86: baselib.a86 atclock.a86
+
+mem.a86: tinylib.a86
 
 atinit.a86: baselib.a86 atclock.a86
 

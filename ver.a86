@@ -48,7 +48,7 @@ print_ver_base:
             pop     si
             ret
 
-include baselib.a86
+include tinylib.a86
 
             dseg    
 msg_ver_cc  db      'Concurrent ',0

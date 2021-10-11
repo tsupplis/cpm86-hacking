@@ -87,6 +87,7 @@ For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - PAUSE: submit tool waiting for a keystroke
 - TOD: Replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool. (CP/M-86 1.1 for PC/XT only)
 - VER: Displays the BDOS version
+- MEM: Displays the available and system memory
 - BALL: A simple CGA demo (CP/M-86 1.1 for PC/XT only)
 - GETCH: A simple keyboard scanner
 - AT clock tools
@@ -104,7 +105,8 @@ ATINIT and PCEINIT tools provide a quick configuration dump equivalent to what C
 ```
 CP/M-86 Version 2.2
 Hardware Configuration: 
- - Memory: 640Kb
+ - System Memory: 640Kb
+ - Available Memory: 607Kb
  - Math Coprocessor: No
  - Floppy Drive(s): 2
  - Hard Disk(s): 1

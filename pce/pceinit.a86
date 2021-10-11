@@ -64,6 +64,18 @@ print_hw:
             call    print_uint16
             lea     si, msg_hw_kb
             call    print_str  
+            lea     si, msg_hw_amem
+            call    print_str  
+            mov     dx,offset mcb
+            mov     cl,35h
+            int     0E0h
+            mov     ax, word ptr mlen
+            mov     cl,6
+            shr     ax, cl
+            mov     bx,10
+            call    print_uint16
+            lea     si, msg_hw_kb
+            call    print_str  
             lea     si, msg_hw_87
             call    print_str  
             int     11h
@@ -181,7 +193,10 @@ include baselib.a86
 
              dseg
 
-month_siz    db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
+mcb         dw     0
+mlen        dw     65534
+mext        db     0
+mmonth_siz    db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 month_day    dw      000,031,059,090,120,151,181,212,243,273,304,334
 msg_notpce   db      'Not running under PCE ...',13,10,0
 msg_hookerr  db      'No PCE RTC clock ...',13,10,0
@@ -189,7 +204,8 @@ msg_rtc      db      'Date now: ',0
 msg_ver_cc   db      'Concurrent ',0
 msg_ver_hdr  db      'CP/M-86 Version ',0
 msg_hw_hdr   db      'Hardware Configuration: ',13,10,0
-msg_hw_mem   db      ' - Memory: ',0
+msg_hw_mem   db      ' - System Memory: ',0
+msg_hw_amem  db      ' - Available Memory: ',0
 msg_hw_87    db      ' - Math Coprocessor: ',0
 msg_hw_flp   db      ' - Floppy Drive(s): ',0
 msg_hw_dsk   db      ' - Hard Disk(s): ',0
