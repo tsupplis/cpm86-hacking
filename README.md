@@ -158,6 +158,8 @@ RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
 
 For a rudimentary, cross development environment, look at (https://github.com/tsupplis/cpm86-crossdev).
 
+Some submit/batch scripts are provided for dos (aztec 3.4) and cp/m-86 (aztec 3.2) are also available.
+
 ## Test Environment
 - CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html). The simple way to start however is probably (http://www.cpm.z80.de/download/144cpm86.zip)
   - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
