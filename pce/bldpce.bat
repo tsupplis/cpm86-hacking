@@ -1,4 +1,3 @@
-@echo off
 rasm86 pcever $ pz sz
 linkcmd pcever[$sz]
 rasm86 pcetime $ pz sz
