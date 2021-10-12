@@ -1,10 +1,10 @@
 rasm86 pcever $$ pz sz
-link86 pcever[$$sz]
+linkcmd pcever[$$sz]
 rasm86 pcetime $$ pz sz
-link86 pcetime[$$sz]
+linkcmd pcetime[$$sz]
 rasm86 pcemnt $$ pz sz
-link86 pcemnt[$$sz]
+linkcmd pcemnt[$$sz]
 rasm86 pceinit $$ pz sz
-link86 pceinit[$$sz]
+linkcmd pceinit[$$sz]
 rasm86 pceexit $$ pz sz
-link86 pceexit[$$sz]
+linkcmd pceexit[$$sz]

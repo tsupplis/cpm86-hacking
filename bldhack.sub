@@ -1,27 +1,54 @@
-cc -D__CPM86__ -ic: dump.c
+as os.asm
+as gfx.asm
+cc -D__CPM86__ -Ip: -Ic: util.c
+cc -D__CPM86__ -Ip: -Ic: dirent.c
+cc -D__CPM86__ -Ip: -Ic: conio.c
+cc -D__CPM86__ -Ip: -Ic: dpb.c
+cc -D__CPM86__ -Ip: -Ic: debug.c
+lb util.lib util.o conio.o dirent.o dpb.o debug.o os.o gfx.o
+cc -D__CPM86__ -Ip: -Ic: dump.c
 sqz dump.o
-ln -o dump.cmd dump.o -lc
-cc -D__CPM86__ -ic: more.c
-sqz more
-ln -o mode.cmd more.o c:m.lib -lc
-cc -D__CPM86__ -ic: mode.c
-sqz mode
-ln -o mode.cmd mode.o c:m.lib -lc
-cc -D__CPM86__ -ic: write.c
+ln -o dump.cmd dump.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: more.c
+sqz more.o
+ln -o mode.cmd more.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: mode.c
+sqz mode.o
+ln -o mode.cmd mode.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: write.c
 sqz write.o
-ln -o write.cmd write.o -lc
-cc -D__CPM86__ -ic: dirent.c
-sqz dirent.o
-cc -D__CPM86__ -ic: debug.c
-sqz debug.o
-cc -D__CPM86__ -ic: ls.c
+ln -o write.cmd write.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: ls.c
 sqz ls.o
-ln -o ls.cmd ls.o dirent.o debug.o -lc
-cc -D__CPM86__ -ic: rm.c
+ln -o ls.cmd ls.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: touch.c
+sqz touch.o
+ln -o touch.cmd touch.o p:c.lib
+cc -D__CPM86__ -Ip: -Ic: rm.c
 sqz rm.o
-ln -o rm.cmd rm.o dirent.o debug.o -lc
+ln -o rm.cmd rm.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: printenv.c
+sqz printenv.o
+ln -o printenv.cmd printenv.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: ciotest.c
+sqz ciotest.o
+ln -o ciotest.cmd ciotest.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: ball.c
+sqz ball.o
+ln -o ball.cmd ball.o util.lib p:c.lib
+cc -D__CPM86__ -Ip: -Ic: getch.c
+sqz getch.o
+ln -o getch.cmd getch.o util.lib p:c.lib
+rasm86 atinit $$ pz sz
+link86 atinit[$$sz]
+rasm86 attime $$ pz sz
+link86 attime[$$sz]
+rasm86 mem $$ pz sz
+link86 mem[$$sz]
 rasm86 ver $$ pz sz
 link86 ver[$$sz]
+rasm86 clsansi $$ pz sz
+link86 clsansi[$$sz]
 rasm86 cls $$ pz sz
 link86 cls[$$sz]
 rasm86 pause $$ pz sz
@@ -30,11 +57,3 @@ rasm86 tod $$ pz sz
 link86 tod[$$sz]
 rasm86 reboot $$ pz sz
 link86 reboot[$$sz]
-era rm.o
-era dirent.o
-era debug.o
-era write.o
-era ls.o
-era mode.o
-era more.o
-era dump.o
