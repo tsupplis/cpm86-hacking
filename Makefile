@@ -85,15 +85,15 @@ debug.c: debug.h
 
 rm.c: dirent.h
 
-tod.a86: baselib.a86 tinylib.a86
+tod.obj: tod.a86 baselib.a86 tinylib.a86
 
-ver.a86: tinylib.a86
+ver.obj: ver.a86 tinylib.a86
 
-attime.a86: baselib.a86 tinylib.a86 atclock.a86
+attime.obj: attime.a86 baselib.a86 tinylib.a86 atclock.a86
 
-mem.a86: tinylib.a86
+mem.obj: mem.a86 tinylib.a86
 
-atinit.a86: baselib.a86 tinylib.a86 atclock.a86
+atinit.obj: atinit.a86 baselib.a86 tinylib.a86 atclock.a86
 
 %.cmd: %.obj
 	$(LINK86) $* '[$$sz]'
@@ -112,6 +112,7 @@ clean:
 
 
 dostest.img: binaries Makefile test.txt env.dat
+	(cd pce;make binaries)
 	cp dosbase.img dostest.img
 	-for i in $(PCETOOLS) $(TOOLS) $(EXTRAS);do \
 	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
@@ -124,7 +125,7 @@ ccpmtest.img: cpmtest.img startup.0
 	cp cpmtest.img ccpmtest.img
 	cpmcp -f ibmpc-514ss ccpmtest.img startup.0 0:
 
-cpmtest.img: $(TOOLS) $(EXTRAS) Makefile test.txt env.dat
+cpmtest.img: binaries Makefile test.txt env.dat
 	(cd pce;make binaries)
 	cp cpmbase.img cpmtest.img
 	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:

@@ -11,19 +11,19 @@
                 mov     cx,0Ch
                 int     0E0h
                 sub     al,22H
-                ja      wrong_os
+                ja      wrg_os
                 call    arg_avail
                 or      ax,ax
                 jz      just_show
                 call    parse_date
                 or      ax,ax
-                jnz     wrong_fmt
+                jnz     wrg_fmt
                 call    check_date
                 or      ax,ax
-                jnz     wrong_fmt
+                jnz     wrg_fmt
                 call    cpm_set_time
                 cmp     ax,0
-                jnz     wrong_fmt
+                jnz     wrg_fmt
 just_show:  
                 call    clear_keys
 just_show_time:
@@ -42,12 +42,12 @@ loop_just_show:
 loop_show_done:
                 call    clear_keys
                 call    quit
-wrong_os:
-	            lea	    si, msg_wrong_os
+wrg_os:
+	            lea	    si, msg_wrg_os
                 call	print_str
                 call    quit
-wrong_fmt:
-	            lea	    si, msg_wrong_fmt
+wrg_fmt:
+	            lea	    si, msg_wrg_fmt
                 call	print_str
                 call    quit
 
@@ -420,8 +420,8 @@ include baselib.a86
 
                 dseg
 month_siz       db      0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
-msg_wrong_os    db      'Requires CP/M-86 1.1',13,10,0
-msg_wrong_fmt   db      'Invalid Date & Time Format',13,10
+msg_wrg_os      db      'Requires CP/M-86 1.1',13,10,0
+msg_wrg_fmt     db      'Invalid Date & Time Format',13,10
                 db      'Please retry using:',13,10
                 db      'X>TOD MM/DD/YY HH:MM:SS',13,10
                 db      'where YY is in range 00-99 for 2000 to 2099',13,10,0

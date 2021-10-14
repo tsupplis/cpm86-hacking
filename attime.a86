@@ -8,6 +8,14 @@
 
                 mov     cx,ds
                 mov     es,cx
+                mov     cx,0Ch
+                int     0E0h
+                cmp     ax,1431h
+                jnz     at_time
+                lea	    si, msg_wrg_os
+                call	print_str
+                call    quit
+at_time:
                 lea     si, msg_hdr
                 call	print_str
 
@@ -20,6 +28,7 @@ include baselib.a86
                 
 month_siz       db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 month_day       dw      000,031,059,090,120,151,181,212,243,273,304,334
+msg_wrg_os      db      'Not supported by this operating system.',13,10,0
 msg_hdr         db      'Requesting BIOS time ...',13,10,0
 msg_interr 	    db      'AT BIOS interrupt error ...',13,10,0
 msg_86err 	    db      'Not an AT class system ...',13,10,0

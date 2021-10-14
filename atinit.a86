@@ -12,9 +12,16 @@
             call    print_cpm_ver
             mov     cx,0Ch
             int     0E0h
-            sub     al,50H
+            cmp     ax,1431h
+            jz      wrg_os
+            sub     ax,1462h
             ja      hw_end
             call    print_hw
+            jmp     hw_end
+wrg_os:
+            lea	    si, msg_wrg_os
+            call	print_str
+            call    quit
 hw_end:
             lea     si, msg_rtc
             call    print_str
@@ -92,20 +99,7 @@ done_87:
             call    print_str  
             lea     si, msg_hw_dsk
             call    print_str  
-            mov     cx,0Ch
-            int     0E0h
-            cmp     ax,1041H
-            jz      disk_dosplus
             call    disk_count
-            jmp     disk_print
-disk_dosplus:
-            push    ds
-            mov     cx,40h
-            mov     bx,75h
-            mov     ds,cx
-            mov     ax,[bx]
-            pop     ds
-disk_print:
             mov     bx,10
             call    print_uint16
             lea     si, msg_nl
@@ -182,11 +176,12 @@ include baselib.a86
 
             dseg
 
-mcb         dw     0
-mlen        dw     65534
-mext        db     0
+mcb         dw      0
+mlen        dw      65534
+mext        db      0
 month_siz   db      31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 month_day   dw      000,031,059,090,120,151,181,212,243,273,304,334
+msg_wrg_os  db      'Not supported by this operating system.',13,10,0
 msg_interr  db      'AT BIOS interrupt error ...',13,10,0
 msg_86err   db      'Not an AT class system ...',13,10,0
 msg_rtc     db      'Date now: ',0

@@ -157,12 +157,43 @@ print_dec:
          add	    sp, 6
          ret
 
+dosplus_disk_count:
+        ret
+
+
 disk_count:
+        push    bx
         push    cx
+        push    ds
+        push    es
+        mov     cx,0Ch
+        int     0E0h
+        cmp     ax,1041h
+        jz      disk_count_dosplus
+ 
         mov     ax,80h
         call    disk_count_dsk
         xor     ah,ah
+        jmp     disk_count_end
+disk_count_dosplus:
+        mov     cl,9Ah
+        int     0E0h
+        push    ds
+        push    es
+        push    es
+        pop     ds
+        mov     ax,81h
+        mov     cx,0
+        callf   ds:dword ptr 28h[bx]
+        mov     cx,bx
+        pop     es
+        pop     ds
+        mov     ax,es:word ptr 2[bx]
+disk_count_end:
+        pop     es
+        pop     ds
         pop     cx
+        pop     bx
         ret
 
 disk_count_dsk:
