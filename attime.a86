@@ -10,8 +10,12 @@
                 mov     es,cx
                 mov     cx,0Ch
                 int     0E0h
+                cmp     ax,1430h
+                jz      wrg_os
                 cmp     ax,1431h
-                jnz     at_time
+                jz      wrg_os
+                jmp     at_time
+wrg_os:
                 lea	    si, msg_wrg_os
                 call	print_str
                 call    quit

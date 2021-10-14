@@ -19,11 +19,70 @@ print_cpm_ver:
             push    dx
             mov     cx,0Ch
             int     0E0h
-            and     ah,04h
-            jz      print_ver_base
-            lea     si, msg_ver_cc
+            push    ax
+            cmp     ah,15h
+            jz      print_ver_mpm
+            cmp     ax,1430h
+            jz      print_ver_ccpm
+            cmp     ax,1431h
+            jz      print_ver_ccpm
+            cmp     ax,1466h
+            jae     print_ver_mdos
+            cmp     ah,14h
+            jz      print_ver_cdos
+            cmp     ax,1041h
+            jz      print_ver_dosp
+            cmp     ax,22h
+            jz      print_ver_cpm
+            lea     si, msg_cpm86
             call    print_str  
+            jmp     print_ver_base
+print_ver_cpm:
+            lea     si, msg_pccpm86
+            call    print_str  
+            jmp     print_ver_base
+print_ver_dosp:
+            lea     si, msg_dosp
+            call    print_str  
+            jmp     print_os_ver
+print_ver_mpm:
+            lea     si, msg_mpm86
+            call    print_str  
+            jmp     print_os_ver
+print_ver_cdos:
+            lea     si, msg_cdos
+            call    print_str  
+            jmp     print_os_ver
+print_ver_mdos:
+            lea     si, msg_mdos
+            call    print_str  
+            jmp     print_os_ver
+print_ver_ccpm:
+            lea     si, msg_ccpm86
+            call    print_str  
+            jmp     print_os_ver
+print_os_ver:
+            mov     cx,0A3h
+            int     0E0h
+            mov     ax,bx
+            xor     ah,ah
+            mov     bx,16
+            mov     dl,al
+            mov     cl,4
+            shr     al, cl
+            and     al,0Fh
+            call    print_uint16
+            mov     al,'.'
+            call    print_char
+            mov     al,dl
+            xor     ah,ah
+            and     al,0Fh
+            call    print_uint16
+            lea     si, msg_ver_sep
+            call    print_str  
+            jmp     print_ver_base
 print_ver_base:
+            pop     ax
             lea     si, msg_ver_hdr
             call    print_str  
             xor     ah,ah
@@ -41,6 +100,7 @@ print_ver_base:
             call    print_uint16
             lea     si, msg_nl
             call    print_str  
+print_ver_end:
             pop     dx
             pop     cx
             pop     bx
@@ -51,7 +111,14 @@ print_ver_base:
 include tinylib.a86
 
             dseg    
-msg_ver_cc  db      'Concurrent ',0
-msg_ver_hdr db      'CP/M-86 Version ',0
+msg_cpm86   db      'CP/M-86, ',0
+msg_pccpm86 db      'CP/M-86 1.1, ',0
+msg_ccpm86  db      'Concurrent CP/M-86 ',0
+msg_mpm86   db      'MP/M-86 ',0
+msg_cdos    db      'Concurrent DOS ',0
+msg_mdos    db      'Multiuser DOS ',0
+msg_dosp    db      'DOSPLUS ',0
+msg_ver_hdr db      'BDOS ',0
+msg_ver_sep db      ', ',0
 msg_nl      db      13,10,0
             end
