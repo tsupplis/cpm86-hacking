@@ -69,6 +69,8 @@ print_hw:
             mov     ax, word ptr mlen
             mov     cl,6
             shr     ax, cl
+            inc     ax
+            inc     ax
             mov     bx,10
             call    print_uint16
             lea     si, msg_hw_kb
@@ -190,7 +192,7 @@ print_os_ver:
             int     0E0h
             mov     ax,bx
             xor     ah,ah
-            mov     bx,16
+            mov     bx,10
             mov     dl,al
             mov     cl,4
             shr     al, cl
@@ -210,7 +212,7 @@ print_ver_base:
             lea     si, msg_ver_hdr
             call    print_str  
             xor     ah,ah
-            mov     bx,16
+            mov     bx,10
             mov     dl,al
             mov     cl,4
             shr     al, cl

@@ -66,7 +66,7 @@ print_os_ver:
             int     0E0h
             mov     ax,bx
             xor     ah,ah
-            mov     bx,16
+            mov     bx,10
             mov     dl,al
             mov     cl,4
             shr     al, cl
@@ -86,7 +86,7 @@ print_ver_base:
             lea     si, msg_ver_hdr
             call    print_str  
             xor     ah,ah
-            mov     bx,16
+            mov     bx,10
             mov     dl,al
             mov     cl,4
             shr     al, cl

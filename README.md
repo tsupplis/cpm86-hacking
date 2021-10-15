@@ -103,7 +103,7 @@ For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 ATINIT and PCEINIT tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
 
 ```
-CP/M-86 Version 2.2
+CP/M-86 1.1, BDO 2.2
 Hardware Configuration: 
  - System Memory: 640Kb
  - Available Memory: 607Kb
@@ -123,9 +123,10 @@ Unless mentioned otherwise, all the tools are working on
 - CP/M-86 1.1 
 - DOS Plus 1.2
 - Personal CP/M 2.04
-- Concurrent DOS 3.2 to 6.21
+- Concurrent DOS 3.2, DOS 4.1 6.21
 
-For the following OSes, only the files tools work well. Interacting with the bios is generally prohibited (ATINIT/ATTIME and PCEINIT/PCETIME)
+For the following OSes, only the files tools work well. Interacting with the bios is generally prohibited (ATINIT/ATTIME and PCEINIT/PCETIME)...
+- Concurrent CP/M 3.0
 - Concurrent CP/M 3.1
 
 Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
@@ -170,7 +171,7 @@ Some submit/batch scripts are provided for dos (aztec 3.4) and cp/m-86 (aztec 3.
 ## Quick points on CP/M-86
 Despite being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
 - DR CB86 2.0 (http://www.cpm.z80.de/binary.html)
-- DR C86 1.32 (http://www.cpm.z80.de/binary.html)
+- DR C86 1.11 (http://www.cpm.z80.de/binary.html)
 - Aztec C 3.2 (Although Aztec C 3.4 or C 4.10 (ANSI) cross compilation from DOS is better) (https://www.aztecmuseum.ca/compilers.htm)
 - Turbo Pascal 3.01A and Poly Pascal 3.1 (Turbo Pascal Sibling)
 - RASM86 Macro Assembler (http://www.cpm.z80.de/binary.html)
