@@ -383,17 +383,42 @@ static le()
 static void le()
 #endif
 {
-    if(!loaded) {
-        char path[20];
-    
-        strcpy(path,"0/?:ENV.DAT");
+    char path[20];
+    char drv; 
 
-        path[2]=getccpdrv()+'A';
-        loaded=!lef(path);
-        path[2]=getcurdrv()+'A';
-        loaded=!lef(path);
-        loaded=1;
+    if(loaded) {
+        return;
     }
+
+    strcpy(path,"?:ENV.DAT");
+
+    drv=getcurdrv()+'A';
+    path[1]=drv;
+    loaded=!lef(path);
+    
+    if(loaded) {
+        return;
+    }
+
+    strcpy(path,"0/?:ENV.DAT");
+
+    if(getusr()!=0) {
+        drv=getcurdrv()+'A';
+        path[2]=drv;
+        loaded=!lef(path);
+    }
+    
+    if(loaded) {
+        return;
+    }
+    
+
+    drv=getccpdrv()+'A';
+    if(drv!=path[2]){
+        path[2]=drv;
+        loaded=!lef(path);
+    }
+    loaded=1;
 }
 
 #ifndef __STDC__
