@@ -121,7 +121,8 @@ dostest.img: binaries Makefile test.txt env.dat
 	mcopy -o -i dostest.img env.dat ::ENV.DAT
 	mdir -w -i dostest.img ::*.*
 
-ccpmtest.img: cpmtest.img startup.0
+ccpmtest.img: binaries cpmtest.img startup.0
+	(cd pce;make binaries)
 	cp cpmtest.img ccpmtest.img
 	cpmcp -f ibmpc-514ss ccpmtest.img startup.0 0:
 
@@ -144,4 +145,4 @@ cpmtest: cpmtest.img
 	@./cpm86
 
 dostest: dostest.img
-	@./dosplus
+	@./dos
