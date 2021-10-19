@@ -65,6 +65,7 @@ int main(int argc, char **argv)
     unsigned long c = 0;
     int flag_break=1;
     int ctrlc=0;
+    dirent_t * root=0;
 
     i=1;
     while(i<argc) {
@@ -103,9 +104,10 @@ int main(int argc, char **argv)
     }
 
     while(i<argc && !ctrlc) {
-        dirent_t * root;
         dirent_t * cursor;
         int rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
+        rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
+        rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
         if(rc) {
             if(rc==255) {
                 fprintf(stderr,"INF: No file found for '%s'\n",argv[i]);
