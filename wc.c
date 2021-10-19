@@ -102,7 +102,7 @@ int main(int argc, char **argv)
         flag_break=0;
     }
 
-    while(i<argc) {
+    while(i<argc && !ctrlc) {
         dirent_t * root;
         dirent_t * cursor;
         int rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
@@ -167,11 +167,11 @@ int main(int argc, char **argv)
                 break;
             }
         }
-        if(!ctrlc) {
-            fprintf(stdout, "%-20s %-6lu %-6lu %-6lu\n","TOTAL",tw,tl,tc);
-        }
         dirent_free(root);
         i++;
+    }
+    if(!ctrlc) {
+        fprintf(stdout, "%-20s %-6lu %-6lu %-6lu\n","TOTAL",tw,tl,tc);
     }
     exit(0);
 }
