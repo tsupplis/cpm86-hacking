@@ -75,6 +75,14 @@ INF: Usage: touch [-h] | filespec
 INF: Empty file creation utility 
 INF:     -h for help
 ```
+- WC: File content counter
+```
+INF: Usage: wc [-h] | [-a] filepat [filepat] ...
+INF: File word/line/character count utility 
+INF: where filepat is [user/]filespec with wildcard
+INF:     -h for help
+INF:     -a to include both dir and sys files 
+```
 - PRINTENV: Print Environment Variables
 ```
 INF: Usage: printenv [-h]

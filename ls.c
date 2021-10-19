@@ -261,7 +261,7 @@ int main(int argc, char **argv)
     if(flag_mode<2) {
         fprintf(stdout,"%d File(s) %luK",count,all_size);
     }
-    dirent_clear(root);
+    dirent_free(root);
     return 0;
 }
 

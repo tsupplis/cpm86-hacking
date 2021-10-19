@@ -262,10 +262,10 @@ dirent_sort(dirent_t** root, int sort_order)
 } 
 
 #ifndef __STDC__
-int dirent_clear(root) 
+int dirent_free(root) 
     dirent_t * root;
 #else
-int dirent_clear(dirent_t * root)
+int dirent_free(dirent_t * root)
 #endif
 {
     while(root) {

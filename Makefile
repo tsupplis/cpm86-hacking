@@ -9,7 +9,7 @@ LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
-    cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd \
+    cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd printenv.cmd \
     mem.cmd
 EXTRAS=clsansi.cmd
@@ -28,6 +28,9 @@ hack-bin.zip pce-bin.zip: binaries
 	zip pce-bin.zip $(PCETOOLS) 
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
+
+wc.cmd: wc.o util.lib
+	$(LD) -o $@ $^ $(LDFLAGS)
 
 printenv.cmd: printenv.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
