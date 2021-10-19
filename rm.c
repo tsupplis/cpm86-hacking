@@ -97,7 +97,7 @@ int main(int argc, char **argv)
     }
     rc=dirent_load(pat,&root,(int*)0,(int*)0,0,0);
     if(rc) {
-        if(rc=255) {
+        if(rc==255) {
             fprintf(stderr,"INF: No file found\n");
             exit(0);
         } else {
@@ -185,6 +185,7 @@ int main(int argc, char **argv)
                     if(c==3) {
                         fprintf(stdout,"\x08\x08\x08\x08\x08     ");
                         fprintf(stdout,"\x08\x08\x08\x08\x08^C");
+                        dirent_free(root);
                         exit(0);
                         break;
                     }
@@ -201,5 +202,6 @@ int main(int argc, char **argv)
         }
         cursor=cursor->next;
     }
+    dirent_free(root);
     exit(0);
 }
