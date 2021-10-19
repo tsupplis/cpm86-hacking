@@ -366,6 +366,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
 #endif
     
     setusr(user);
+    bdos(26,(char*)0x80);
     rc=dirent_first(fcb,root);
     if(rc) {
         return rc;
