@@ -8,6 +8,7 @@
 #endif
 #include "debug.h"
 
+/*#define DEBUG*/
 #ifndef __STDC__
 unsigned long debug_dump_hex(fd, data, size, offset, raw) 
     FILE *fd;
