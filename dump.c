@@ -5,6 +5,11 @@
 #include <stdio.h>
 #include <sgtty.h>
 
+#ifdef __STDC__
+#include <stdlib.h>
+#else
+char * malloc();
+#endif
 
 #ifndef __STDC__
 unsigned long dump_hex(fd, data, size, offset, raw) 
@@ -81,8 +86,7 @@ int getch() {
     return c;
 }
 
-#define BUFLEN 1024
-char buffer[BUFLEN];
+#define BUFLEN (16*1024)
 
 #ifndef __STDC__
 int main(argc, argv) 
@@ -99,6 +103,7 @@ int main(int argc, char **argv)
     char *infile = 0;
     FILE *infp = 0;
     int process = 1;
+    char *buffer=malloc(BUFLEN);
 
 
     i = 1;

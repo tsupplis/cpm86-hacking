@@ -6,13 +6,20 @@
 #include <ctype.h>
 #include <conio.h>
 
+#ifdef __STDC__
+#include <stdlib.h>
+#else
+char * malloc();
+#endif
+
+
 int kbhit() {   
     return bdos(6,254);
 }
 
-#define GETCH_BUFLEN (12)
+#define GETCH_BUFLEN (64)
 
-static char getch_buffer[GETCH_BUFLEN];
+static char * getch_buffer=0;
 
 #ifndef __STDC__
 int cputc(c)
@@ -43,6 +50,9 @@ int getch()
     static int s=0;
     static int o=0;
 
+    if(getch_buffer==0) {
+        getch_buffer=malloc(GETCH_BUFLEN+1);
+    }
     if(s>0) {
         c=getch_buffer[o];s--;o++;
         o=o%GETCH_BUFLEN;

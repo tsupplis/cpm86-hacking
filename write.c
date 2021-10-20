@@ -4,9 +4,18 @@
 
 #include <stdio.h>
 
-#define BUFLEN (2048)
-#define GETCH_BUFLEN (12)
+#ifdef __STDC__
+#include <stdlib.h>
+#else
+char * malloc();
+#endif
 
+#include <dirent.h>
+#include <util.h>
+
+#define BUFLEN (16*1024)
+
+#define GETCH_BUFLEN (12)
 static char getch_buffer[GETCH_BUFLEN];
 
 int getch()
@@ -31,8 +40,6 @@ int getch()
     return c;
 }
 
-char buffer[BUFLEN+1];
-
 #ifndef __STDC__
 int main(argc, argv) 
     int argc;
@@ -47,6 +54,7 @@ int main(int argc, char **argv)
     int arg_offset=1;
     FILE * fp=stdout;
     int eof=0;
+    char * buffer=malloc(BUFLEN+1);
 
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);

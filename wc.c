@@ -13,6 +13,8 @@
 char *malloc();
 #endif
 
+#define BUFLEN (16*1024)
+
 #ifndef __STDC__
 int parse_file(filename, w, l, c) 
     char *filename;
@@ -34,12 +36,12 @@ int parse_file(char * filename, unsigned long *w, unsigned long *l,
     if (!(infp = fopen(filename, "r"))) {
         return -1;
     }
-    buffer=malloc(1024);
+    buffer=malloc(BUFLEN);
 
     *w = 0;
     *l = 0;
     *c = 0;
-    while(!eof && (count = fread(buffer,1,1024,infp)) != 0) {
+    while(!eof && (count = fread(buffer,1,BUFLEN,infp)) != 0) {
         int i;
         for(i=0;i<count;i++) {
             ic=buffer[i];
