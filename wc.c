@@ -7,6 +7,12 @@
 #include <ctype.h>
 #include <dirent.h>
 
+#ifdef __STDC__
+#include <stdlib.h>
+#else
+char *malloc();
+#endif
+
 #ifndef __STDC__
 int parse_file(filename, w, l, c) 
     char *filename;
@@ -19,31 +25,44 @@ int parse_file(char * filename, unsigned long *w, unsigned long *l,
 #endif
 {
     FILE *infp;
-    int inc; 
+    int count; 
+    int ic;
     int state=0;
+    int eof=0;
+    char * buffer;
 
     if (!(infp = fopen(filename, "r"))) {
         return -1;
     }
+    buffer=malloc(1024);
 
     *w = 0;
     *l = 0;
     *c = 0;
-    while ((inc = fgetc(infp)) != EOF) {
-        if(inc == '\r') {
-            l[0]++;
-        }
-        if(isalnum(inc)) {
-            if (state != 1) {
-                state = 1;
-                w[0]++;
+    while(!eof && (count = fread(buffer,1,1024,infp)) != 0) {
+        int i;
+        for(i=0;i<count;i++) {
+            ic=buffer[i];
+            if(ic==26) {
+                eof=1;
+                break;
             }
-        } else {
-            state = 0;
+            if(ic == '\r') {
+                l[0]++;
+            }
+            if(isalnum(ic)) {
+                if (state != 1) {
+                    state = 1;
+                    w[0]++;
+                }
+            } else {
+                state = 0;
+            }
+            c[0]++;
         }
-        c[0]++;
     }
-    fclose (infp);
+    fclose(infp);
+    free(buffer);
     return 0;
 }
 
