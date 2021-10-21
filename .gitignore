@@ -1,7 +1,7 @@
 **/*.lock
 **/*.lha
 **/*.zip
-.D*
+**/.D*
 **/*.log
 **/*.cmd
 **/*.lib
@@ -21,6 +21,5 @@
 **/*.sym
 **/*.lst
 **/*.map
-.vscode
-**/push
+**/.vscode
 **/push
