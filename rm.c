@@ -151,7 +151,6 @@ int main(int argc, char **argv)
                 memset(ro_fcb,0,sizeof(ro_fcb));
                 ou=getusr();
                 u=dirent_fcb(ro_fcb,cursor);
-                fprintf(stderr,"DBG %d\n",u);
                 fcb_clear_ro(ro_fcb);
                 setusr(u);
                 debug_dump_hex(stderr, (unsigned char*)(ro_fcb), 33, 0L, 0);
