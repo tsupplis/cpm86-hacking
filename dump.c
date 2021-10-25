@@ -161,7 +161,7 @@ int main(int argc, char **argv)
     } else {
         infp = fopen(infile, "r");
         if (!infp) {
-            fprintf(stderr, "ERR: File %s not found or accessible\n", argv[1]);
+            fprintf(stderr, "ERR: File %s not found or accessible\n", infile);
             exit(-1);
         }
         fclose(stdin);

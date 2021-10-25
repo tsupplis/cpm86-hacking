@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     if(infile) {
         infp = fopen(infile, "r");
         if (0 == infp) {
-            fprintf(stderr, "ERR: File %s not found or accessible\n", argv[1]);
+            fprintf(stderr, "ERR: File %s not found or accessible\n", infile);
             exit(-1);
         }
     } else {
