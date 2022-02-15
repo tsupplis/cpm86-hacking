@@ -8,6 +8,11 @@
 
             mov     cx,ds
             mov     es,cx
+            mov     cx, 20h
+            xor     dx,dx
+            mov     dl, 0FFh
+            int     0E0h
+            mov     byte ptr bkp_user, al
             call    cls
             call    print_cpm_ver
             mov     cx,0Ch
@@ -27,6 +32,10 @@ wrg_os:
 hw_end:
             lea     si, msg_rtc
             call    print_str
+            mov     cx, 20h
+            xor     dx,dx
+            mov     dl, byte ptr bkp_user
+            int     0E0h
 
 include atclock.a86
 
@@ -274,6 +283,7 @@ stamp_year  rw      1
 stamp_hours rb      1
 stamp_mins  rb      1
 stamp_secs  rb      1
+bkp_user    rw      0
             db      0
 
             end
