@@ -201,10 +201,10 @@ disk_count_dsk:
         push    di
         push    si
         mov     dl,al
-        push    dx
-        mov     ah,00h
-        int     13h
-        pop     dx
+        ;push    dx
+        ;mov     ah,00h
+        ;int     13h
+        ;pop     dx
         mov     ah,08h
         int     13h
         jnc     disk_count_dsk_end
