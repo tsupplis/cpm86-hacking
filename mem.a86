@@ -14,6 +14,7 @@
             mov     ax, word ptr mlen
             mov     cl,6
             shr     ax, cl
+            inc     ax
             mov     bx,10
             call    print_uint16
             lea     si, msg_sep
