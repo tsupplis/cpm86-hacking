@@ -4,6 +4,12 @@
 
 A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and derivatives on PC. But most of the tools work with the Just4Fun V20-MBC SBC.
 
+## Where to find CP/M-86?
+
+The source for CP/M-86 doc, sources and binaries is http://www.cpm.z80.de.
+
+A cleaned-up distribution and kernel is available at https://github.com/tsupplis/cpm86-kernel. This distribution is working well in virtual environments, patched with all known patches, 'y2k' friendly (it contains the version of tod which sources are in this project) and AT friendly.
+
 ## Tools 
 
 - LS: Directory listing
@@ -170,7 +176,7 @@ For a rudimentary, cross development environment, look at (https://github.com/ts
 Some submit/batch scripts are provided for dos (aztec 3.4) and cp/m-86 (aztec 3.2) are also available.
 
 ## Test Environment
-- CP/M-86 1.1 for IBM PC XT. I recompile cpm.sys from patched sources from (http://www.cpm.z80.de/source.html). The simple way to start however is probably (http://www.cpm.z80.de/download/144cpm86.zip)
+- CP/M-86 1.1 for IBM PC XT patched at https://github.com/tsupplis/cpm86-kernel
   - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
   - DOS Plus 1.2 and Patched kernel can be found on (https://www.seasip.info/Cpm/dosplus.html)
 - The Excellent PCE emulator (http://www.hampa.ch/pce/pce-ibmpc.html)
