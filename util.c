@@ -412,9 +412,8 @@ static void le()
         return;
     }
     
-
     drv=getccpdrv()+'A';
-    if(drv!=path[2]){
+    if(drv>=0 && drv!=path[2]){
         path[2]=drv;
         loaded=!lef(path);
     }

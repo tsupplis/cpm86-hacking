@@ -44,6 +44,15 @@ int main(int argc, char **argv)
         }
         break;
     }
+#ifdef DEBUG
+    fprintf(stderr,"INF: OS var: %x, OS type: %x, current drive: %d, CCP drive: %d, current user: %d\n",
+
+        osver(),
+        ostype(),
+        getcurdrv(),
+        getccpdrv(),
+        getusr());
+#endif
     printenv(stdout);
     return 0;
 }

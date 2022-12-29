@@ -45,15 +45,30 @@ getccpdrv_	proc	near
         push    dx
         mov     cx,0Ch
         int     0E0h
-        sub     al,22H
-        ja      ccpdrv_nsv
+        cmp     ax,22h
+        jz      ccpdrv_cp11sv
+        cmp     ax,1431h
+        jge     ccpdrv_ccp31ds
+        cmp     ax,1041h
+        jz      ccpdrv_4xsv
+        cmp     ax,1050h
+        jz      ccpdrv_4xsv
+        jmp     ccpdrv_none
+ccpdrv_cp11sv:
         mov     cx,31h
         int     0E0h
         add     bx, 17h
         xor     ah, ah
         mov     al, es:[bx] 
         jmp     ccpdrv_end 
-ccpdrv_nsv:
+ccpdrv_ccp31ds:
+        mov     cx, 9Ah
+        int     0E0h
+        xor     ah,ah
+        add     bx, 4Bh
+        mov     al, es:[bx] 
+        jmp     ccpdrv_end
+ccpdrv_4xsv:
         mov     al,86h
         mov     byte ptr scb_pb_,al
         mov     al,0h
@@ -65,7 +80,8 @@ ccpdrv_nsv:
         mov     al,byte ptr scb_pb_+2
         cmp     bx,0FFFh
         jnz     ccpdrv_end
-        mov     ax,255
+ccpdrv_none:
+        mov     ax,0FFFh
 ccpdrv_end:
         pop     dx
         pop     cx
@@ -170,6 +186,34 @@ bdosx_	proc	near
         ret
 bdosx_	endp
 
+	        public	ostype_
+ostype_ 	proc	near
+            push	bp
+            mov 	bp,sp
+            push    ds
+            push	es
+            push	di
+            push	si
+            push    bx
+            push    cx
+            mov     cx,0Ch
+            int     0E0h
+            mov     al,ah
+            xor     ah,ah
+            cmp     al,0
+            jnz     ostypeend
+            mov     al,10h
+ostypeend:
+            pop     cx
+            pop     bx
+            pop	    si
+            pop 	di
+            pop     es
+            pop     ds
+            pop     bp
+            ret
+ostype_     endp
+
 	        public	osver_
 osver_  	proc	near
             push	bp
@@ -182,6 +226,7 @@ osver_  	proc	near
             push    cx
             mov     cx,0Ch
             int     0E0h
+            xor     ah,ah
             pop     cx
             pop     bx
             pop	    si

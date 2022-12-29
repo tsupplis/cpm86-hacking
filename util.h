@@ -34,6 +34,7 @@ typedef unsigned int size_t;
 #else
 int keyb();
 int osver();
+int ostype();
 int getcurdrv();
 int setcurdrv(int drv);
 int getccpdrv();
@@ -43,6 +44,7 @@ char *getenv(const char *name);
 void printenv(FILE * fp);
 void delay(unsigned int delay);
 #endif
+#define OSTYPE_MULTIUSER 0x04
 
 #ifndef __STDC__
 dpb_load();
