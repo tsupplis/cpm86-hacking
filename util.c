@@ -393,7 +393,7 @@ static void le()
     strcpy(path,"?:ENV.DAT");
 
     drv=getcurdrv()+'A';
-    path[1]=drv;
+    path[0]=drv;
     loaded=!lef(path);
     
     if(loaded) {
