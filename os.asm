@@ -47,8 +47,8 @@ getccpdrv_	proc	near
         int     0E0h
         cmp     ax,22h
         jz      ccpdrv_cp11sv
-        cmp     ax,1431h
-        jge     ccpdrv_ccp31ds
+        cmp     ax,1430h
+        jge     ccpdrv_ccp3xsd
         cmp     ax,1041h
         jz      ccpdrv_4xsv
         cmp     ax,1050h
@@ -61,7 +61,7 @@ ccpdrv_cp11sv:
         xor     ah, ah
         mov     al, es:[bx] 
         jmp     ccpdrv_end 
-ccpdrv_ccp31ds:
+ccpdrv_ccp3xsd:
         mov     cx, 9Ah
         int     0E0h
         xor     ah,ah
