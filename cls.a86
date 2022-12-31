@@ -6,7 +6,7 @@
 
         cseg     
         mov     cx, ds
-        move    es, cx
+        mov     es, cx
         mov     dx, offset cls_hdr
         mov     cl,9            
         int     0E0h    
