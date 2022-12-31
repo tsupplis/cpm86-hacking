@@ -5,6 +5,8 @@
             title   'Skeleton'
 
             cseg     
+            mov     cx,ds
+            mov     es,cx
             mov     dx, offset msg_hdr
             mov     cl,9            
             int     0E0h    
