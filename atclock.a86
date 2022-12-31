@@ -9,7 +9,7 @@ time_read:
                 cmp     cx, 2359h
                 jl      time_dec
                 cmp     dh, 59h
-                jg      time_read
+                ja      time_read
 time_dec:
                 call    decode_at_time
 	            jc	    int_err
