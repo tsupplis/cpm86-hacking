@@ -124,9 +124,8 @@ int main(int argc, char **argv)
     int xinc = 1;
     int yinc = 1;
 
-
-    if(osver()==0x31) {
-        fprintf(stderr,"INF: No support for direct BIOS access on CCP/M 3.1\n");
+    if(osver()<=0x31 && ostype()&&OSTYPE_MULTIUSER) {
+        fprintf(stderr,"INF: No support for direct BIOS access on CCP/M 3.x\n");
         exit(-1);
     } 
     freopen("con:", "r", stdin);

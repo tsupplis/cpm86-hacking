@@ -189,11 +189,7 @@ wrapline(on)
 void wrapline(int on)
 #endif
 {
-    if(on) {
-        cputs("\x1bv");
-    } else {
-        cputs("\x1bw");
-    }
+    cputs(on?"\x1bv":"\x1bw");
 }
 
 #ifndef __STDC__
@@ -261,13 +257,14 @@ statline(on)
 void statline(int on)
 #endif
 {
-    if(osver()>0x22) {
+    int os=osver();
+    if(os>0x31) {
+        xstatline(on?2:1);
         return;
     }
-    if(on) {
-        cputs("\x1b1");
-    } else {
-        cputs("\x1b0");
+    if(os==0x22) {
+        cputs(on?"\x1b1":"\x1b0");
+        return;
     }
 }
 

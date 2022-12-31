@@ -21,7 +21,6 @@ gfx_palette_   proc    near
             ret 
 gfx_palette_   endp
 
-	        public	gfx_pixel_
             public  gfx_mode_
 gfx_mode_   proc    near
             push	bp

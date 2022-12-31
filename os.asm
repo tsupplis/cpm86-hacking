@@ -276,6 +276,38 @@ pckey_	proc	near
         ret
 pckey_  endp
 
+	    public	xstatline_
+xstatline_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push    ds
+        push    si
+        push    ax
+        push    bx
+        push    cx
+        mov     cl,9Ah
+        int     0E0h
+        mov	    cx, word ptr 4[bp]
+        xor     ch,ch
+        mov     dx,0
+        mov     ax,20H 
+        push    es
+        mov     si, word ptr [68h] ;[4Eh] for Dos Plus
+        mov     es, 10h[si] 
+        pop     ds
+        call    dword ptr[28h]
+        ;mov	    word ptr -2[bp],05H
+        pop     cx
+        pop     bx
+        pop     ax
+        pop     si
+        pop     ds
+        pop     es
+        pop     bp
+        ret
+xstatline_  endp
+
 codeseg	ends
 
 	    end
