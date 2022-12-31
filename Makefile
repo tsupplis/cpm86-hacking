@@ -21,13 +21,16 @@ all: binaries
 binaries: $(TOOLS) $(EXTRAS)
 	(cd pce;make binaries)
 
-dist: hack-bin.zip pce-bin.zip
+dist: hack-bin.zip pce-bin.zip hack.img
 
 hack-bin.zip pce-bin.zip: binaries
 	rm -f pce-bin.zip
 	zip pce-bin.zip $(PCETOOLS) 
 	rm -f hack-bin.zip
 	zip hack-bin.zip $(TOOLS) 
+
+hack.img: cpmtest.img
+	cp $< $@
 
 wc.cmd: wc.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
@@ -110,7 +113,7 @@ atinit.obj: atinit.a86 baselib.a86 tinylib.a86 atclock.a86
 
 clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS) util.lib
-	$(RM) cpmtest.img ccpmtest.img dostest.img
+	$(RM) cpmtest.img ccpmtest.img dostest.img hack.img
 	(cd pce;make clean)
 
 
