@@ -28,6 +28,8 @@ print_cpm_ver:
             jz      print_ver_ccpm
             cmp     ax,1466h
             jae     print_ver_mdos
+            cmp     ax,1450h
+            jae     print_ver_cdosxm
             cmp     ah,14h
             jz      print_ver_cdos
             cmp     ax,1041h
@@ -47,6 +49,10 @@ print_ver_dosp:
             jmp     print_os_ver
 print_ver_mpm:
             lea     si, msg_mpm86
+            call    print_str  
+            jmp     print_os_ver
+print_ver_cdosxm:
+            lea     si, msg_cdosxm
             call    print_str  
             jmp     print_os_ver
 print_ver_cdos:
@@ -115,6 +121,7 @@ msg_cpm86   db      'CP/M-86, ',0
 msg_pccpm86 db      'CP/M-86 1.1, ',0
 msg_ccpm86  db      'Concurrent CP/M-86 ',0
 msg_mpm86   db      'MP/M-86 ',0
+msg_cdosxm  db      'Concurrent DOS XM ',0
 msg_cdos    db      'Concurrent DOS ',0
 msg_mdos    db      'Multiuser DOS ',0
 msg_dosp    db      'DOSPLUS ',0
