@@ -124,7 +124,7 @@ msg_mpm86   db      'MP/M-86 ',0
 msg_cdosxm  db      'Concurrent DOS XM ',0
 msg_cdos    db      'Concurrent DOS ',0
 msg_mdos    db      'Multiuser DOS ',0
-msg_dosp    db      'DOSPLUS ',0
+msg_dosp    db      'DOS Plus ',0
 msg_ver_hdr db      'BDOS ',0
 msg_ver_sep db      ', ',0
 msg_nl      db      13,10,0

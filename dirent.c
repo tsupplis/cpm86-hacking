@@ -47,8 +47,15 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     while(cursor) {
         if(!memcmp(f+1,(cursor->entry)+1,11)) {
             if(root->is_fat) {
-                int * s=(int *)(f+28);
-                cursor->blocks=(*s+cursor->block_size-1)/cursor->block_size;
+                unsigned int * s=(unsigned int *)(f+28);
+                cursor->blocks=((unsigned long)(*s)+cursor->block_size-1)/
+                        cursor->block_size;
+#ifdef DEBUG
+                fprintf(stderr,"---------->fat blocks %ld\n",*s);               
+                fprintf(stderr,"---------->fat blocks %ld\n",*s+cursor->block_size-1); 
+                fprintf(stderr,"---------->fat blocks %ld\n",cursor->blocks);               
+                fprintf(stderr,"---------->fat block size %ld\n",cursor->block_size);       
+#endif
             } else if(root->drive_blocks<=256) {
                 int j;
                 char *blocks;
@@ -85,8 +92,15 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     cursor->drive_blocks=root->drive_blocks;
     cursor->is_fat=root->is_fat;
     if(root->is_fat) {
-        int * s=(int *)(f+28);
-        cursor->blocks=(*s+cursor->block_size-1)/cursor->block_size;
+        unsigned int * s=(unsigned int *)(f+28);
+        cursor->blocks=((unsigned long)(*s)+cursor->block_size-1)/
+                cursor->block_size;
+#ifdef DEBUG
+        fprintf(stderr,"---------->fat blocks %ld\n",*s);               
+        fprintf(stderr,"---------->fat blocks %ld\n",*s+cursor->block_size-1);   
+        fprintf(stderr,"---------->fat blocks %ld\n",cursor->blocks);               
+        fprintf(stderr,"---------->fat block size %ld\n",cursor->block_size);               
+#endif
     } else if(root->drive_blocks<=256) {
         int j;
         char *blocks;
@@ -157,8 +171,14 @@ int dirent_first(char * fcb, dirent_t ** root)
 #endif
     }
     if(root[0]->is_fat) {
-        int * s=(int *)(f+28);
-        root[0]->blocks=(*s+root[0]->block_size-1)/root[0]->block_size;
+        unsigned int * s=(unsigned int *)(f+28);
+        root[0]->blocks=((unsigned long)(*s)+root[0]->block_size-1)/root[0]->block_size;
+#ifdef DEBUG
+        fprintf(stderr,"---------->fat blocks %ld\n",*s);               
+        fprintf(stderr,"---------->fat blocks %ld\n",*s+root[0]->block_size-1);            
+        fprintf(stderr,"---------->fat blocks %ld\n",root[0]->blocks);               
+        fprintf(stderr,"---------->fat block size %ld\n",root[0]->block_size);      
+#endif
     } else if(root[0]->drive_blocks<=256) 
     {
         int j;

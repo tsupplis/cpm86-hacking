@@ -48,7 +48,7 @@ getccpdrv_	proc	near
         cmp     ax,22h
         jz      ccpdrv_cp11sv
         cmp     ax,1430h
-        jge     ccpdrv_ccp3xsd
+        jae     ccpdrv_ccp3xsd
         cmp     ax,1041h
         jz      ccpdrv_4xsv
         cmp     ax,1050h
@@ -286,18 +286,30 @@ xstatline_	proc	near
         push    ax
         push    bx
         push    cx
+        mov     cl,0Ch
+        int     0E0h
+        push    ax
         mov     cl,9Ah
         int     0E0h
         mov	    cx, word ptr 4[bp]
         xor     ch,ch
-        mov     dx,0
-        mov     ax,20H 
-        push    es
+        pop     ax
+        cmp     ax, 1041h
+        jz      xst_dosplus
+        cmp     ax, 1432h
+        jb      xst_exit
         mov     si, word ptr [68h] ;[4Eh] for Dos Plus
+        jmp     xst_call
+xst_dosplus:
+        mov     si, word ptr [4Eh] 
+xst_call:
+        mov     dx,0
+        push    es
         mov     es, 10h[si] 
         pop     ds
+        mov     ax,20H 
         call    dword ptr[28h]
-        ;mov	    word ptr -2[bp],05H
+xst_exit:
         pop     cx
         pop     bx
         pop     ax

@@ -163,7 +163,7 @@ int main(int argc, char **argv)
         dpb_load(root->drive,&dpb);
         block_size=128<<dpb.bsh;
 #ifdef DEBUG
-        fprintf(stderr,"ERR: %u %u %u\n",block_size,(unsigned int)dpb.bsh,
+        fprintf(stderr,"INF: %u %u %u\n",block_size,(unsigned int)dpb.bsh,
                 (unsigned int)dpb.blm);
 #endif
     }
