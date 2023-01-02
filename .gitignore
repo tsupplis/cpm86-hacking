@@ -5,6 +5,8 @@ rom
 **/.D*
 **/*.log
 **/*.cmd
+**/*.exe
+**/*.com
 **/*.lib
 **/.*.swp
 **/*.obj

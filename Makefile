@@ -1,6 +1,9 @@
 AS=aztec34_as
 CC=aztec34_cc
 AR=aztec34_lib
+MASM=pcdev_masm
+LINK=pcdev_link
+EXE2BIN=pcdev_exe2bin
 CFLAGS=-I. -B +0 -D__CPM86__
 STRIP=aztec34_sqz
 LDFLAGS=-lc86
@@ -11,7 +14,7 @@ RASM86=pcdev_rasm86
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd printenv.cmd \
-    mem.cmd
+    mem.cmd dosver.com
 EXTRAS=clsansi.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
@@ -101,6 +104,15 @@ mem.obj: mem.a86 tinylib.a86
 
 atinit.obj: atinit.a86 baselib.a86 tinylib.a86 atclock.a86
 
+dosver.com: dosver.exe
+	$(EXE2BIN) dosver.exe dosver.com
+
+dosver.exe: dosver.obj
+	$(LINK) dosver \;
+
+dosver.obj: dosver.asm
+	$(MASM) dosver \;
+
 %.cmd: %.obj
 	$(LINK86) $* '[$$sz]'
 
@@ -113,6 +125,7 @@ atinit.obj: atinit.a86 baselib.a86 tinylib.a86 atclock.a86
 
 clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS) util.lib
+	$(RM) dosver.exe
 	$(RM) cpmtest.img ccpmtest.img dostest.img hack.img
 	(cd pce;make clean)
 
