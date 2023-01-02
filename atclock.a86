@@ -147,11 +147,28 @@ bcd_conv_byte:
                 pop     bx
                 ret
 
-leap_year:
+leap_days:
+                push    si
                 push    cx
+                push    dx
                 mov     cl, 2
                 shr     ax, cl
+                mov     dx, ax
+                and     ax, 3
+                jnz     leap_days_end
+                lea     cx, month_day
+                add     cx, bx
+                add     cx, bx
+                mov     si, cx
+                mov     cx, [si]
+                cmp     cx, 59
+                jae     leap_days_end
+                dec     dx
+leap_days_end:
+                mov     ax,dx
+                pop     dx
                 pop     cx
+                pop     si
                 ret
 
 cpm31_set_time:
@@ -161,39 +178,39 @@ cpm31_set_time:
                 push    bx
                 push    cx
                 push    dx
+                ; (year-1978)*365
                 mov	    ax, word ptr tm_buffer
+                push    ax
                 sub     ax, 1978
                 mov     cx, 365
                 mul     cx
+                mov     dx, ax
+                ; +day
                 mov	    cl, byte ptr tm_buffer+2
                 xor     ch, ch
                 add     cl, 1
-                add     ax, cx
-                xor     dh, dh
-                mov	    dl, byte ptr tm_buffer+3
+                add     dx, cx
+                ; +leap_days(1978,0)
+                mov     ax, 1979
+                mov     bx, 0
+                call    leap_days
+                sub     dx, ax
+                ; +month_days
+                mov	    bl, byte ptr tm_buffer+3
+                xor     bh, bh
                 lea     cx, month_day
-                add     cx, dx
-                add     cx, dx
+                add     cx, bx
+                add     cx, bx
                 mov     si, cx
-                mov	    dx, [si]
-                add     ax, dx
-                cmp     dx, 59
-                jnb     no_current_leap
-                dec     ax
-no_current_leap:
-                push    ax
-                mov	    ax, word ptr tm_buffer
-                call    leap_year
-                mov     bx, ax
+                mov     cx, [si]
+                add     dx, cx
+                ; +leap_days(year, month)
                 pop     ax
-                add     ax, bx
-                push    ax
-                mov	    ax, 1978
-                call    leap_year
-                mov     bx, ax
-                pop     ax
-                sub     ax, bx
-                mov	    word ptr stamp_year, ax
+                mov	    bl, byte ptr tm_buffer+3
+                xor     bh, bh
+                call    leap_days
+                add     dx, ax
+                mov	    word ptr stamp_year, dx
                 mov	    al, byte ptr tm_buffer+5
                 xor     ah, ah
                 mov     bl, 10
