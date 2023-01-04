@@ -5,14 +5,13 @@
         title   'Clear Screen'
 
         cseg     
-        mov     cx, ds
+        mov     cx, cs
+        mov     ds, cx
         mov     es, cx
         mov     dx, offset cls_hdr
         mov     cl,9            
         int     0E0h    
         xor     cx,cx 
         int     0E0h  
-
-        dseg    
 cls_hdr db      27,'E$'
         end
