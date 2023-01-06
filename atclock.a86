@@ -2,8 +2,8 @@
 ; Licensed under the MIT license. See LICENSE file in the project root for details.
 ;
 
-                mov     ah, 02h
 time_read:
+                mov     ah, 02h
                 clc
                 int     01Ah
                 cmp     cx, 2359h
