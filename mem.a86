@@ -26,12 +26,16 @@
             cmp     ax,1431h
             jz      ccpm3x
             int     12h
+            cmp     ax,640
+            ja      fixax
             jmp     prram
 ccpm3x: 
             mov     bx,40h
             mov     es,bx
             mov     bx,13h
             mov     ax, es:[bx]
+fixax:      
+            mov     ax, 640
 prram:
             mov     bx,10
             call    print_uint16
