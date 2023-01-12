@@ -178,7 +178,7 @@ rtc_wait:
                 mov     dx, DPORT
                 in      al, dx 
                 mov	    byte ptr tm_buffer+5,   al
-IF DS12887
+IF DS12C887
                 mov     dx, CPORT
                 mov     al, 32h  ; century
                 out     dx, al
