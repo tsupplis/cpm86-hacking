@@ -13,9 +13,9 @@ RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd printenv.cmd \
-    mem.cmd dosver.com
-EXTRAS=clsansi.cmd
+    atinit.cmd attime.cmd rtcinit.cmd rtctime.cmd ciotest.cmd ball.cmd getch.cmd \
+    printenv.cmd mem.cmd dosver.com
+EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
 
@@ -98,11 +98,23 @@ tod.obj: tod.a86 baselib.a86 tinylib.a86
 
 ver.obj: ver.a86 tinylib.a86
 
-attime.obj: attime.a86 baselib.a86 tinylib.a86 atclock.a86
+attime.obj: time.a86 baselib.a86 tinylib.a86 clock.a86
+	$(RASM86) $< $$ pz sz iatdef.a86
+	mv time.obj attime.obj
+
+rtctime.obj: time.a86 baselib.a86 tinylib.a86 clock.a86
+	$(RASM86) $< $$ pz sz irtcdef.a86
+	mv time.obj rtctime.obj
 
 mem.obj: mem.a86 tinylib.a86
 
-atinit.obj: atinit.a86 baselib.a86 tinylib.a86 atclock.a86
+atinit.obj: init.a86 baselib.a86 tinylib.a86 clock.a86
+	$(RASM86) $< $$ pz sz iatdef.a86
+	mv init.obj atinit.obj
+
+rtcinit.obj: init.a86 baselib.a86 tinylib.a86 clock.a86
+	$(RASM86) $< $$ pz sz irtcdef.a86
+	mv init.obj rtcinit.obj
 
 dosver.com: dosver.exe
 	$(EXE2BIN) dosver.exe dosver.com
@@ -125,7 +137,7 @@ dosver.obj: dosver.asm
 
 clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(TOOLS) util.lib
-	$(RM) dosver.exe
+	$(RM) dosver.exe $(EXTRAS)
 	$(RM) cpmtest.img ccpmtest.img dostest.img hack.img
 	(cd pce;make clean)
 

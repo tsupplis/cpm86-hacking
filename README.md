@@ -107,6 +107,9 @@ For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - AT clock tools
     - ATTIME: Sync up clock (PC/XT with an AT compatible clock only)
     - ATINIT: Sync up clock and display boot banner (PC/XT with an AT compatible clock only)
+- RTC clock tools
+    - RTCTIME: Sync up clock (PC/XT with Dallas clock (at port 02C0h by default))
+    - RTCINIT: Sync up clock and display boot banner (PC/XT with an Dallas clock (at port 02C0h by default)
 - PCE tools (PCE Emulator only)
     - PCETIME: Sync up clock
     - PCEINIT: Sync up clock and display boot banner 
@@ -114,7 +117,7 @@ For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
     - PCEEXIT: Leaves the Emulator
     - PCEMNT: Mount a disk image from the host
 
-ATINIT and PCEINIT tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
+ATINIT, RTCINIT and PCEINIT tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
 
 ```
 CP/M-86 1.1, BDO 2.2

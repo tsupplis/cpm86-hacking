@@ -37,7 +37,7 @@ hw_end:
             mov     dl, byte ptr bkp_user
             int     0E0h
 
-include atclock.a86
+include clock.a86
 
 cls:
             push    ax

@@ -1,0 +1,4 @@
+                ATCLOCK EQU 0
+                CPORT   EQU 02C0h
+                DPORT   EQU CPORT + 1
+                DS12887 EQU 0

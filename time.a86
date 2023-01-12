@@ -23,7 +23,7 @@ at_time:
                 lea     si, msg_hdr
                 call	print_str
 
-include atclock.a86
+include clock.a86
 
 include tinylib.a86
 include baselib.a86
