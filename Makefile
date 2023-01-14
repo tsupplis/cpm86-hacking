@@ -13,7 +13,7 @@ RASM86=pcdev_rasm86
 
 TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
-    atinit.cmd attime.cmd rtcinit.cmd rtctime.cmd ciotest.cmd ball.cmd getch.cmd \
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd \
     printenv.cmd mem.cmd dosver.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
