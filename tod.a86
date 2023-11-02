@@ -4,7 +4,8 @@
 
                 title   'CP/M-86 TOD replacement'
 
-                cseg
+
+                code cseg  
 
                 mov     cx,ds
                 mov     es,cx
@@ -418,7 +419,7 @@ id_end:
 include tinylib.a86
 include baselib.a86
 
-                dseg
+                data dseg
 month_siz       db      0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 msg_wrg_os      db      'Requires CP/M-86 1.1',13,10,0
 msg_wrg_fmt     db      'Invalid Date & Time Format',13,10
