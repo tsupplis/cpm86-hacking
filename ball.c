@@ -9,7 +9,9 @@
 #define BALL_WIDTH 8
 #define BALL_HEIGHT 8
 
-int ball[BALL_WIDTH*BALL_HEIGHT]= {
+int seq=0;
+int ball[4][BALL_WIDTH*BALL_HEIGHT]= {
+{
     0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 1, 1, 1, 1, 0, 0, 
     0, 1, 2, 2, 3, 2, 1, 0, 
@@ -18,6 +20,37 @@ int ball[BALL_WIDTH*BALL_HEIGHT]= {
     0, 1, 2, 2, 2, 2, 1, 0, 
     0, 0, 1, 1, 1, 1, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0
+},
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 1, 1, 1, 1, 0, 0, 
+    0, 1, 2, 2, 2, 2, 1, 0, 
+    0, 1, 2, 2, 2, 2, 1, 0, 
+    0, 1, 2, 2, 3, 3, 1, 0, 
+    0, 1, 2, 2, 3, 2, 1, 0, 
+    0, 0, 1, 1, 1, 1, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0
+},
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 1, 1, 1, 1, 0, 0, 
+    0, 1, 2, 2, 2, 2, 1, 0, 
+    0, 1, 2, 2, 2, 2, 1, 0, 
+    0, 1, 3, 3, 2, 2, 1, 0, 
+    0, 1, 2, 3, 2, 2, 1, 0, 
+    0, 0, 1, 1, 1, 1, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0
+},
+{
+    0, 0, 0, 0, 0, 0, 0, 0, 
+    0, 0, 1, 1, 1, 1, 0, 0, 
+    0, 1, 2, 3, 2, 2, 1, 0, 
+    0, 1, 3, 3, 2, 2, 1, 0, 
+    0, 1, 2, 2, 2, 2, 1, 0, 
+    0, 1, 2, 2, 2, 2, 1, 0, 
+    0, 0, 1, 1, 1, 1, 0, 0, 
+    0, 0, 0, 0, 0, 0, 0, 0
+}
 };
 
 #ifndef __STDC__
@@ -36,7 +69,7 @@ void draw_map(int x, int y, int *map, int width, int height)
     int y_offset=0;
     int length=width*height;
     do {
-        gfx_pixel(x + x_offset, y + y_offset, ball[offset]);
+        gfx_pixel(x + x_offset, y + y_offset, ball[seq/4][offset]);
         offset++;
         x_offset++;
         x_offset=x_offset%width;
@@ -106,6 +139,8 @@ void ball_demo()
         else if (y <= BOX_Y+BOX_THICKNESS)
             yinc = 1;
         draw_map(x, y, ball, BALL_WIDTH, BALL_HEIGHT);
+        seq++;
+        if(seq>12) seq=0;
         delay(1);
     } while (!kbhit());
     getch();

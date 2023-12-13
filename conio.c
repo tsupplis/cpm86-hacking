@@ -208,6 +208,7 @@ void scrmode(int m)
         clrscr();
         break;
     case SCRMODE_COL80:
+        ;
 #asm
         push ax
         push bx
@@ -226,6 +227,7 @@ void scrmode(int m)
         clrscr();
         break;
     case SCRMODE_COL40:
+        ;
 #asm
         push ax
         push bx
