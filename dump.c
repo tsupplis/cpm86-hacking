@@ -132,7 +132,7 @@ int main(int argc, char **argv)
                 default:
                     fprintf(stderr, "INF: Usage: dump -h | [-p][-r] [infile]\n");
                     fprintf(stderr,"ERR: Wrong parameters\n");
-                    exit(0);
+                    exit(-1);
                     break;
                 }
                 j++;
