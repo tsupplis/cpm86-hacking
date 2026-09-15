@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 		new_psp_target();
 		dump_hex(stdout,"NEW_PSP",psp_target,92);
 	} else {
-		dump_hex(stdout,"NEW_PSP",psp_target,92);
+		dump_hex(stdout,"PSP",psp_target,92);
 	}
     dump_hex(stdout,"CPMEXIT",psp_target,2);
     dump_hex(stdout,"JMPTERM",psp_target+0x05,5);
