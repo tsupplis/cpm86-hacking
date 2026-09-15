@@ -16,6 +16,7 @@ _start:
             xchg    al,ah
             mov     bx,0
             call    print_ver
+            stc
             mov     ax, 4452h
             int     21h
             jc      .chk_cdos
@@ -26,10 +27,13 @@ _start:
             call    print_ver
             jmp     .exit
 .chk_cdos:
+            stc
             mov     ax, 4451h
             int     21h
             jc      .exit
             call    fix_dr_ver
+            cmp     ah,14h
+            jz      .exit
             mov     dx, offset cdos_version
             call    print_string
             mov     bx,1
