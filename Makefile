@@ -33,7 +33,7 @@ all: binaries
 binaries: $(CPM86TOOLS) $(DOSTOOLS) $(EXTRAS)
 	(cd pce;make binaries)
 
-dist: cpm86-bin.zip pce-bin.zip dos-bin.zip hack.img
+dist: cpm86-bin.zip pce-bin.zip dos-bin.zip cpm86-bin.img dos-bin.img
 
 dos-bin.zip cpm86-bin.zip pce-bin.zip: binaries
 	rm -f pce-bin.zip
@@ -43,7 +43,10 @@ dos-bin.zip cpm86-bin.zip pce-bin.zip: binaries
 	rm -f dos-bin.zip
 	zip dos-bin.zip $(DOSTOOLS) 
 
-hack.img: cpmtest.img
+dos-bin.img: dostest.img
+	cp $< $@
+
+cpm86-bin.img: cpmtest.img
 	cp $< $@
 
 clsansi.cmd: clsansi.h86
@@ -210,18 +213,16 @@ dosver.obj: dosver.asm
 clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(CPM86TOOLS) $(DOSTOOLS) util.lib
 	$(RM) dosver.exe $(EXTRAS)
-	$(RM) cpmtest.img ccpmtest.img dostest.img hack.img
+	$(RM) cpmtest.img ccpmtest.img cpm86-bin.img dostest.img dos-bin.img
 	(cd pce;make clean)
 
 
-dostest.img: binaries Makefile test.txt env.dat
+dostest.img: binaries Makefile 
 	(cd pce;make binaries)
 	cp dosbase.img dostest.img
-	-for i in $(PCETOOLS) $(DOSTOOLS) $(EXTRAS);do \
+	-for i in $(DOSTOOLS);do \
 	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
     done
-	mcopy -o -i dostest.img test.txt ::TEST.TXT
-	mcopy -o -i dostest.img env.dat ::ENV.DAT
 	mdir -w -i dostest.img ::*.*
 
 ccpmtest.img: binaries cpmtest.img startup.0

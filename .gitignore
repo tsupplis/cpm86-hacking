@@ -20,6 +20,7 @@ rom
 **/cpmtest.img
 **/pcpm*.img
 **/cdos-*.img
+**/dos-*.img
 **/dosplus-*.img
 **/*.sym
 **/*.lst

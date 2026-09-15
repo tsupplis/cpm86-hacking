@@ -162,31 +162,21 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
     - /Mnt^/User/^JOhn/^test.img becomes /mnt/USERS/john/TEST.IMG
 
 ## Build Environment
-- Makefile for DOS Aztec C cross compilers targetting CP/M-86.  (May require adaptation. emu2 is used to run dos compiler on unix/mac)
-- aztec c compiler version 3.4
-- rasm86/linkcmd, DOS version from Digital Research (http://www.cpm.z80.de/binary.html)
 
-```
-LINK86 Linkage Editor  02/Feb/87      Version 2.02
-Cross Linker: DOS -> CPM-86 & CDOS-286      1/2/86
-```
-```
-RASM-86 Assembler   12-Mar-87  PC-DOS Version 1.4a
-```
-- The Super Cool emu2 DOS emulator to run the DR tools on macOS and Linux (https://github.com/dmsc/emu2). This is an incredible way to bring dos command line development tools to a modern and up to date shell/make/whatever based dev environment. Another stunning emulator. Emu2 and PCE are an incredible pair.
+For this cross development environment, please use (https://github.com/tsupplis/cpm86-crossdev). It comes with wrappers for all the tools necesary.
 
-For a rudimentary, cross development environment, look at (https://github.com/tsupplis/cpm86-crossdev).
-
-Some submit/batch scripts are provided for dos (aztec 3.4) and cp/m-86 (aztec 3.2) are also available.
 
 ## Test Environment
+
 - CP/M-86 1.1 for IBM PC XT patched at https://github.com/tsupplis/cpm86-kernel
   - CP/M-86 1.1, CCP/M-86 3.1 and PCP/M-2.0 can be found on (http://www.cpm.z80.de)
   - DOS Plus 1.2 and Patched kernel can be found on (https://www.seasip.info/Cpm/dosplus.html)
 - The Excellent PCE emulator (http://www.hampa.ch/pce/pce-ibmpc.html)
+- The most excellent CLI emulator for DOS and CP/M-86 is available at https://github.com/johnsonjh/emu2-cpm86 and delivered as part of the crossdev project.
 - mtools 4 and cpmtools 2.20
 
 ## Quick points on CP/M-86
+
 Despite being a very primitive OS (in some cases actually enjoyably primitive...No time management at all outside of the clock, for example), it is possible to do quite an amount of things with a couple of good tools:
 - DR CB86 2.0 (http://www.cpm.z80.de/binary.html)
 - DR C86 1.11 (http://www.cpm.z80.de/binary.html)
@@ -237,8 +227,8 @@ programs work.
 Finally, Assembly using asm86 and gencmd can also be done but it needs to be done on CP/M environments (CP/M-80 or CPM-86 derivatives can be used)
 
 It is a bit lacking on the tooling side though ... so I will port tools little by little for comfort sake.
-- VE+ 2.03 (or better VE+ 2.33a) is really the only strong editor I found. (http://www.retroarchive.org/cpm/text/text.htm) (There is also TED a basic editor that allows you to stay away from ED). 
-- Automation through submit is very very rudimentary (no dream of makefiles)
+- VE+ 2.03 (or better VE+ 2.33a) is really the only strong editor I found. (https://github.com/johnsonjh/vedit) 
+- A VI like editor is available for CP/M-86 at https://github.com/tsupplis/cpm86-vi
 - There is no real solid CP/M-86 emulation as mentioned... But piggy backing the INT E0H API end point on emu2 perhaps? after all the 2 CP/M-86 and DOS 1.1 APIs are pretty much aligned...
 
 Still it is a funny bit of discovery and archeology...
