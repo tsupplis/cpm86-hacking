@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
 #else
 	if(argc>1 && (!strcmp(argv[1],"-c") || !strcmp(argv[1],"-C"))) {
 		memset(psp_buffer, 0xDD, sizeof(psp_buffer));
-		fprintf(stdout,"Setting new PSP target...\n");
 		psp_target = psp_buffer;
 		psp_target += 16-((int)(psp_target) % 16);
 		new_psp_target();
