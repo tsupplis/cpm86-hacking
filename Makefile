@@ -33,13 +33,15 @@ all: binaries
 binaries: $(CPM86TOOLS) $(DOSTOOLS) $(EXTRAS)
 	(cd pce;make binaries)
 
-dist: hack-bin.zip pce-bin.zip hack.img
+dist: cpm86-bin.zip pce-bin.zip dos-bin.zip hack.img
 
-hack-bin.zip pce-bin.zip: binaries
+dos-bin.zip cpm86-bin.zip pce-bin.zip: binaries
 	rm -f pce-bin.zip
 	zip pce-bin.zip $(PCETOOLS) 
-	rm -f hack-bin.zip
-	zip hack-bin.zip $(TOOLS) 
+	rm -f cpm86-bin.zip
+	zip cpm86-bin.zip $(CPM86TOOLS) 
+	rm -f dos-bin.zip
+	zip dos-bin.zip $(DOSTOOLS) 
 
 hack.img: cpmtest.img
 	cp $< $@
@@ -69,7 +71,7 @@ dosgetch.o: getch.c
 	$(CC) $(DOS_CFLAGS) -o $@ $<
 	$(STRIP) $@
 
-getch.cmd: getch.o util.lib
+getch.cmd: getch.o
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
 
 ls.cmd: ls.o util.lib
