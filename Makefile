@@ -22,7 +22,8 @@ CPM86TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd \
     printenv.cmd mem.cmd zpdump.cmd
-DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com dosmem11.com
+DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com dosmem11.com \
+    dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
     pce/pceinit.cmd
@@ -60,6 +61,13 @@ wc.cmd: wc.o util.lib
 
 printenv.cmd: printenv.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+
+dosgetch.com: dosgetch.o
+	$(LD) -o $@ $^ $(DOS11_LDFLAGS)
+
+dosgetch.o: getch.c
+	$(CC) $(DOS_CFLAGS) -o $@ $<
+	$(STRIP) $@
 
 getch.cmd: getch.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
@@ -236,6 +244,12 @@ ccpmtest: ccpmtest.img
 
 cpmtest: cpmtest.img
 	@./cpm86
+
+dosplus: cpmtest.img dostest.img
+	@./dosplus
+
+cdos41test: cpmtest.img dostest.img
+	@./cdos41
 
 dostest: dostest.img
 	@./dos

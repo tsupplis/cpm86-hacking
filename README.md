@@ -103,7 +103,8 @@ For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
 - VER: Displays the BDOS version (DOSVER.COM is provided to display MS-DOS Compatibility on PC-MODE compatible OSes)
 - MEM: Displays the available and system memory (DOSMEM.COM and DOSMEM11.COM are provided to display infor in PC-MODE)
 - BALL: A simple CGA demo (CP/M-86 1.1 for PC/XT, DOS Plus and CCP/M-86 or Concurrent DOS BDOS > 3.1) (take on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip)
-- GETCH: A simple keyboard scanner
+- GETCH: A simple keyboard scanner (DOSGETCH.COM is provided as DOS counterpart)
+- ZPDUMP: Dumps the Zero Page content (PSPDUMP.COM is provided as DOS counterpart)
 - AT clock tools
     - ATTIME: Sync up clock (PC/XT with an AT compatible clock only)
     - ATINIT: Sync up clock and display boot banner (PC/XT with an AT compatible clock only)
