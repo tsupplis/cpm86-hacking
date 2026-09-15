@@ -41,12 +41,11 @@ new_psp_target() {
 	;push ax
 	push cx
 	push dx
-	mov ax, psp_target_
+	mov dx, psp_target_
 	mov cl, 4
-	shr ax, cl
-	mov dx, ax
-	mov ax, cs
-	add dx, ax
+	shr dx, cl
+	mov cx, ds
+	add dx, cx
 	mov ax, dx
 	mov ah, 26h
 	int 21h
