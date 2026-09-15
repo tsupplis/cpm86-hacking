@@ -5,6 +5,7 @@
         title   'Clear Screen'
 
         cseg     
+        org 100h
         mov     cx, cs
         mov     ds, cx
         mov     es, cx

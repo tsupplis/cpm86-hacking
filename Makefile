@@ -1,6 +1,8 @@
 AS=aztec34_as
 CC=aztec34_cc
 AR=aztec34_lib
+ASM86=cpm86_asm86
+GENCMD=cpm86_gencmd
 MASM=pcdev_masm
 LINK=pcdev_link
 EXE2BIN=pcdev_exe2bin
@@ -34,6 +36,18 @@ hack-bin.zip pce-bin.zip: binaries
 
 hack.img: cpmtest.img
 	cp $< $@
+
+clsansi.cmd: clsansi.h86
+	$(GENCMD) $< 8080
+
+clsansi.h86: clsansi.a86
+	$(ASM86) $< 
+
+cls.cmd: cls.h86
+	$(GENCMD) $< 8080
+
+cls.h86: cls.a86
+	$(ASM86) $< 
 
 wc.cmd: wc.o util.lib
 	$(LD) -o $@ $^ $(LDFLAGS)
