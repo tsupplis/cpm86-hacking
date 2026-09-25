@@ -35,6 +35,7 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `reboot` | Cold or warm reboot | PC only. |
 | `cls` | Clear the screen | `cls` targets VT52; `clsansi` targets VT100/ANSI terminals. |
 | `pause` | Wait for a keystroke | CP/M-86 submit tool. |
+| `wait` | Wait for n seconds | CP/M-86 submit tool. |
 | `tod` | Replacement date/time utility | Removes the 78-99 year constraint and validates dates, including leap years. CP/M-86 1.1 for PC/XT only. |
 | `ver` | Display BDOS version | `dosver.com` is the DOS counterpart for PC-MODE systems. |
 | `mem` | Display available and system memory | `dosmem.com` and `dosmem11.com` are the DOS counterparts. |

@@ -9,6 +9,7 @@ rom
 **/*.com
 **/*.lib
 **/.*.swp
+**/*.h86
 **/*.obj
 **/*.o
 **/hack*.img

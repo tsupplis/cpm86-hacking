@@ -1,0 +1,34 @@
+;
+; Licensed under the MIT license. See LICENSE file in the project root for details.
+;
+
+            title   'Wait N Seconds'
+
+            cseg
+            org     100h
+            mov     si,81h          ; first byte of command tail
+skip_sp:
+            lodsb
+            cmp     al,' '
+            jz      skip_sp
+            cmp     al,'9'
+            jg      quit            ; no/invalid argument, exit quietly
+            cmp     al,'1'
+            jl      quit
+            sub     al,'0'          ; al = seconds (1-9)
+            xor     ah,ah
+            mov     bx,18           ; ~18.2 BIOS timer ticks/second
+            mul     bx
+            mov     di,ax           ; int 1Ah preserves di, clobbers ax/cx/dx
+            mov     ah,0
+            int     1Ah             ; dx = current tick count
+            add     di,dx           ; di = target tick count
+wait_loop:
+            mov     ah,0
+            int     1Ah
+            cmp     dx,di
+            jnz     wait_loop
+quit:
+            xor     cx,cx
+            int     0E0h
+            end

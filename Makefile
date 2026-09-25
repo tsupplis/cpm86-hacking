@@ -21,7 +21,7 @@ RASM86=pcdev_rasm86
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd getch.cmd \
-    printenv.cmd mem.cmd zpdump.cmd
+    printenv.cmd mem.cmd zpdump.cmd wait.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com dosmem11.com \
     dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
@@ -109,6 +109,12 @@ ball.cmd: ball.h86
 	$(GENCMD) $< 8080
 
 ball.h86: ball.a86
+	$(ASM86) $<
+
+wait.cmd: wait.h86
+	$(GENCMD) $< 8080
+
+wait.h86: wait.a86
 	$(ASM86) $<
 
 mode.cmd: mode.o util.lib
