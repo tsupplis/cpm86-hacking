@@ -59,13 +59,13 @@ int main(int argc, char **argv)
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
     if(argc<2) {
-        fprintf(stderr,"INF: Usage: write -h | [-a] filename\n");
+        fprintf(stderr,"INF: Usage: copycon -h | [-a] filename\n");
         fprintf(stderr,"ERR: Wrong parameters\n");
         return 1;
     }
     if(!strcmp("-h",argv[arg_offset]) || !strcmp("-H",argv[arg_offset])) {
-        fprintf(stderr,"INF: Usage: write -h | [-a] filename\n");
-        fprintf(stderr,"INF: File write/create utility\n");
+        fprintf(stderr,"INF: Usage: copycon -h | [-a] filename\n");
+        fprintf(stderr,"INF: Copy console input to a file\n");
         fprintf(stderr,"INF: where filename is [user/]filespec\n");
         fprintf(stderr,"INF:     -h for help\n");
         fprintf(stderr,"INF:     -a to happen to existing file\n");
@@ -75,7 +75,7 @@ int main(int argc, char **argv)
         flag_access="a";
         arg_offset=2;
         if(argc<3) {
-            fprintf(stderr,"INF: Usage: write -h | [-a] filename\n");
+            fprintf(stderr,"INF: Usage: copycon -h | [-a] filename\n");
             fprintf(stderr,"ERR: Wrong parameters\n");
             return 1;
         }

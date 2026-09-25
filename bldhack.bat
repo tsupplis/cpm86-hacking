@@ -22,9 +22,9 @@ ln -o mode.cmd more.o util.lib -lc86
 cc -D__CPM86__ -I. mode.c
 sqz mode.o
 ln -o mode.cmd mode.o util.lib -lc86
-cc -D__CPM86__ -I. write.c
-sqz write.o
-ln -o write.cmd write.o util.lib -lc86
+cc -D__CPM86__ -I. copycon.c
+sqz copycon.o
+ln -o copycon.cmd copycon.o util.lib -lc86
 cc -D__CPM86__ -I. ls.c
 sqz ls.o
 ln -o ls.cmd ls.o util.lib -lc86

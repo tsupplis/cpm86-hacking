@@ -18,9 +18,9 @@ LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
 
-CPM86TOOLS=rm.cmd more.cmd write.cmd dump.cmd mode.cmd ls.cmd \
+CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd getch.cmd \
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd getch.cmd \
     printenv.cmd mem.cmd zpdump.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com dosmem11.com \
     dosgetch.com
@@ -92,14 +92,24 @@ touch.cmd: touch.o
 rm.cmd: rm.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
 
-write.cmd: write.o
+copycon.cmd: copycon.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
 
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
 
-ball.cmd: ball.o util.lib
+ballc.cmd: ballc.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+
+ballc.o: ballc.c
+	$(CC) $(CPM86_CFLAGS) -o $@ $<
+	$(STRIP) $@
+	
+ball.cmd: ball.h86
+	$(GENCMD) $< 8080
+
+ball.h86: ball.a86
+	$(ASM86) $<
 
 mode.cmd: mode.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)

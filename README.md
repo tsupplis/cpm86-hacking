@@ -4,121 +4,54 @@
 
 A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and derivatives on PC. But most of the tools work with the Just4Fun V20-MBC SBC.
 
+![CP/M-86 1.1](images/cpm86.png)
+
 ## Where to find CP/M-86?
 
 The source for CP/M-86 doc, sources and binaries is http://www.cpm.z80.de.
 
 A cleaned-up distribution and kernel is available at https://github.com/tsupplis/cpm86-kernel. This distribution is working well in virtual environments, patched with all known patches, 'y2k' friendly (it contains the version of tod which sources are in this project) and AT friendly.
 
-## Tools 
+## Tools
 
-- LS: Directory listing
-```
-INF: Usage: ls [-h] | [-a] [-p] [-s|-r] [-l|-b] filepat
-INF: File listing utility
-INF: where filepat is [user/]filespec with wildcard
-INF:     -h for help
-INF:     -a for all files (including system)
-INF:     -p for for pausing one screen at a time
-INF:     -s for alphabetic sorting
-INF:     -r for reverse alphabetic sorting
-INF:     -l for long listing
-INF:     -b for basic listing
-```
-- RM: File delete
-```
-INF: Usage: rm [-h] | [-a][-i] filepat
-INF: File delete utility 
-INF: where filepat is [user/]filespec with wildcard
-INF:     -h for help
-INF:     -a to include both dir and sys files 
-INF:     -i for user validation per file 
-INF:     -f force file deletion even if read only 
-```
-- MORE: File content list with pause
-```
-INF: Usage: more -h | [infile]
-INF: File paging utility
-INF: where infile is [user/]filespec
-INF:     -h for help
-```
-- WRITE: Equivalent of cat>file
-```
-INF: Usage: write -h | [-a] filename
-INF: File write/create utility
-INF: where filename is [user/]filespec
-INF:     -h for help
-INF:     -a to happen to existing file
-```
-(Ctrl-C or Ctrl-Z used to finish input)
-- DUMP: Hexadecimal dump
-```
-INF: Usage: dump -h | [-p][-r] [infile]
-INF: Hexa file dump utility
-INF: where infile is [user/]filespec
-INF:     -h for help
-INF:     -p pausing every page
-INF:     -r raw output
-```
-- MODE: Screen setup (CP/M-86 1.1 for PC/XT only)
-```
-INF: Usage: mode -h | option option ...
-INF: Console configuration utility
-INF:     -h for help
-INF: and options:
-INF:      cls          Clear screen
-INF:      cursor=on    Show cursor
-INF:      cursor=off   Hide cursor
-INF:      statln=on    Show status line
-INF:      statln=off   Hide status line
-INF:      status=      Set status line message 
-INF:      fg=          Set foreground color (1-F)
-INF:      bg=          Set background color (1-F)
-```
-- TOUCH: Empty file creation
-```
-INF: Usage: touch [-h] | filespec
-INF: Empty file creation utility 
-INF:     -h for help
-```
-- WC: File content counter
-```
-INF: Usage: wc [-h] | [-a] filepat [filepat] ...
-INF: File word/line/character count utility 
-INF: where filepat is [user/]filespec with wildcard
-INF:     -h for help
-INF:     -a to include both dir and sys files 
-```
-- PRINTENV: Print Environment Variables
-```
-INF: Usage: printenv [-h]
-INF: Display environment variables 
-INF:     -h for help
-```
-For the status, (\\s: space, \\\\: \\, \\u: upper, \\l: lower)
-- REBOOT: Simple cold or warm reboot (PC only)
-- CLS: Clear screen (clsansi is a vt100/ansi version as opposed to vt52 for PC)
-- PAUSE: submit tool waiting for a keystroke
-- TOD: Replacement for CP/M-86 without the 78-99 year constraint and date/time validation including leap years. It does not fix the visual issue of the century hard coded to 19. Patches exist for that. It has exactly the same behaviour as the original CP/M-86 tod.cmd tool. (CP/M-86 1.1 for PC/XT only)
-- VER: Displays the BDOS version (DOSVER.COM is provided to display MS-DOS Compatibility on PC-MODE compatible OSes)
-- MEM: Displays the available and system memory (DOSMEM.COM and DOSMEM11.COM are provided to display infor in PC-MODE)
-- BALL: A simple CGA demo (CP/M-86 1.1 for PC/XT, DOS Plus and CCP/M-86 or Concurrent DOS BDOS > 3.1) (take on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip)
-- GETCH: A simple keyboard scanner (DOSGETCH.COM is provided as DOS counterpart)
-- ZPDUMP: Dumps the Zero Page content (PSPDUMP.COM is provided as DOS counterpart). PSPDUMP also takes a command line -C to perform an int 21h function 26h first and dumps the new PSP.
-- AT clock tools
-    - ATTIME: Sync up clock (PC/XT with an AT compatible clock only)
-    - ATINIT: Sync up clock and display boot banner (PC/XT with an AT compatible clock only)
-- RTC clock tools
-    - RTCTIME: Sync up clock (PC/XT with Dallas clock (at port 02C0h by default))
-    - RTCINIT: Sync up clock and display boot banner (PC/XT with an Dallas clock (at port 02C0h by default)
-- PCE tools (PCE Emulator only)
-    - PCETIME: Sync up clock
-    - PCEINIT: Sync up clock and display boot banner 
-    - PCEVER: Displays the Emulator version 
-    - PCEEXIT: Leaves the Emulator
-    - PCEMNT: Mount a disk image from the host
+### File and Console Tools
 
-ATINIT, RTCINIT and PCEINIT tools provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
+| Tool | Purpose | Usage and options |
+| --- | --- | --- |
+| `ls` | Directory listing | `ls [-h] \| [-a] [-p] [-s\|-r] [-l\|-b] filepat`<br>`filepat` is `[user/]filespec` with wildcards. `-a` includes system files, `-p` pauses, `-s`/`-r` sort, and `-l`/`-b` select long/basic output. |
+| `rm` | File deletion | `rm [-h] \| [-a][-i] filepat`<br>`-a` includes directory and system files, `-i` asks for confirmation, and `-f` deletes read-only files. |
+| `more` | Paginated file display | `more -h \| [infile]`<br>`infile` is a `[user/]filespec`. |
+| `copycon` | Copy console input to a file | `copycon -h \| [-a] filename`<br>`filename` is a `[user/]filespec`; `-a` appends. Ctrl-C or Ctrl-Z finishes input. |
+| `dump` | Hexadecimal dump | `dump -h \| [-p][-r] [infile]`<br>`-p` pauses each page and `-r` selects raw output. |
+| `mode` | Screen configuration | `mode -h \| option option ...`<br>Supports `cls`, `cursor=on/off`, `statln=on/off`, `status=`, `fg=`, and `bg=`. CP/M-86 1.1 for PC/XT only. |
+| `touch` | Empty file creation | `touch [-h] \| filespec` |
+| `wc` | Count file contents | `wc [-h] \| [-a] filepat [filepat] ...`<br>Counts words, lines, and characters. `-a` includes directory and system files. |
+| `printenv` | Display environment variables | `printenv [-h]`<br>Status text supports `\\s` for space, `\\` for backslash, `\\u` for upper case, and `\\l` for lower case. |
+
+### System and Demo Tools
+
+| Tool | Purpose | Compatibility or build note |
+| --- | --- | --- |
+| `reboot` | Cold or warm reboot | PC only. |
+| `cls` | Clear the screen | `cls` targets VT52; `clsansi` targets VT100/ANSI terminals. |
+| `pause` | Wait for a keystroke | CP/M-86 submit tool. |
+| `tod` | Replacement date/time utility | Removes the 78-99 year constraint and validates dates, including leap years. CP/M-86 1.1 for PC/XT only. |
+| `ver` | Display BDOS version | `dosver.com` is the DOS counterpart for PC-MODE systems. |
+| `mem` | Display available and system memory | `dosmem.com` and `dosmem11.com` are the DOS counterparts. |
+| `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. Supported on CP/M-86 1.1 PC/XT, DOS Plus, and CCP/M-86 or Concurrent DOS with BDOS > 3.1. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
+| `ballc` | CGA bouncing-ball demo | C implementation of the same demo. |
+| `getch` | Keyboard scanner | `dosgetch.com` is the DOS counterpart. |
+| `zpdump` | Dump the zero page | `pspdump.com` is the DOS counterpart and supports `-c` to call DOS `int 21h` function `26h` before dumping the new PSP. |
+
+### Clock and Emulator Tools
+
+| Group | Tools | Purpose and compatibility |
+| --- | --- | --- |
+| AT clock | `attime`, `atinit` | Synchronize the clock; `atinit` also displays a boot banner. PC/XT with an AT-compatible clock only. |
+| RTC clock | `rtctime`, `rtcinit` | Synchronize the clock; `rtcinit` also displays a boot banner. Dallas clock at port `02C0h` by default. |
+| PCE emulator | `pcetime`, `pceinit`, `pcever`, `pceexit`, `pcemnt` | Clock setup, boot banner, emulator version, emulator exit, and host disk-image mounting. PCE only. |
+
+`atinit`, `rtcinit` and `pceinit` provide a quick configuration dump equivalent to what CP/M-86 1.1 displays on boot
 
 ```
 CP/M-86 1.1, BDO 2.2
@@ -133,7 +66,7 @@ Hardware Configuration:
 Date now: 2021-9-27 22:17:39.0
 ```
 
-All the C tools (rm, ls, mode, more, write, dump) benefit from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
+All the C tools (rm, ls, mode, more, copycon, dump) benefit from the file specification pattern of Aztec C: [user]/[drive]:[filespec]. as well basic \<file and \>file redirects are supported.
 
 ## What CP/M-86?
 
@@ -149,7 +82,7 @@ For the following OSes, only the files tools work well. Interacting with the bio
 
 Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
-![CP/M-86 1.1](images/cpm86.png)
+![BALL demo](images/ball.img)
 
 ![CP/M-86 1.1 Apps](images/cpmapps.png)
 

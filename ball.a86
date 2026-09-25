@@ -1,6 +1,14 @@
-program     segment
-            assume cs:program, ds:program
-            org 100h
+    title   'Bouncing Ball'
+
+    cseg
+    org     100h
+
+    mov     cx, cs
+    mov     ds, cx
+    mov     es, cx
+    mov     dx, offset status_off
+    mov     cl, 9
+    int     0E0h
 
 BOX_X       EQU 89
 BOX_Y       EQU 59
@@ -10,7 +18,7 @@ BOX_T       EQU 1
 BALL_W      EQU 8
 BALL_H      EQU 8
 
-_start:
+start:
             mov     ax, 0004h
             int     10h
             mov     ah, 0Bh
@@ -71,50 +79,50 @@ right_loop:
             cmp     si, BOX_Y+BOX_H
             jle     right_loop
 
-            mov     word ptr [x], BOX_X+BOX_T
-            mov     word ptr [y], BOX_Y+BOX_T
-            mov     word ptr [xinc], 1
-            mov     word ptr [yinc], 1
-            mov     byte ptr [seq], 0
+            mov     x, BOX_X+BOX_T
+            mov     y, BOX_Y+BOX_T
+            mov     xinc, 1
+            mov     yinc, 1
+            mov     seq, 0
 
 main_loop:
-            mov     ax, [x]
-            add     ax, [xinc]
-            mov     [x], ax
-            mov     ax, [y]
-            add     ax, [yinc]
-            mov     [y], ax
+            mov     ax, x
+            add     ax, xinc
+            mov     x, ax
+            mov     ax, y
+            add     ax, yinc
+            mov     y, ax
 
-            mov     ax, [x]
+            mov     ax, x
             cmp     ax, BOX_X+BOX_W-BALL_W-BOX_T
             jle     check_x_low
-            mov     word ptr [xinc], -1
+            mov     xinc, -1
             jmp     check_y
 check_x_low:
             cmp     ax, BOX_X+BOX_T
             jg      check_y
-            mov     word ptr [xinc], 1
+            mov     xinc, 1
 
 check_y:
-            mov     ax, [y]
+            mov     ax, y
             cmp     ax, BOX_Y+BOX_H-BALL_H-BOX_T
             jle     check_y_low
-            mov     word ptr [yinc], -1
+            mov     yinc, -1
             jmp     draw_ball
 check_y_low:
             cmp     ax, BOX_Y+BOX_T
             jg      draw_ball
-            mov     word ptr [yinc], 1
+            mov     yinc, 1
 
 draw_ball:
-            mov     al, [seq]
+            mov     al, seq
             xor     ah, ah
             mov     bl, 4
             div     bl
             xor     ah, ah
-            mov     [frame], al
+            mov     frame, al
 
-            mov     al, [frame]
+            mov     al, frame
             mov     cl, BALL_W*BALL_H
             mul     cl
             mov     si, offset ball_data
@@ -126,9 +134,9 @@ yy_loop:
 xx_loop:
             mov     al, [si]
             push    ax
-            mov     cx, [x]
+            mov     cx, x
             add     cx, di
-            mov     ax, [y]
+            mov     ax, y
             add     ax, bx
             mov     dx, ax
             pop     ax
@@ -141,22 +149,22 @@ xx_loop:
             cmp     bx, BALL_H
             jl      yy_loop
 
-            mov     al, [seq]
+            mov     al, seq
             inc     al
             cmp     al, 13
             jl      store_seq
             xor     al, al
 store_seq:
-            mov     [seq], al
+            mov     seq, al
 
             xor     ah, ah
             int     1Ah
-            mov     [start_tick], dx
+            mov     start_tick, dx
 delay_wait:
             xor     ah, ah
             int     1Ah
             mov     ax, dx
-            sub     ax, [start_tick]
+            sub     ax, start_tick
             cmp     ax, 1
             jl      delay_wait
 
@@ -170,7 +178,14 @@ key_available:
 
             mov     ax, 0003h
             int     10h
-            int     20h
+            mov     dx, offset status_on
+            mov     cl, 9
+            int     0E0h
+            mov     dx, offset cls_hdr
+            mov     cl, 9
+            int     0E0h
+            xor     cx, cx
+            int     0E0h
 
 putpix:
             push    bx
@@ -187,6 +202,9 @@ yinc        dw      1
 seq         db      0
 frame       db      0
 start_tick  dw      0
+status_off  db      27,'0','$'
+status_on   db      27,'1','$'
+cls_hdr     db      27,'E$'
 
 ball_data   db      0,0,0,0,0,0,0,0
             db      0,0,1,1,1,1,0,0
@@ -221,5 +239,4 @@ ball_data   db      0,0,0,0,0,0,0,0
             db      0,0,1,1,1,1,0,0
             db      0,0,0,0,0,0,0,0
 
-program     ends
-            end _start
+    end
