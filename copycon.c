@@ -68,7 +68,7 @@ int main(int argc, char **argv)
         fprintf(stderr,"INF: Copy console input to a file\n");
         fprintf(stderr,"INF: where filename is [user/]filespec\n");
         fprintf(stderr,"INF:     -h for help\n");
-        fprintf(stderr,"INF:     -a to happen to existing file\n");
+        fprintf(stderr,"INF:     -a to append to existing file\n");
         return 0;
     }
     if(!strcmp("-a",argv[arg_offset]) || !strcmp("-A",argv[arg_offset])) {
