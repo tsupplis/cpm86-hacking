@@ -64,6 +64,7 @@ cls.h86: cls.a86
 
 wc.cmd: wc.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 printenv.cmd: printenv.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
