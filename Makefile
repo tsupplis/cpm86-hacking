@@ -16,6 +16,7 @@ DOS11_LDFLAGS=-ld11
 LD=aztec34_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
+UPX=pcdev_upx
 
 
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
@@ -66,6 +67,7 @@ wc.cmd: wc.o util.lib
 
 printenv.cmd: printenv.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 dosgetch.com: dosgetch.o
 	$(LD) -o $@ $^ $(DOS11_LDFLAGS)
@@ -76,30 +78,38 @@ dosgetch.o: getch.c
 
 getch.cmd: getch.o
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 ls.cmd: ls.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 ciotest.cmd: ciotest.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 cp.cmd: cp.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
 
 touch.cmd: touch.o
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 rm.cmd: rm.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 copycon.cmd: copycon.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 ballc.cmd: ballc.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 ballc.o: ballc.c
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
@@ -119,9 +129,11 @@ wait.h86: wait.a86
 
 mode.cmd: mode.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 more.cmd: more.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 util.lib: util.o conio.o dirent.o dpb.o debug.o os.o gfx.o
 	rm -f $@
@@ -137,11 +149,12 @@ os.o: os.asm
 
 zpdump.cmd: zpdump.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(UPX) $@
 
 zpdump.o: pspdump.c
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
 	$(STRIP) $@
-
+	
 pspdump.com: pspdump.o
 	$(LD) -o $@ $< $(DOS11_LDFLAGS)
 
