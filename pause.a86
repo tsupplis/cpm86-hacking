@@ -5,6 +5,11 @@
             title   'Pause for Key'
 
             cseg     
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 128
+            sti
             mov     cx,ds
             mov     es,cx
             mov     dx, offset msg_hdr
@@ -28,4 +33,5 @@ got_key:
             dseg    
 msg_hdr     db      'Press any key to continue...','$'
 msg_clear   db      13,27,'K$'
+stk         rw      64              ; 128 bytes program stack
         end

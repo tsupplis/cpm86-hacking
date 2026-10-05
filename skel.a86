@@ -5,6 +5,11 @@
             title   'Skeleton'
 
             cseg     
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 128
+            sti
             mov     cx,ds
             mov     es,cx
             mov     dx, offset msg_hdr
@@ -15,4 +20,5 @@
 
             dseg    
 msg_hdr     db      'Test',13,10,'$'
+stk         rw      64              ; 128 bytes program stack
             end

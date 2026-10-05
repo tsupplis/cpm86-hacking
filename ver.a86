@@ -6,6 +6,11 @@
 
 
             cseg  
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 128
+            sti
             mov     cx,ds
             mov     es,cx
             call    print_cpm_ver   
@@ -128,4 +133,5 @@ msg_dosp    db      'DOS Plus ',0
 msg_ver_hdr db      'BDOS ',0
 msg_ver_sep db      ', ',0
 msg_nl      db      13,10,0
+stk         rw      64              ; 128 bytes program stack
             end

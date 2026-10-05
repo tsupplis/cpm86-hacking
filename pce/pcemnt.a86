@@ -18,6 +18,11 @@
 include pce.a86
 
                 cseg
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 128
+            sti
 
                 mov     cx, ds
                 mov     es, cx
@@ -95,6 +100,7 @@ msg_hookerr 	db      'PCE Hook Error',13,10,0
 msg_conclude 	db      ' ...',13,10,0
 str1            rs      256
 str2            rs      256
+stk         rw      64              ; 128 bytes program stack
                 db      0
 
                 end

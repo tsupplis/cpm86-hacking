@@ -5,6 +5,11 @@
             title   'ATINIT - Start CP/M'
 
             cseg
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 256
+            sti
 
             mov     cx,ds
             mov     es,cx
@@ -293,6 +298,7 @@ stamp_hours rb      1
 stamp_mins  rb      1
 stamp_secs  rb      1
 bkp_user    rw      0
+stk         rw      128             ; 256 bytes program stack
             db      0
 
             end

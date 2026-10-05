@@ -6,6 +6,10 @@
     mov     cx, cs
     mov     ds, cx
     mov     es, cx
+    cli
+    mov     ss, cx
+    mov     sp, offset stk + 128
+    sti
     mov     dx, offset status_off
     mov     cl, 9
     int     0E0h
@@ -238,5 +242,16 @@ ball_data   db      0,0,0,0,0,0,0,0
             db      0,1,2,2,2,2,1,0
             db      0,0,1,1,1,1,0,0
             db      0,0,0,0,0,0,0,0
+
+; program stack, 128 zero bytes that are part of the image
+            db      0               ; word alignment
+stk         db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+            db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 
     end

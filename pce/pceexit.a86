@@ -16,7 +16,12 @@
 
 include pce.a86
 
-            cseg
+                cseg
+                cli
+                mov     ax,ds
+                mov     ss,ax
+                mov     sp,offset stk + 128
+                sti
 
                 lea     si, msg_hdr
                 call	print_str
@@ -46,4 +51,5 @@ msg_hdr         db      'Exiting PCE ...',13,10,0
 msg_notpce	    db      'Not running under PCE',13,10,0
 msg_hookerr 	db      'PCE Hook Error',13,10,0
                 
+stk         rw      64              ; 128 bytes program stack
                 end

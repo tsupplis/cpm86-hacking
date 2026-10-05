@@ -18,6 +18,11 @@
 include pce.a86
 
             cseg
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 128
+            sti
 
             mov     cx,ds
             mov     es,cx
@@ -44,6 +49,7 @@ stamp_hours rb      1
 stamp_mins  rb      1
 stamp_secs  rb      1
 
+stk         rw      64              ; 128 bytes program stack
             db      0
 
             end

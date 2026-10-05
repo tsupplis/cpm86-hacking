@@ -5,6 +5,11 @@
             title   'Memory'
 
             cseg
+            cli
+            mov     ax,ds
+            mov     ss,ax
+            mov     sp,offset stk + 128
+            sti
 
             mov     cx,ds
             mov     es,cx
@@ -53,4 +58,5 @@ mext        db     0
 msg_sep     db     'K/',0
 msg_nl      db     'K',13,10,0
 
+stk         rw      64              ; 128 bytes program stack
             end

@@ -6,6 +6,11 @@
 
 
                 code cseg  
+                cli
+                mov     ax,ds
+                mov     ss,ax
+                mov     sp,offset stk + 128
+                sti
 
                 mov     cx,ds
                 mov     es,cx
@@ -434,6 +439,7 @@ tmz_sep         db      9
 tmz_time        db      '01:01:01'
                 db      0
 tm_buffer       rs      256
+stk         rw      64              ; 128 bytes program stack
                 db      0
 
                 end

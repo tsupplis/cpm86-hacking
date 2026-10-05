@@ -18,6 +18,11 @@
 include pce.a86
 
                 cseg
+                cli
+                mov     ax,ds
+                mov     ss,ax
+                mov     sp,offset stk + 128
+                sti
 
                 lea     si, msg_hdr
                 call	print_str
@@ -81,6 +86,7 @@ msg_verstr1	    db      'PCE version ',0
 msg_verstr2	    db      ' (',0
 msg_verstr3	    db      ')',13,10,0
 buffer          rs      256
+stk         rw      64              ; 128 bytes program stack
                 db      0
 
                 end
