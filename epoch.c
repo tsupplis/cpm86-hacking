@@ -52,10 +52,61 @@ static int isleap(y)
     return (y % 4 == 0 && y % 100 != 0) || y % 400 == 0;
 }
 
+static int bcd(b)
+    int b;
+{
+    b &= 0xff;
+    return (b >> 4) * 10 + (b & 15);
+}
+
+/*
+ * BDOS fn 105 (T_GET, 69h), MP/M II and later: DE -> time stamp
+ *   DW day (1 = 1 January 1978), DB hour (BCD), DB minute (BCD)
+ * and A = seconds (BCD).
+ */
+static int tget(dt)
+    struct sysdt *dt;
+{
+    char stamp[4];
+    unsigned n;
+    int y, m, len;
+
+    stamp[0] = stamp[1] = stamp[2] = stamp[3] = 0;
+    dt->sec = bcd(bdos(105, stamp));
+    n = (stamp[0] & 0xff) | ((stamp[1] & 0xff) << 8);
+    if (n == 0)
+        return -1;
+    n--;				/* days since 1978-01-01 */
+    dt->hour = bcd(stamp[2]);
+    dt->min  = bcd(stamp[3]);
+
+    for (y = 1978; ; y++) {
+        len = isleap(y) ? 366 : 365;
+        if (n < len)
+            break;
+        n -= len;
+    }
+    for (m = 0; m < 12; m++) {
+        len = month_days[m] + (m == 1 && isleap(y));
+        if (n < len)
+            break;
+        n -= len;
+    }
+    dt->year = y;
+    dt->mon  = m + 1;
+    dt->day  = n + 1;
+    return 0;
+}
+
 int sys_datetime(dt)
     struct sysdt *dt;
 {
-    if ((bdos(12, 0) & 0xff) != 0x22)		/* CP/M-86 1.1 only */
+    int v;
+
+    v = bdos(12, 0) & 0xff;
+    if (v > 0x22)				/* BDOS >= 2.2: T_GET */
+        return tget(dt);
+    if (v != 0x22)				/* CP/M-86 1.1: sysdata */
         return -1;
     getsys();
 
