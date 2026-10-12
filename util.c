@@ -421,7 +421,7 @@ static void le()
 }
 
 #ifndef __STDC__
-printenv(fp)
+void printenv(fp)
     FILE *fp;
 #else
 void printenv(FILE * fp)

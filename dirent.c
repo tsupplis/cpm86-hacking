@@ -233,36 +233,36 @@ dirent_t* dirent_merge_sorted(dirent_t* lst1, dirent_t* lst2, int sort_order)
 } 
 
 #ifndef __STDC__
-dirent_split(source, front, back) 
-    dirent_t* source; 
-    dirent_t** front; 
-    dirent_t** back; 
+void dirent_split(source, front, back)
+    dirent_t* source;
+    dirent_t** front;
+    dirent_t** back;
 #else
-void dirent_split(dirent_t* source, dirent_t** front, dirent_t** back) 
+void dirent_split(dirent_t* source, dirent_t** front, dirent_t** back)
 #endif
-{ 
+{
 	dirent_t* slow = source;
 	dirent_t* fast = source->next;
 
-	while (fast && fast->next) { 
-		fast = fast->next; 
-		if (fast) { 
-			slow = slow->next; 
-			fast = fast->next; 
-		}  
-	} 
+	while (fast && fast->next) {
+		fast = fast->next;
+		if (fast) {
+			slow = slow->next;
+			fast = fast->next;
+		}
+	}
 
-	*front = source; 
-	*back = slow->next; 
-	slow->next = 0; 
-} 
+	*front = source;
+	*back = slow->next;
+	slow->next = 0;
+}
 
 #ifndef __STDC__
-dirent_sort(root, sort_order)
-    dirent_t** root; 
+void dirent_sort(root, sort_order)
+    dirent_t** root;
     int sort_order;
 #else
-dirent_sort(dirent_t** root, int sort_order) 
+void dirent_sort(dirent_t** root, int sort_order)
 #endif
 { 
 	dirent_t* head = *root; 

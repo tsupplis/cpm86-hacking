@@ -11,11 +11,11 @@ char *malloc();
 #include <util.h>
 
 #ifndef __STDC__
-dpb_load(drive, dpb)
-    int drive; 
-    dpb_t* dpb; 
+void dpb_load(drive, dpb)
+    int drive;
+    dpb_t* dpb;
 #else
-dpb_load(int drive, dpb_t*dpb) 
+void dpb_load(int drive, dpb_t*dpb)
 #endif
 {
     int i;

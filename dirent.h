@@ -19,10 +19,11 @@ typedef struct _dirent_t {
 #ifndef __STDC__
 int dirent_next();
 int dirent_first();
-int dirent_free(); 
+int dirent_free();
 int dirent_load();
 int dirent_is_fat();
 int dirent_fcb();
+void dirent_sort();
 #else
 int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents);
 int dirent_first(char * fcb, dirent_t ** root);
@@ -31,6 +32,7 @@ int dirent_load(char * path, dirent_t ** root,int *ouser, int *odrive, int sort_
         int all_extents);
 int dirent_is_fat(int drive);
 int dirent_fcb(char *fcb,dirent_t *d);
+void dirent_sort(dirent_t ** root, int sort_order);
 
 #endif
 

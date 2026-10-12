@@ -19,37 +19,41 @@ typedef struct dpb_t {
 } dpb_t;
 
 
+#define OSTYPE_MULTIUSER 0x04
+
 #ifndef __STDC__
 int keyb();
+int bioskey();
+int pckey();
 int osver();
+int ostype();
 int getcurdrv();
 int setcurdrv();
 int getccpdrv();
 int bdosx();
+xstatline();
 int istrcmp();
 char * getenv();
 printenv();
 delay();
+dpb_load();
 typedef unsigned int size_t;
 #else
-int keyb();
-int osver();
-int ostype();
-int getcurdrv();
+int keyb(void);
+int bioskey(void);
+int pckey(void);
+int osver(void);
+int ostype(void);
+int getcurdrv(void);
 int setcurdrv(int drv);
-int getccpdrv();
+int getccpdrv(void);
 int bdosx(int cx, int dx, int* es, int *bx);
-int istrcmp (char *p1, char *p2,int p);
+void xstatline(int mode);
+int istrcmp(char *p1, char *p2, int p);
 char *getenv(const char *name);
 void printenv(FILE * fp);
 void delay(unsigned int delay);
-#endif
-#define OSTYPE_MULTIUSER 0x04
-
-#ifndef __STDC__
-dpb_load();
-#else
-dpb_load(int drive, dpb_t*dpb);
+void dpb_load(int drive, dpb_t*dpb);
 #endif
 
 #ifndef __STDC__
