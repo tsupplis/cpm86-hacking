@@ -33,7 +33,10 @@ all: binaries
 binaries: $(CPM86TOOLS) $(DOSTOOLS) $(EXTRAS)
 	(cd pce;make binaries)
 
-dist: cpm86-lib.zip cpm86-bin.zip pce-bin.zip dos-bin.zip cpm86-bin.img dos-bin.img
+dist: cpm86-lib.zip cpm86-bin.zip pce-bin.zip dos-bin.zip disks.zip
+
+disks.zip: cpm86-bin.img dos-bin.img
+	zip disks.zip cpm86-bin.img dos-bin.img
 
 cpm86-lib.zip: util.lib
 	rm -f cpm86-lib.zip
