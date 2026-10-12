@@ -33,7 +33,11 @@ all: binaries
 binaries: $(CPM86TOOLS) $(DOSTOOLS) $(EXTRAS)
 	(cd pce;make binaries)
 
-dist: cpm86-bin.zip pce-bin.zip dos-bin.zip cpm86-bin.img dos-bin.img
+dist: cpm86-lib.zip cpm86-bin.zip pce-bin.zip dos-bin.zip cpm86-bin.img dos-bin.img
+
+cpm86-lib.zip: util.lib
+	rm -f cpm86-lib.zip
+	zip cpm86-lib.zip util.lib *.h
 
 dos-bin.zip cpm86-bin.zip pce-bin.zip: binaries
 	rm -f pce-bin.zip
@@ -247,18 +251,27 @@ dostest.img: binaries Makefile
 
 ccpmtest.img: binaries cpmtest.img startup.0
 	(cd pce;make binaries)
-	cp cpmtest.img ccpmtest.img
-	cpmcp -f ibmpc-514ss ccpmtest.img startup.0 0:
+	cp cpmtest.img $@
+	rm -f tmp.img
+	python3 tools/cpm86twist.py untwist $@ tmp.img
+	cpmcp -f cpm86-320 tmp.img startup.0 0:
+	python3 tools/cpm86twist.py twist tmp.img $@
+	rm -f tmp.img
 
 cpmtest.img: binaries Makefile test.txt env.dat
 	(cd pce;make binaries)
-	cp cpmbase.img cpmtest.img
-	cpmcp -f ibmpc-514ss cpmtest.img $(PCETOOLS) 0:
-	cpmcp -f ibmpc-514ss cpmtest.img $(CPM86TOOLS) 0:
-	cpmcp -f ibmpc-514ss cpmtest.img $(EXTRAS) 0:
-	cpmcp -f ibmpc-514ss cpmtest.img test.txt 0:
-	cpmcp -f ibmpc-514ss cpmtest.img env.dat 0:
-	cpmls -F -f ibmpc-514ss cpmtest.img 0:*.*
+	cp cpmbase.img $@
+	rm -f tmp.img
+	python3 tools/cpm86twist.py untwist $@ tmp.img
+	cpmcp -f cpm86-320 tmp.img $(PCETOOLS) 0:
+	cpmcp -f cpm86-320 tmp.img $(CPM86TOOLS) 0:
+	cpmcp -f cpm86-320 tmp.img $(EXTRAS) 0:
+	cpmcp -f cpm86-320 tmp.img test.txt 0:
+	cpmcp -f cpm86-320 tmp.img *.h *.lib 0:
+	cpmcp -f cpm86-320 tmp.img env.dat 0:
+	cpmls -F -f cpm86-320 tmp.img 0:*.*
+	python3 tools/cpm86twist.py twist tmp.img $@
+	rm -f tmp.img
 
 test: cpmtest
 
