@@ -1,5 +1,5 @@
 /*
- * subfile.c -- .sub file reader for sub.lib (used by MENU and MSUB).
+ * subfile.c -- .sub file reader, part of util.lib (used by MENU and MSUB).
  * Licensed under the MIT license. See LICENSE file in the project root.
  */
 #include <stdio.h>
