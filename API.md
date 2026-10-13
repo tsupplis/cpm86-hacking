@@ -165,27 +165,32 @@ typedef struct _dirent_t {
 
 ---
 
-## 5. CGA Graphics (`gfx.h`)
+## 5. Graphics (`gfx.h`)
 
-Implemented in [`gfx.asm`](gfx.asm:1). Direct BIOS `INT 10h` primitives for CGA graphics modes.
+Implemented in [`gfx.asm`](gfx.asm:1). Direct BIOS `INT 10h` primitives for CGA and EGA graphics modes.
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `gfx_mode` | `void gfx_mode(int mode)` | Sets video mode via BIOS `INT 10h` (`AH=00h`). E.g. `MODE_CGA_320X200` (4), `MODE_CGA_640X200` (6), `MODE_TEXT` (3). |
+| `gfx_mode` | `void gfx_mode(int mode)` | Sets video mode via BIOS `INT 10h` (`AH=00h`). E.g. `MODE_CGA_320X200` (4), `MODE_CGA_640X200` (6), `MODE_EGA_640X350` (16), `MODE_TEXT` (3). |
 | `gfx_palette` | `void gfx_palette(int palette)` | Sets CGA color palette via BIOS `INT 10h` (`AH=0Bh`). E.g. `CGA_PALETTE_GRY` (`0x100`), `CGA_PALETTE_CMW` (`0x101`). |
 | `gfx_pixel` | `void gfx_pixel(int x, int y, int palette)` | Plots pixel at coordinates `(x, y)` with color/palette index `palette` via BIOS `INT 10h` (`AH=0Ch`). |
+| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Writes text string `str` at character grid `(col, row)` in graphics mode with specified `color` (e.g. 15 for bright white) via BIOS `INT 10h` (`AH=02h` and `AH=0Eh`). |
 
 ### Constants
 
 ```c
-#define CGA_PALETTE_CMW   0x101  /* Cyan / Magenta / White */
-#define CGA_PALETTE_GRY   0x100  /* Green / Red / Yellow */
+#define CGA_PALETTE_CMW         0x101  /* Cyan / Magenta / White */
+#define CGA_PALETTE_GRY         0x100  /* Green / Red / Yellow */
 
-#define MODE_CGA_320X200  4
-#define MODE_CGA_640X200  6
-#define MODE_TEXT         3
+#define MODE_TEXT               3
+#define MODE_CGA_320X200        4
+#define MODE_CGA_640X200        6
+#define MODE_EGA_320X200        13     /* 0x0D: 320x200, 16 colors */
+#define MODE_EGA_640X200        14     /* 0x0E: 640x200, 16 colors */
+#define MODE_EGA_640X350_MONO   15     /* 0x0F: 640x350, monochrome */
+#define MODE_EGA_640X350        16     /* 0x10: 640x350, 16 colors */
 ```
 
 ---

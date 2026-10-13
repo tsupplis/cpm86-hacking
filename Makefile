@@ -13,7 +13,7 @@ CPM86_LDFLAGS=-lc86
 DOS_CFLAGS=-I. -B +0 -D__DOS__
 DOS_LDFLAGS=-lc
 DOS11_LDFLAGS=-ld11
-LD=aztec34_link
+LD=aztec42_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 
@@ -21,7 +21,7 @@ RASM86=pcdev_rasm86
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd getch.cmd \
-    printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd
+    printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com dosmem11.com \
     dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
@@ -112,6 +112,13 @@ ballc.cmd: ballc.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
 
 ballc.o: ballc.c
+	$(CC) $(CPM86_CFLAGS) -o $@ $<
+	$(STRIP) $@
+
+sine.cmd: sine.o util.lib
+	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
+
+sine.o: sine.c
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
 	$(STRIP) $@
 	

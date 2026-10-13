@@ -41,6 +41,7 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `mem` | Display available and system memory | `dosmem.com` and `dosmem11.com` are the DOS counterparts. |
 | `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. Supported on CP/M-86 1.1 PC/XT, DOS Plus, and CCP/M-86 or Concurrent DOS with BDOS > 3.1. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
 | `ballc` | CGA bouncing-ball demo | C implementation of the same demo. |
+| `sine` | EGA sine wave demo | C implementation of high-resolution EGA $640 \times 350$ graphics demo plotting $f(x)=\sin(x)$ over $[-2\pi, +2\pi]$ with labeled coordinate axes and text. |
 | `getch` | Keyboard scanner | `dosgetch.com` is the DOS counterpart. |
 | `zpdump` | Dump the zero page | `pspdump.com` is the DOS counterpart and supports `-c` to call DOS `int 21h` function `26h` before dumping the new PSP. |
 
@@ -83,7 +84,7 @@ For the following OSes, only the files tools work well. Interacting with the bio
 
 Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
-![BALL demo](images/ball.img)
+![SINE demo](images/sine.png)
 
 ![CP/M-86 1.1 Apps](images/cpmapps.png)
 
