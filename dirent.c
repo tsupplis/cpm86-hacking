@@ -371,8 +371,13 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     }
     if(fcb[1]==' ') {
         int i;
-        for(i=1;i<12;i++) {
+        for(i=1;i<9;i++) {
             fcb[i]='?';
+        }
+        if(fcb[9]==' ') {
+            for(i=9;i<12;i++) {
+                fcb[i]='?';
+            }
         }
     }
     if(all_extents) {
