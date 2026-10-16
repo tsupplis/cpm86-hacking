@@ -9,9 +9,473 @@ dataseg ends
     extrn memset_:near
     bss scb_pb_:word,257
     bss chainbuf:byte,128
+    bss clibuf:byte,130
 ;
 
-	    public	setcurdrv_  
+;
+; BDOS version gates for the calls below. Each one runs BDOS fn 12
+; (AH = system type, AL = version) and returns with CF set (JB) when the
+; running OS does not support the call. Clobbers AX,BX,CX,DX,ES.
+;
+;  ver_ge30: version >= 30h (MP/M II, CP/M 3, CCP/M 3.x, DOS Plus ...)
+;            CP/M-86 1.1 returns 22h, so it is rejected.
+;  ver_ge41: version >= 41h (CP/M-86 v4 / DOS Plus)
+;
+ver_ge30	proc	near
+ mov	cx,0Ch
+ int	0E0h
+ cmp	al,30h
+ ret
+ver_ge30	endp
+
+;  ver_gt22: version > 22h (T_GET/T_SET: MP/M II, DOS+ 2.x and later);
+;            CF set when unsupported.
+ver_gt22	proc	near
+	mov	cx,0Ch
+	int	0E0h
+	cmp	al,23h
+	ret
+ver_gt22	endp
+
+;  ver_cpm3: version >= 30h and not MP/M II (system type bit 0 clear),
+;            i.e. CP/M 3 and above; CF set when unsupported.
+ver_cpm3	proc	near
+	mov	cx,0Ch
+	int	0E0h
+	cmp	al,30h
+	jb	ver_cpm3_ret		; CF set
+	test	ah,01h			; CF cleared
+	jz	ver_cpm3_ret
+	stc
+ver_cpm3_ret:
+	ret
+ver_cpm3	endp
+
+;  ver_mpm:  MP/M or multi-user system (system type bit 0 or 2 set), i.e.
+;            MP/M, Concurrent CP/M, CCP/M-86; CF set when unsupported.
+;  ver_mpm4: ver_mpm, or CP/M-86 v4 (version >= 41h); CF set when unsupported.
+ver_mpm	proc	near
+	mov	cx,0Ch
+	int	0E0h
+	test	ah,05h			; CF cleared
+	jnz	ver_mpm_ret
+	stc
+ver_mpm_ret:
+	ret
+ver_mpm	endp
+
+ver_mpm4	proc	near
+	mov	cx,0Ch
+	int	0E0h
+	test	ah,05h			; CF cleared
+	jnz	ver_mpm4_ret
+	cmp	al,41h			; CF set when below
+ver_mpm4_ret:
+	ret
+ver_mpm4	endp
+
+ver_ge41	proc	near
+ mov	cx,0Ch
+ int	0E0h
+ cmp	al,41h
+ ret
+ver_ge41	endp
+
+;
+; getftime: BDOS fn 102 (66h, F_TIMEDATE) -- get the file date/time stamps
+; and password mode of an open FCB: create/access stamp at FCB+18h, update
+; stamp at FCB+1Ch, password mode at FCB+0Ch. MP/M II and later (version
+; >= 30h).
+;
+; int getftime(char *fcb)  -- 0..3 = ok, 0xFF = failed or not supported
+;
+     public	getftime_
+getftime_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_ge30
+        jb      getftime_no
+        mov 	dx,word ptr 4[bp]
+        mov     cx,66h
+        int     0E0h
+        xor     ah,ah
+        jmp     getftime_end
+getftime_no:
+        mov     ax,0FFh
+getftime_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+getftime_	endp
+
+;
+; setftime: BDOS fn 116 (74h) -- set the file date/time stamps. CP/M-86 v4
+; only (version >= 41h). The stamps are read from the DMA address, so the
+; DMA address is pointed at 'stamps' for the call and the previous DMA
+; address (BDOS fn 52) is restored afterwards. 'stamps' uses the same
+; layout as getftime returns at FCB+18h: create/access stamp (4 bytes:
+; DW days since 1/1/78, DB BCD hour, DB BCD minute) followed by the update
+; stamp (4 bytes, same layout).
+;
+; int setftime(char *fcb, char *stamps)  -- 0..3 = ok, 0xFF = failed or
+;                                           not supported
+;
+     public	setftime_
+setftime_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_ge41
+        jb      setftime_no
+        mov     cx,34h                  ; get DMA address -> ES:BX
+        int     0E0h
+        push    es                      ; -10[bp] old DMA segment
+        push    bx                      ; -12[bp] old DMA offset
+        push    ax                      ; -14[bp] result slot
+        mov     dx,ds
+        mov     cx,33h                  ; DMA segment = DS
+        int     0E0h
+        mov     dx,word ptr 6[bp]
+        mov     cx,1Ah                  ; DMA offset = stamps
+        int     0E0h
+        mov     dx,word ptr 4[bp]
+        mov     cx,74h                  ; set file date & time
+        int     0E0h
+        xor     ah,ah
+        mov     word ptr -14[bp],ax
+        mov     dx,word ptr -10[bp]
+        mov     cx,33h                  ; restore DMA segment
+        int     0E0h
+        mov     dx,word ptr -12[bp]
+        mov     cx,1Ah                  ; restore DMA offset
+        int     0E0h
+        mov     ax,word ptr -14[bp]
+        jmp     setftime_end
+setftime_no:
+        mov     ax,0FFh
+setftime_end:
+        mov     sp,bp
+        sub     sp,8
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+setftime_	endp
+
+;
+; gettime / settime: BDOS fn 105 (69h, T_GET) / fn 104 (68h, T_SET) -- the
+; system date and time, MP/M II and later (version > 22h). The stamp is the
+; same 4-byte layout getftime/setftime use in the FCB and in 'stamps':
+;   DW  day     ; day 1 = 1 January 1978, little endian
+;   DB  hour    ; packed BCD
+;   DB  minute  ; packed BCD
+;   DB  second  ; packed BCD, DOS Plus only: T_GET stores it and T_SET reads it
+; so the buffer must be 5 bytes. Elsewhere the seconds are not in the stamp:
+; T_GET returns them in AL, and T_SET resets them to zero.
+;
+; int gettime(char *stamp)  -- seconds (packed BCD, 0..59h) or -1 if unsupported
+; int settime(char *stamp)  -- 0 or -1 if unsupported
+;
+	    public	gettime_
+gettime_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_gt22
+        jb      time_no
+        mov 	dx,word ptr 4[bp]
+        mov     cx,69h
+        int     0E0h
+        xor     ah,ah
+        jmp     time_end
+time_no:
+        mov     ax,-1
+time_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+gettime_	endp
+
+	    public	settime_
+settime_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_gt22
+        jb      settime_no
+        mov 	dx,word ptr 4[bp]
+        mov     cx,68h
+        int     0E0h
+        xor     ax,ax
+        jmp     settime_end
+settime_no:
+        mov     ax,-1
+settime_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+settime_	endp
+
+;
+; getpcode / setpcode: BDOS fn 108 (6Ch, P_CODE) -- get/put the program
+; return code. getcmode / setcmode: BDOS fn 109 (6Dh, C_MODE) -- get/set the
+; console mode bitmap (CP/M 3: bit 0 fn 11 sees only ^C, 1 no ^S pause,
+; 2 no tab expansion/^P echo, 3 ^C does not abort, 4 like 2, 7 CCP/M ^O,
+; 8-9 GET/SUBMIT fn 11 behaviour; Personal CP/M: bit 4 only).
+; CP/M 3 and above: version >= 30h, not MP/M II (system type bit 0 set).
+; All return the value in HL, or 0FFFFh when the OS does not support the
+; call (not a valid return code). set*(0xFFFF) is a read.
+;
+; unsigned getpcode(void)       unsigned setpcode(unsigned code)
+; unsigned getcmode(void)       unsigned setcmode(unsigned mode)
+;
+	    public	getpcode_
+getpcode_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov     dx,0FFFFh
+        mov     cx,6Ch
+        jmp     cpm3_go
+getpcode_	endp
+
+	    public	setpcode_
+setpcode_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov 	dx,word ptr 4[bp]
+        mov     cx,6Ch
+        jmp     cpm3_go
+setpcode_	endp
+
+	    public	getcmode_
+getcmode_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov     dx,0FFFFh
+        mov     cx,6Dh
+        jmp     cpm3_go
+getcmode_	endp
+
+	    public	setcmode_
+setcmode_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov 	dx,word ptr 4[bp]
+        mov     cx,6Dh
+cpm3_go:
+        push    cx
+        push    dx
+        call    ver_cpm3
+        pop     dx
+        pop     cx
+        jb      cpm3_no
+        int     0E0h
+        mov     ax,bx
+        jmp     cpm3_end
+cpm3_no:
+        mov     ax,0FFFFh
+cpm3_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+setcmode_	endp
+
+;
+; p_cli: BDOS fn 150 (96h, P_CLI) -- send a command line to the CLI
+; (resident system process or program load). MP/M and Concurrent CP/M only:
+; system type bit 0 (MP/M) or bit 2 (multi-user) set. The command is copied
+; (max 127 chars) into a static 130-byte CLI buffer
+;   DB 0 / DS 128 (0-terminated command line) / DB 0
+;
+; int p_cli(char *cmd)  -- 0 = ok, 0xFF = failed or not supported
+;
+     public	p_cli_
+p_cli_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_mpm
+        jb      p_cli_no
+        push    ds
+        pop     es
+        mov     si,word ptr 4[bp]
+        mov     di,offset clibuf
+        mov     byte ptr [di],0		; reserved
+        inc     di
+        mov     cx,127
+p_cli_copy:
+        lodsb
+        or      al,al
+        jz      p_cli_done
+        stosb
+        loop    p_cli_copy
+p_cli_done:
+        mov     byte ptr [di],0
+        mov     byte ptr clibuf+129,0	; reserved
+        mov     dx,offset clibuf
+        mov     cx,96h
+        int     0E0h
+        xor     ah,ah
+        jmp     p_cli_end
+p_cli_no:
+        mov     ax,0FFh
+p_cli_end:
+        pop     bx
+        pop	si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+p_cli_	endp
+
+;
+; p_priority: BDOS fn 145 (91h, P_PRIORITY) -- set the process priority.
+; MP/M, Concurrent CP/M (ver_mpm). 0 is the highest priority, 0FFh the
+; lowest; transient programs start at 200.
+;
+; int p_priority(int priority)  -- 0 = ok, -1 = not supported
+;
+     public	p_priority_
+p_priority_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_mpm
+        jb      prio_no
+        mov 	dx,word ptr 4[bp]
+        mov     cx,91h
+        int     0E0h
+        xor     ax,ax
+        jmp     prio_end
+prio_no:
+        mov     ax,-1
+prio_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+p_priority_	endp
+
+;
+; conattach: BDOS fn 146 (92h, C_ATTACH) -- block until the process's default
+; console is available and attach to it. MP/M, Concurrent CP/M (ver_mpm).
+; Done automatically by any console I/O while detached.
+;
+; int conattach(void)  -- 0 = ok, -1 = not supported
+;
+     public	conattach_
+conattach_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_mpm
+        jb      attach_no
+        xor     dx,dx
+        mov     cx,92h
+        int     0E0h
+        xor     ax,ax
+        jmp     attach_end
+attach_no:
+        mov     ax,-1
+attach_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+conattach_	endp
+
+;
+; condetach: BDOS fn 147 (93h, C_DETACH) -- disconnect the program from the
+; screen and keyboard; it must run in the background. MP/M, Concurrent CP/M
+; and CP/M-86 v4 (ver_mpm4). Under CP/M-86 v4 using the keyboard while
+; detached terminates the program, and only INT 0E0h calls may be used (no
+; INT 2nh DOS-like calls). Under MP/M and CCP/M screen output re-attaches.
+;
+; int condetach(void)  -- 0 = ok, -1 = not supported
+;
+     public	condetach_
+condetach_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        call    ver_mpm4
+        jb      detach_no
+        xor     dx,dx
+        mov     cx,93h
+        int     0E0h
+        xor     ax,ax
+        jmp     detach_end
+detach_no:
+        mov     ax,-1
+detach_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+condetach_	endp
+
+     public	setcurdrv_
 setcurdrv_	proc	near
         push	bp
         mov 	bp,sp

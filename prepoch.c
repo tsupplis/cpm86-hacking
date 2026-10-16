@@ -3,7 +3,7 @@
  * Thin front end over epoch.lib (see epoch.h).
  */
 #include <stdio.h>
-#include "epoch.h"
+#include "util.h"
 
 int main()
 {

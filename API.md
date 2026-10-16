@@ -11,7 +11,7 @@
 3. [Console I/O & Terminal Control (`conio.h`)](#3-console-io--terminal-control-conioh)
 4. [Directory & Disk FCB Handling (`dirent.h`)](#4-directory--disk-fcb-handling-direnth)
 5. [CGA Graphics (`gfx.h`)](#5-cga-graphics-gfxh)
-6. [Date, Time & Epoch (`epoch.h`)](#6-date-time--epoch-epochh)
+6. [Date, Time & Epoch (`util.h`)](#6-date-time--epoch-utilh)
 7. [Submit Files & Process Chaining (`sub.h`)](#7-submit-files--process-chaining-subh)
 8. [Debug Utilities (`debug.h`)](#8-debug-utilities-debugh)
 
@@ -36,6 +36,24 @@ Implemented across [`os.asm`](os.asm:1) and [`dpb.c`](dpb.c:1).
 | `pckey` | `int pckey(void)` | Direct PC keyboard hardware read from port `0x60`, followed by keyboard acknowledge and 8259 PIC EOI (`0x20`). Returns raw scan code. |
 | `xstatline` | `void xstatline(int mode)` | Toggles status line display on DOS Plus and CCP/M via OS system call table. |
 | `dpb_load` | `void dpb_load(int drive, dpb_t *dpb)` | Reads the Disk Parameter Block (DPB) for `drive` (0 = `A:`, etc.) via BDOS fn 31 (`1Fh`) into `dpb_t`. |
+| `getftime` | `int getftime(char *fcb)` | BDOS fn 102 (`66h`, `F_TIMEDATE`): reads the date/time stamps and password mode of an open FCB. Stamps land in the FCB: create/access at `+18h`, update at `+1Ch`; password mode at `+0Ch`. Requires version >= `30h` (MP/M II, CP/M 3, DOS Plus ...). Returns 0-3 on success, `0xFF` on failure or if unsupported (e.g. CP/M-86 1.1). |
+| `setftime` | `int setftime(char *fcb, char *stamps)` | BDOS fn 116 (`74h`): sets the file date/time stamps. CP/M-86 v4 / DOS Plus only (version >= `41h`). `stamps` is 8 bytes (create/access stamp, then update stamp), each `DW` days since 1/1/78, `DB` BCD hour, `DB` BCD minute. The DMA address is pointed at `stamps` for the call and restored afterwards. Returns 0-3 on success, `0xFF` on failure or if unsupported. |
+| `getpcode` | `unsigned int getpcode(void)` | BDOS fn 108 (`6Ch`, `P_CODE`): returns the program return code. CP/M 3 and above (version >= `30h`, not MP/M II). Returns `0xFFFF` if unsupported. |
+| `setpcode` | `unsigned int setpcode(unsigned int code)` | BDOS fn 108 (`6Ch`): sets the program return code and returns it. `0x0000`-`0xFEFF` = no fatal error, `0xFF00`-`0xFF7F` = fatal error (a following `:` command is not run), `0xFFFD` = hardware error, `0xFFFE` = Control-C. `setpcode(0xFFFF)` is a read. Returns `0xFFFF` if unsupported. |
+| `getcmode` | `unsigned int getcmode(void)` | BDOS fn 109 (`6Dh`, `C_MODE`): returns the console mode bitmap. CP/M 3 and above (version >= `30h`, not MP/M II). CP/M 3 bits: 0 fn 11 detects only ^C, 1 ^S does not pause, 2 no tab expansion / no ^P echo, 3 ^C does not terminate, 4 like bit 2, 7 CCP/M ^O not a byte bucket, 8-9 GET/SUBMIT behaviour of fn 11 (0 conditional, 1 always true, 2 always false, 3 input from keyboard). Personal CP/M uses bit 4 only. Returns `0xFFFF` if unsupported. |
+| `setcmode` | `unsigned int setcmode(unsigned int mode)` | BDOS fn 109: sets the console mode bitmap and returns it (`setcmode(0xFFFF)` is a read). Returns `0xFFFF` if unsupported. |
+| `p_cli` | `int p_cli(char *cmd)` | BDOS fn 150 (`96h`, `P_CLI`): sends a command line (max 127 chars) to the CLI, i.e. a resident system process or a program load. MP/M and Concurrent CP/M only (system type bit 0 or 2 set). Returns 0 on success, `0xFF` on failure or if unsupported. |
+| `p_priority` | `int p_priority(int priority)` | BDOS fn 145 (`91h`, `P_PRIORITY`): sets the process priority; `0` is the highest, `0xFF` the lowest, transient programs start at 200. MP/M and Concurrent CP/M only (system type bit 0 or 2 set). Returns 0, or -1 if unsupported. |
+| `conattach` | `int conattach(void)` | BDOS fn 146 (`92h`, `C_ATTACH`): blocks until the process's default console is available, then attaches to it. Done automatically by any console I/O while detached. MP/M and Concurrent CP/M only. Returns 0, or -1 if unsupported. |
+| `condetach` | `int condetach(void)` | BDOS fn 147 (`93h`, `C_DETACH`): disconnects the program from screen and keyboard so that it runs in the background. MP/M, Concurrent CP/M and CP/M-86 v4 (version >= `41h`). Under CP/M-86 v4 using the keyboard while detached terminates the program, and only `INT 0E0h` calls may be used (no `INT 2nh` DOS-like calls); under MP/M and CCP/M screen output re-attaches (fn 146). Returns 0, or -1 if unsupported. |
+
+> Already provided by the Aztec C base library, so not part of `util.lib`: `getusr()` / `setusr(n)` / `rstusr()` (BDOS fn 32, get/set user number), `fcbinit(name, fcb)` (file name to FCB) and `bdos(fn, dx)`. They are documented in [section 4](#aztec-c-base-library-companions-fcbinit-getusr-setusr-rstusr) because the FCB-based functions here (`getftime`, `setftime`, `dirent_*`) work on FCBs built that way. `p_chain` (BDOS fn 47) is documented in [section 7](#7-submit-files--process-chaining-subh).
+>
+> `getftime`, `setftime`, `getpcode`, `setpcode`, `getcmode`, `setcmode`, `gettime`, `settime`, `p_cli`, `p_priority`, `conattach` and `condetach` check the OS via BDOS fn 12 before calling.
+>
+> Time stamp format shared by `getftime`, `setftime`, `gettime` and `settime`: `DW` day count (day 1 = 1 January 1978, little endian), `DB` hour (packed BCD), `DB` minute (packed BCD). `getftime` leaves two stamps in the FCB (`+18h`, `+1Ch`), `setftime` takes the same two back-to-back (8 bytes), `gettime`/`settime` use one stamp plus an optional fifth seconds byte (DOS Plus only; elsewhere `gettime` returns the BCD seconds in its result and `settime` resets them to zero).
+>
+> Note: `getpcode`/`setpcode`/`getcmode`/`setcmode` use a 16-bit result, so `0xFFFF` doubles as the "unsupported" marker (it is never a valid return code).
 
 ### Structures & Macros
 
@@ -163,6 +181,53 @@ typedef struct _dirent_t {
 #define dirent_is_ro(a)  ((a)->entry[9] & 0x80)
 ```
 
+### Aztec C base-library companions (`fcbinit`, `getusr`, `setusr`, `rstusr`)
+
+These four routines are **not** part of `util.lib`: they come from the Aztec C86 runtime (`fcbinit.asm`, `user.asm` in `aztec42/src/cpm86`) and are linked from `-lc86`. `util.lib` deliberately does not reimplement them; every FCB-based function in this library (`dirent_*`, `getftime`, `setftime`, `rm`, ...) expects an FCB built by `fcbinit` and the user area selected with `setusr`. `fcbinit` is declared in Aztec's `<cpm.h>`; `getusr`/`setusr`/`rstusr` have no header declaration and are used with implicit `int` return (as `dirent.c` and `rm.c` do).
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `fcbinit` | `int fcbinit(char *name, void *fcb)` | Parses `[user/][d:]name[.ext]` into the CP/M FCB at `fcb`. Returns the **user number** from the prefix (`0`-`255`), `255` if there is no `user/` prefix (meaning "keep the current user"), or `-1` if the drive letter is invalid (not a letter). |
+| `getusr` | `int getusr(void)` | BDOS fn 32 (`20h`) with `E=0FFh`: returns the current user number. |
+| `setusr` | `int setusr(int user)` | Remembers the current user number in a single static byte, then selects `user` with BDOS fn 32. `setusr(255)` only remembers the current user and does not change it, so it can be called directly with the value returned by `fcbinit`. |
+| `rstusr` | `int rstusr(void)` | Restores the user number saved by the last `setusr`. |
+
+**`fcbinit` details**
+
+- Name syntax: optional `NN/` user prefix (decimal digits followed by `/`), optional `d:` drive (upper or lower case), then `NAME[.EXT]`. Name and extension are upper-cased; a `*` is expanded to `?` for the rest of the field; a name longer than 8 characters or an extension longer than 3 is truncated.
+- FCB bytes written: `+0` drive (`0` = default, `1` = `A:` ... `16` = `P:`), `+1..+8` name and `+9..+11` extension (blank padded), and `+12..+15` (`EX`, `S1`, `S2`, `RC`) cleared to zero. **Bytes `+16` and above are not touched**: clear the whole buffer first (`memset(fcb, 0, 40)`), as `dirent_load` does, before using the FCB with `getftime`/`setftime` (which use `+18h`..`+1Fh`) or random/sequential I/O.
+- Wildcards are not interpreted: an all-blank name stays blank (`dirent_load` replaces it by `????????.???` itself).
+
+**`setusr` / `rstusr` details**
+
+- There is only **one** saved user, so the pair does not nest: a second `setusr` overwrites the value that the first `rstusr` would restore. Always bracket one FCB operation with one `setusr` ... `rstusr`.
+- The user number is not stored in the FCB: it must be selected with `setusr` around every BDOS call that uses that FCB (including `getftime`/`setftime`).
+
+**Typical use together with the functions of this library**
+
+```c
+char fcb[40];
+char stamps[8];
+int user;
+
+memset(fcb, 0, sizeof(fcb));
+user = fcbinit("2/B:REPORT.TXT", fcb);   /* user = 2, drive B: */
+if (user == -1)
+    return -1;                           /* bad drive letter */
+
+setusr(user);                            /* 255 = keep current user */
+if (bdos(15, fcb) != 0xFF) {             /* F_OPEN */
+    if (getftime(fcb) != 0xFF) {         /* stamps now at fcb+18h, fcb+1Ch */
+        memcpy(stamps, fcb + 0x18, 4);   /* create/access */
+        memcpy(stamps + 4, fcb + 0x1C, 4); /* update */
+        /* ... modify stamps ... */
+        setftime(fcb, stamps);           /* CP/M-86 v4 / DOS Plus only */
+    }
+    bdos(16, fcb);                       /* F_CLOSE */
+}
+rstusr();
+```
+
 ---
 
 ## 5. Graphics (`gfx.h`)
@@ -195,17 +260,22 @@ Implemented in [`gfx.asm`](gfx.asm:1). Direct BIOS `INT 10h` primitives for CGA 
 
 ---
 
-## 6. Date, Time & Epoch (`epoch.h`)
+## 6. Date, Time & Epoch (`util.h`)
 
-Implemented in [`epoch.c`](epoch.c:1). Reads system clock from CP/M-86 1.1 sysdata area and converts to/from Unix epoch timestamps (seconds since 1970-01-01 00:00:00 UTC).
+Implemented in [`time.c`](time.c:1). Provides system clock read/write, file timestamp read/write, and Unix epoch conversion. On CP/M-86 1.1 the clock comes from the sysdata area; on OSes with version > `22h` it comes from `gettime()` / `settime()` (BDOS fn 105/104). File timestamps use `getftime()` / `setftime()` (BDOS fn 102/116). `time.o` depends on `os.o` and must precede it in `util.lib` (see the `Makefile`).
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `sys_datetime` | `int sys_datetime(struct sysdt *dt)` | Reads system date and time from CP/M-86 1.1 sysdata area (`BDOS 31h` + offset `20h`). Populates `struct sysdt`. Returns 0 on success, -1 on failure. |
-| `epoch_make` | `long epoch_make(int y, int m, int d, int hh, int mm, int ss)` | Computes Unix epoch timestamp (seconds since 1970-01-01 UTC) for given calendar date/time (`y` = 1970..2099). Returns `EPOCH_ERR` (`-1L`) on invalid date/time. |
-| `epoch_now` | `long epoch_now(void)` | Reads current system time via `sys_datetime` and converts to Unix epoch timestamp. Returns `EPOCH_ERR` (`-1L`) on error. |
+| `getdatetime` | `int getdatetime(struct sysdt *dt)` | Reads system date and time into `*dt`. On CP/M-86 1.1 (version `22h`) reads from sysdata area (`BDOS 31h` + offset `20h`); on version > `22h` uses `gettime()` (BDOS fn 105). Returns 0 on success, -1 on failure (unsupported OS or unset clock). |
+| `setdatetime` | `int setdatetime(struct sysdt *dt)` | Sets system date and time from `*dt`. On CP/M-86 1.1 (version `22h`) writes directly to the sysdata area (same as `tod.a86`); on version > `22h` uses `settime()` (BDOS fn 104). Returns 0 on success, -1 if unsupported. |
+| `getfdatetime` | `int getfdatetime(char *fcb, struct sysdt *dt, int which)` | Reads a file timestamp from an open FCB via `getftime()` (BDOS fn 102). `which=0` reads the create/access stamp (FCB+`18h`); `which=1` reads the update stamp (FCB+`1Ch`). Returns 0 on success, -1 on failure or unsupported. |
+| `setfdatetime` | `int setfdatetime(char *fcb, struct sysdt *create_dt, struct sysdt *update_dt)` | Sets file timestamps on an open FCB via `setftime()` (BDOS fn 116, CP/M-86 v4 only). Either pointer may be `NULL` to leave that stamp unchanged (the current stamp is read back from the FCB first). Returns 0..3 on success, -1 on failure or unsupported. |
+| `epoch` | `long epoch(struct sysdt *dt)` | Converts `*dt` to a Unix epoch timestamp (seconds since 1970-01-01 00:00:00 UTC). Returns `EPOCH_ERR` (`-1L`) if `dt` is `NULL` or the date/time is out of range (year must be 1970..2099). |
+| `epoch_now` | `long epoch_now(void)` | Reads the system clock via `getdatetime()` and returns the Unix epoch timestamp. Returns `EPOCH_ERR` (`-1L`) on error. |
+| `gettime` | `int gettime(char *stamp)` | BDOS fn 105 (`69h`, `T_GET`): reads the system date/time into `stamp` (5 bytes): `DW` days since 1/1/78 (day 1 = 1 January 1978), `DB` BCD hour, `DB` BCD minute, and on DOS Plus `DB` BCD seconds. Returns BCD seconds, or -1 if unsupported (version <= `22h`). Low-level; prefer `getdatetime()`. |
+| `settime` | `int settime(char *stamp)` | BDOS fn 104 (`68h`, `T_SET`): sets the system date/time from a `gettime`-style stamp. Seconds are reset to zero except on DOS Plus. Returns 0, or -1 if unsupported. Low-level; prefer `setdatetime()`. |
 
 ### Structures & Constants
 
@@ -219,7 +289,7 @@ struct sysdt {
     int sec;    /* 0..59 */
 };
 
-#define EPOCH_ERR  (-1L)
+#define EPOCH_ERR  (-1L)   /* returned by now() / epoch() on error */
 ```
 
 ---
