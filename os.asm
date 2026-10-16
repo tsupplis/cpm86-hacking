@@ -475,6 +475,109 @@ detach_end:
         ret
 condetach_	endp
 
+;
+; getpid / getppid / getpriority / getppriority: read the process descriptor
+; (PD) returned by BDOS fn 156 (9Ch, P_PDADR) in ES:BX -- see
+; commands/submit/submit.a86 in ccpm86-y2k. MP/M, Concurrent CP/M (ver_mpm).
+; PD offsets used:  +05h p_prior (priority byte)
+;                   +1Eh p_parent (parent PD offset in the same segment, 0 = none)
+; The process ID is the PD address (offset in the system data segment).
+;
+; unsigned getpid(void)   -- PD address of this process, 0FFFFh if unsupported
+; unsigned getppid(void)  -- PD address of the parent, 0 if none, 0FFFFh if unsupported
+; int getpriority(void)   -- priority 0..255 of this process, -1 if unsupported
+; int getppriority(void)  -- priority 0..255 of the parent, -1 if no parent or
+;                            unsupported
+;
+pd_get	proc	near
+	call	ver_mpm
+	jb	pd_get_ret		; CF set: unsupported
+	mov	cx,9Ch
+	int	0E0h			; ES:BX = process descriptor
+	clc
+pd_get_ret:
+	ret
+pd_get	endp
+
+     public	getpid_
+getpid_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov     dx,0
+        jmp     pd_go
+getpid_	endp
+
+     public	getppid_
+getppid_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov     dx,1
+        jmp     pd_go
+getppid_	endp
+
+     public	getpriority_
+getpriority_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov     dx,2
+        jmp     pd_go
+getpriority_	endp
+
+     public	getppriority_
+getppriority_	proc	near
+        push	bp
+        mov 	bp,sp
+        push    es
+        push	di
+        push	si
+        push    bx
+        mov     dx,3
+pd_go:
+        push    dx
+        call    pd_get
+        pop     dx
+        jb      pd_no
+        cmp     dx,1
+        jb      pd_pid
+        je      pd_ppid
+        cmp     dx,2
+        je      pd_prio
+        mov     bx,word ptr es:1Eh[bx]	; parent PD
+        or      bx,bx
+        jz      pd_no			; no parent
+pd_prio:
+        xor     ax,ax
+        mov     al,byte ptr es:5[bx]	; p_prior
+        jmp     pd_end
+pd_ppid:
+        mov     ax,word ptr es:1Eh[bx]	; p_parent
+        jmp     pd_end
+pd_pid:
+        mov     ax,bx
+        jmp     pd_end
+pd_no:
+        mov     ax,-1
+pd_end:
+        pop     bx
+        pop	    si
+        pop 	di
+        pop 	es
+        pop 	bp
+        ret
+getppriority_	endp
+
      public	setcurdrv_
 setcurdrv_	proc	near
         push	bp

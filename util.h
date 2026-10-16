@@ -63,6 +63,10 @@ int p_cli();
 int p_priority();
 int conattach();
 int condetach();
+unsigned int getpid();
+unsigned int getppid();
+int getpriority();
+int getppriority();
 xstatline();
 int istrcmp();
 char * getenv();
@@ -100,6 +104,10 @@ int p_cli(char *cmd);
 int p_priority(int priority);
 int conattach(void);
 int condetach(void);
+unsigned int getpid(void);
+unsigned int getppid(void);
+int getpriority(void);
+int getppriority(void);
 void xstatline(int mode);
 int istrcmp(char *p1, char *p2, int p);
 char *getenv(const char *name);
@@ -148,6 +156,11 @@ char *malloc();
                                   console is free; 0 ok, -1 unsupported.
     condetach()           fn 147  MP/M, Concurrent CP/M and CP/M-86 v4 (>= 41h); runs in
                                   the background; 0 ok, -1 unsupported.
+    getpid()              fn 156  MP/M, Concurrent CP/M only; PD address of this process
+                                  (offset in the system data segment), 0xFFFF unsupported.
+    getppid()             fn 156  PD address of the parent process, 0 = none, 0xFFFF unsupported.
+    getpriority()         fn 156  priority (0..255) of this process, -1 unsupported.
+    getppriority()        fn 156  priority (0..255) of the parent, -1 = no parent/unsupported.
   p_chain (fn 47) is in sub.h.
 */
 
