@@ -166,12 +166,14 @@ pspdump.o: pspdump.c
 	$(CC) $(DOS_CFLAGS) -o $@ $<
 	$(STRIP) $@
 
-dosenv.com: dosenv.o
-	$(LD) -o $@ $< $(DOS_LDFLAGS)
+dosenv.com: dosenv.exe
+	$(EXE2BIN) dosenv.exe dosenv.com
 
-dosenv.o: dosenv.c
-	$(CC) $(DOS_CFLAGS) $<
-	$(STRIP) $@
+dosenv.exe: dosenv.obj
+	$(LINK) dosenv \;
+
+dosenv.obj: dosenv.asm
+	$(MASM) dosenv \;
 
 ls.c: dirent.h debug.h
 
