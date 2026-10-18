@@ -141,6 +141,24 @@ int sub_abort(void)
     return 0;
 }
 
+/* Restore a previously committed stack after the other user failed.
+   Use an independent FCB: sub_open has replaced the library's rollback state. */
+int sub_restore(int records)
+{
+    char fcb[33];
+    int i;
+    if (records < 0 || records > 128) return -1;
+    fcb[0] = 0;
+    for (i = 1; i < 12; i++) fcb[i] = "$$$     SUB"[i - 1];
+    for (; i < sizeof(fcb); i++) fcb[i] = 0;
+    if (!records) return (bdos(19, fcb) & 0xff) == 0xff ? -1 : 0;
+    if ((bdos(15, fcb) & 0xff) == 0xff) return -1;
+    if ((fcb[15] & 0xff) < records) return -1;
+    fcb[15] = (char)records;
+    fcb[14] = 0;             /* force directory update, as in sub_abort */
+    return (bdos(16, fcb) & 0xff) == 0xff ? -1 : 0;
+}
+
 int sub_delete(void)
 {
     /* BDOS 19: delete -- ignore error if file does not exist */

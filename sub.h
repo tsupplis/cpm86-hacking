@@ -9,6 +9,10 @@ int sub_append(char *cmd);
 int sub_close(void);
 int sub_records(void); /* records in the existing $$$SUB (0 if none); writes nothing */
 int sub_abort(void);   /* undo since sub_open: delete if created, else restore rc */
+/* Restore the current drive/user stack using an independent FCB.
+   records: 0 deletes it, 1..128 truncates it; returns 0 or -1 on error.
+   Does not change sub_open/sub_abort rollback state. */
+int sub_restore(int records);
 int sub_delete(void);  /* BDOS 19: delete $$$SUB if it exists */
 void sub_exit(void);       /* BDOS fn 0: warm boot, CCP picks up $$$SUB automatically */
 void p_chain(char *cmd, int submode); /* BDOS 47: chain; submode!=0 sets MDSUBE so $$$SUB runs after */
