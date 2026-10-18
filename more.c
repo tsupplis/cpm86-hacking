@@ -107,7 +107,7 @@ int main(int argc, char **argv)
         if (flag_pause) {
             if (ctr > 22) {
                 int wt = 1;
-                printf("[More]");
+                printf("[more]");
                 while (wt) {
                     d = getch();
                     switch (d) {

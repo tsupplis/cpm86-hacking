@@ -225,7 +225,7 @@ int main(int argc, char **argv)
             if (flag_pause) {
                 int d = 0;
                 int wt = 1;
-                printf("[More]");
+                printf("[more]");
                 while (wt) {
                     d = getch();
                     switch (d) {
