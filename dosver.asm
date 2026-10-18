@@ -128,7 +128,7 @@ cdos_version:
 dr_version:
             db 0Ah,0Dh,"DR BDOS $"
 olddos:
-            db "1.x0$"
+            db "1.X?$"
             db "000000"
 digitend:   
             db "$"
