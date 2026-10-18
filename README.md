@@ -37,8 +37,8 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `pause` | Wait for a keystroke | CP/M-86 submit tool. |
 | `wait` | Wait for n seconds | CP/M-86 submit tool. |
 | `tod` | Replacement date/time utility | Removes the 78-99 year constraint and validates dates, including leap years. CP/M-86 1.1 for PC/XT only. |
-| `ver` | Display BDOS version | `dosver.com` is the DOS counterpart for PC-MODE systems. |
-| `mem` | Display available and system memory | `dosmem.com` and `dosmem11.com` are the DOS counterparts. |
+| `ver` | Display BDOS and operating-system version | Identifies the CP/M-86 family; `dosver.com` is the DOS-family PC-MODE counterpart, including DR DOS and Concurrent DOS probes. |
+| `mem` | Display available and system memory | DOS PC-MODE counterparts: `dosmem.com` uses the DOS 2+ resize-allocation probe when available, with a PSP fallback for DOS 1. Both show the BIOS conventional-memory total. |
 | `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. Supported on CP/M-86 1.1 PC/XT, DOS Plus, and CCP/M-86 or Concurrent DOS with BDOS > 3.1. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
 | `ballc` | CGA bouncing-ball demo | C implementation of the same demo. |
 | `sine` | EGA sine wave demo | C implementation of high-resolution EGA $640 \times 350$ graphics demo plotting $f(x)=\sin(x)$ over $[-2\pi, +2\pi]$ with labeled coordinate axes and text. |

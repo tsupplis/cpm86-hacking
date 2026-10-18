@@ -1,6 +1,17 @@
 ;
 ; Licensed under the MIT license. See LICENSE file in the project root for details.
 ;
+;*-------------------------------------------------------------------------
+;  MEM.A86 - Native CP/M-86 memory viewer
+;
+;  Uses the CP/M-86 BDOS memory-control query (INT E0h, function 35h) to
+;  obtain the current program allocation.  It separately reports installed
+;  PC memory through the CP/M-family appropriate path: the BIOS data area on
+;  CCP/M 3.x, otherwise INT 12h (capped at 640 KiB).
+;
+;  This is intentionally distinct from DOSMEM, whose PSP:0002h and
+;  INT 21h conventions apply only to DOS PC-MODE programs.
+;-------------------------------------------------------------------------
 
             title   'Memory'
 

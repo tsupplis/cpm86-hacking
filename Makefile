@@ -22,7 +22,7 @@ CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd getch.cmd \
     printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd
-DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com dosmem11.com \
+DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com \
     dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
 PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
@@ -212,14 +212,6 @@ dosmem.exe: dosmem.obj
 dosmem.obj: dosmem.asm
 	$(MASM) dosmem \;
 
-dosmem11.com: dosmem11.exe
-	$(EXE2BIN) dosmem11.exe dosmem11.com
-
-dosmem11.exe: dosmem11.obj
-	$(LINK) dosmem11 \;
-
-dosmem11.obj: dosmem11.asm
-	$(MASM) dosmem11 \;
 
 dosver.com: dosver.exe
 	$(EXE2BIN) dosver.exe dosver.com
@@ -253,7 +245,7 @@ clean:
 dostest.img: binaries Makefile 
 	(cd pce;make binaries)
 	cp dosbase.img dostest.img
-	-for i in $(DOSTOOLS);do \
+	-for i in $(DOSTOOLS) $(CPM86TOOLS);do \
 	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
     done
 	mdir -w -i dostest.img ::*.*

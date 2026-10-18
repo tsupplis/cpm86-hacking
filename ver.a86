@@ -1,6 +1,16 @@
 ;
 ; Licensed under the MIT license. See LICENSE file in the project root for details.
 ;
+;*-------------------------------------------------------------------------
+;  VER.A86 - Native CP/M-86 family version reporter
+;
+;  Queries BDOS function 12h (INT E0h) to identify CP/M-86, MP/M-86,
+;  Concurrent CP/M-86, Concurrent DOS, Multiuser DOS, or DOS Plus.  Where a
+;  family exposes a separate operating-system version, function A3h supplies
+;  it; the base BDOS version is always displayed.
+;
+;  DOSVER.ASM is the separate PC-MODE INT 21h counterpart.
+;-------------------------------------------------------------------------
 
             title   'CP/M Version'
 

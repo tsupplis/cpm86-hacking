@@ -1,3 +1,12 @@
+;*-------------------------------------------------------------------------
+;  DOSVER.ASM - DOS-family version reporter for CP/M-86 PC-MODE systems
+;
+;  Reports the normal PC/MS-DOS version when INT 21h/AH=30h returns a valid,
+;  non-zero major version.
+;  It also uses the historical 44h multiplex probes to identify DR DOS and
+;  Concurrent DOS.  DOS 1.x has no standard AH=30h service, so that path is
+;  reported as the deliberately generic "1.x0" fallback.
+;-------------------------------------------------------------------------
 program  segment
          assume cs:program, ds:program
             org    100h
@@ -6,8 +15,9 @@ _start:
             call    print_string
             mov     ah, 30h
             int     21h
-            cmp     al, 1
-            jge     .chk_drdos
+            or      al, al
+            jnz     .chk_drdos
+.old_dos:
             mov     ah, 9
             lea     dx, olddos
             int     21h
