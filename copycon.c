@@ -54,7 +54,7 @@ int main(int argc, char **argv)
     int arg_offset=1;
     FILE * fp=stdout;
     int eof=0;
-    char * buffer=malloc(BUFLEN+1);
+    char * buffer;
 
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
@@ -80,9 +80,15 @@ int main(int argc, char **argv)
             return 1;
         }
     }
+    buffer=malloc(BUFLEN+1);
+    if(!buffer) {
+        fprintf(stderr,"ERR: Not enough memory\n");
+        return 1;
+    }
     fp=fopen(argv[arg_offset],flag_access);
     if(!fp) {
         fprintf(stderr,"ERR: Cannot open '%s'",argv[arg_offset]);
+        free(buffer);
         return 1;
     }
     fprintf(stderr,"INF: Opening file '%s' in %s mode ...\n",argv[arg_offset],
@@ -114,6 +120,9 @@ int main(int argc, char **argv)
                 printf("%s","\r\n");
                 buffer[offset]=0;
                 fprintf(fp,"%s\n",buffer);
+                if(ferror(fp)) {
+                    goto write_error;
+                }
                 offset=0;
                 continue;
             default:
@@ -133,12 +142,28 @@ int main(int argc, char **argv)
     if(offset>0) {
         buffer[offset]=0;
         fprintf(fp,"%s",buffer);
-        fflush(fp);
+        if(ferror(fp)) {
+            goto write_error;
+        }
     }
     fputc(26,fp);
+    if(ferror(fp) || fflush(fp)==EOF) {
+        goto write_error;
+    }
+    if(fclose(fp)) {
+        fp=0;
+        goto write_error;
+    }
+    free(buffer);
     fprintf(stderr,"INF: --END--\n");
-    fprintf(stderr,"INF: Closing file '%s' ...",argv[arg_offset]);
-    fflush(fp);
-    fclose(fp);
+    fprintf(stderr,"INF: Closed file '%s'\n",argv[arg_offset]);
     return 0;
+
+write_error:
+    fprintf(stderr,"ERR: Failed to write or close '%s'\n",argv[arg_offset]);
+    if(fp) {
+        fclose(fp);
+    }
+    free(buffer);
+    return 1;
 }

@@ -143,24 +143,10 @@ int main(int argc, char **argv)
             cursor=cursor->next;
             continue;
         }
-        if(dirent_is_ro(cursor)) {
-            if(force) {
-                char ro_fcb[40];
-                int ou;
-                int u;
-                memset(ro_fcb,0,sizeof(ro_fcb));
-                ou=getusr();
-                u=dirent_fcb(ro_fcb,cursor);
-                fcb_clear_ro(ro_fcb);
-                setusr(u);
-                debug_dump_hex(stderr, (unsigned char*)(ro_fcb), 33, 0L, 0);
-                bdos(30,ro_fcb);
-                setusr(ou);;
-            } else {
-                cursor=cursor->next;
-                continue;
-            }
-        } 
+        if(dirent_is_ro(cursor) && !force) {
+            cursor=cursor->next;
+            continue;
+        }
         {
             int delete=1;
             fprintf(conout,"INF: Deleting %s ",path);
@@ -192,6 +178,19 @@ int main(int argc, char **argv)
             } else {
             }
             if(delete) {
+                if(dirent_is_ro(cursor)) {
+                    char ro_fcb[40];
+                    int ou;
+                    int u;
+                    memset(ro_fcb,0,sizeof(ro_fcb));
+                    ou=getusr();
+                    u=dirent_fcb(ro_fcb,cursor);
+                    fcb_clear_ro(ro_fcb);
+                    setusr(u);
+                    debug_dump_hex(stderr, (unsigned char*)(ro_fcb), 33, 0L, 0);
+                    bdos(30,ro_fcb);
+                    setusr(ou);;
+                }
                 if(unlink(path)) {
                     fprintf(conout,"Failed\n",path);
                 } else {

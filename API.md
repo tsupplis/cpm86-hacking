@@ -340,6 +340,7 @@ Implemented across [`sub.c`](sub.c:1), [`subfile.c`](subfile.c:1), and [`os.asm`
 #define SUBERR_LONG    -2
 #define SUBERR_LINES   -3
 #define SUBERR_CTRL    -4
+#define SUBERR_READ    -5
 
 #define SUB_RD_EOF     -1
 #define SUB_RD_LONG    -2

@@ -697,13 +697,23 @@ delay_	proc	near
         int     0E0h
         sub     al,22H
         jz      delay_bios
-        mov     bl, 3
-        mov     al, byte ptr 4[bp]
-        mul     bl
+        mov     si,word ptr 4[bp]
+delay_more:
+        mov     ax,si
+        cmp     ax,21845                 ; 3 * chunk must fit in DX
+        jbe     delay_chunk
+        mov     ax,21845
+delay_chunk:
+        sub     si,ax
+        mov     bx,3
+        mul     bx
         mov     dx,ax
-        ;mov     dx, word ptr 4[bp]
         mov     cx,8Dh
+        push    si                       ; BDOS may clobber SI
         int     0E0h
+        pop     si
+        or      si,si
+        jnz     delay_more
         jmp     delay_end
 delay_bios:
         mov     ah, 00h
@@ -868,15 +878,17 @@ xstatline_	proc	near
         jz      xst_dosplus
         cmp     ax, 1432h
         jb      xst_exit
+        push    es
+        pop     ds                       ; SYSDAT before reading system pointers
         mov     si, word ptr [68h] ;[4Eh] for Dos Plus
         jmp     xst_call
 xst_dosplus:
+        push    es
+        pop     ds                       ; SYSDAT
         mov     si, word ptr [4Eh] 
 xst_call:
         mov     dx,0
-        push    es
-        mov     es, 10h[si] 
-        pop     ds
+        mov     es, 10h[si]              ; UDA segment from system PD
         mov     ax,20H 
         call    dword ptr[28h]
 xst_exit:

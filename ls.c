@@ -146,8 +146,8 @@ int main(int argc, char **argv)
     }
     rc=dirent_load(pat,&root,&user,&drive,sort_order,1);
     if(rc) {
-        if(rc=255) {
-            if(!flag_mode!=2) {
+        if(rc==255) {
+            if(flag_mode!=2) {
                 fprintf(stdout,"Drive %d%c:\n",user, 'A'+drive);
                 fprintf(stdout,"%d File(s) %luK",count,all_size);
             }

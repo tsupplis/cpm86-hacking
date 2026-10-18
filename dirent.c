@@ -47,7 +47,7 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     while(cursor) {
         if(!memcmp(f+1,(cursor->entry)+1,11)) {
             if(root->is_fat) {
-                unsigned int * s=(unsigned int *)(f+28);
+                unsigned long * s=(unsigned long *)(f+28);
                 cursor->blocks=((unsigned long)(*s)+cursor->block_size-1)/
                         cursor->block_size;
 #ifdef DEBUG
@@ -61,18 +61,16 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
                 char *blocks;
                 blocks=(char*)(f+16);
                 for(j=0;j<16;j++) {
-                    if(!blocks[j]) 
-                        break;
-                    cursor->blocks++;
+                    if(blocks[j])
+                        cursor->blocks++;
                 }
             } else {
                 int j;
                 int *blocks;
                 blocks=(int*)(f+16);
                 for(j=0;j<8;j++) {
-                    if(!blocks[j]) 
-                        break;
-                    cursor->blocks++;
+                    if(blocks[j])
+                        cursor->blocks++;
                 }
             }
             cursor->fcbs++;
@@ -92,7 +90,7 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     cursor->drive_blocks=root->drive_blocks;
     cursor->is_fat=root->is_fat;
     if(root->is_fat) {
-        unsigned int * s=(unsigned int *)(f+28);
+        unsigned long * s=(unsigned long *)(f+28);
         cursor->blocks=((unsigned long)(*s)+cursor->block_size-1)/
                 cursor->block_size;
 #ifdef DEBUG
@@ -106,18 +104,16 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
         char *blocks;
         blocks=(char*)(f+16);
         for(j=0;j<16;j++) {
-            if(!blocks[j]) 
-                break;
-            cursor->blocks++;
+            if(blocks[j])
+                cursor->blocks++;
         }
     } else {
         int j;
         int *blocks;
         blocks=(int*)(f+16);
         for(j=0;j<8;j++) {
-            if(!blocks[j]) 
-                break;
-            cursor->blocks++;
+            if(blocks[j])
+                cursor->blocks++;
         }
     }
     cursor->fcbs=1;
@@ -171,7 +167,7 @@ int dirent_first(char * fcb, dirent_t ** root)
 #endif
     }
     if(root[0]->is_fat) {
-        unsigned int * s=(unsigned int *)(f+28);
+        unsigned long * s=(unsigned long *)(f+28);
         root[0]->blocks=((unsigned long)(*s)+root[0]->block_size-1)/root[0]->block_size;
 #ifdef DEBUG
         fprintf(stderr,"---------->fat blocks %ld\n",*s);               
@@ -185,18 +181,16 @@ int dirent_first(char * fcb, dirent_t ** root)
         char *blocks;
         blocks=(char*)(f+16);
         for(j=0;j<16;j++) {
-            if(!blocks[j]) 
-                break;
-            root[0]->blocks++;
+            if(blocks[j])
+                root[0]->blocks++;
         }
     } else {
         int j;
         int *blocks;
         blocks=(int*)(f+16);
         for(j=0;j<8;j++) {
-            if(!blocks[j]) 
-                break;
-            root[0]->blocks++;
+            if(blocks[j])
+                root[0]->blocks++;
         }
     }
     root[0]->fcbs=1;
@@ -214,22 +208,23 @@ dirent_t* dirent_merge_sorted(lst1,lst2,sort_order)
 dirent_t* dirent_merge_sorted(dirent_t* lst1, dirent_t* lst2, int sort_order) 
 #endif
 { 
-	dirent_t* result = 0; 
+    dirent_t* result = 0;
+    dirent_t** tail = &result;
+    dirent_t* next;
 
-	if (!lst1) 
-		return lst2; 
-	else if (!lst2) 
-		return lst1; 
-
-	if(memcmp(lst1->entry+1,lst2->entry+1,11)*sort_order<0) { 
-		result = lst1; 
-		result->next = dirent_merge_sorted(lst1->next, lst2, sort_order); 
-	} 
-	else { 
-		result = lst2; 
-		result->next = dirent_merge_sorted(lst1, lst2->next, sort_order); 
-	} 
-	return result; 
+    while(lst1 && lst2) {
+        if(memcmp(lst1->entry+1,lst2->entry+1,11)*sort_order<0) {
+            next=lst1;
+            lst1=lst1->next;
+        } else {
+            next=lst2;
+            lst2=lst2->next;
+        }
+        *tail=next;
+        tail=&next->next;
+    }
+    *tail=lst1?lst1:lst2;
+    return result;
 } 
 
 #ifndef __STDC__
@@ -355,6 +350,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     dirent_t * last=0;
     unsigned long count=0;
 
+    *root=0;
     memset(fcb,0,sizeof(fcb));
     user=fcbinit(path,fcb);
     if(user==255) {
@@ -394,6 +390,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     bdos(26,(char*)0x80);
     rc=dirent_first(fcb,root);
     if(rc) {
+        rstusr();
         return rc;
     }
     last=*root;
@@ -408,6 +405,11 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     fprintf(stderr,"dirent_load->done\n",rc);
 #endif
     rstusr();
+    if(rc) {
+        dirent_free(*root);
+        *root=0;
+        return rc;
+    }
     if(sort_order) 
         dirent_sort(root,sort_order);
     return rc;

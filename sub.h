@@ -27,6 +27,7 @@ int  sub_active(void);     /* CCP submit mode: 1 = on, 0 = off, -1 = unknown CCP
 #define SUBERR_LONG    -2    /* expanded line too long  */
 #define SUBERR_LINES   -3    /* too many lines          */
 #define SUBERR_CTRL    -4    /* bad ^x                  */
+#define SUBERR_READ    -5    /* error reading the file  */
 
 int   sub_load(char *cmd);   /* "[d:]file[.typ] [p1 ...]": lines (>0) or SUBERR_* */
 char *sub_line(int i);       /* expanded line i, 0 = first line of the file       */

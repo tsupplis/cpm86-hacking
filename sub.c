@@ -62,14 +62,17 @@ int sub_open(int flags)
 
 int sub_records(void)
 {
-    int n;
+    char probe[33];
+    int i;
 
-    fcb_reset();
-    if ((bdos(15, _fcb) & 0xFF) == 0xFF)
+    /* Use a separate FCB so an open submit stack is left intact. */
+    for (i = 0; i < 12; i++)
+        probe[i] = _fcb[i];
+    for (; i < 33; i++)
+        probe[i] = 0;
+    if ((bdos(15, probe) & 0xFF) == 0xFF)
         return 0;
-    n = _fcb[15] & 0xFF;    /* record count of extent 0 */
-    fcb_reset();
-    return n;
+    return probe[15] & 0xFF;    /* record count of extent 0 */
 }
 
 int sub_append(char *cmd)

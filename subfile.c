@@ -172,6 +172,7 @@ int sub_load(cmd)
             if (out[i] >= 'a' && out[i] <= 'z') out[i] = out[i] - 'a' + 'A';
         nlines++;
     }
+    if (ferror(fp) && err == 0) err = SUBERR_READ;
     fclose(fp);
 
     if (err != 0) return err;
@@ -213,6 +214,7 @@ char *sub_errmsg(n)
     case SUBERR_LONG:  return "Line over 125 chars in ";
     case SUBERR_LINES: return "Too many lines in ";
     case SUBERR_CTRL:  return "Bad ^ control char in ";
+    case SUBERR_READ:  return "Read error in ";
     }
     return "No commands in ";
 }
