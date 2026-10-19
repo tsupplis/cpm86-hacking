@@ -111,14 +111,14 @@ dump.cmd: dump.o
 ballc.cmd: ballc.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
 
-ballc.o: ballc.c
+ballc.o: ballc.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
 	$(STRIP) $@
 
 sine.cmd: sine.o util.lib
 	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
 
-sine.o: sine.c
+sine.o: sine.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
 	$(STRIP) $@
 	
@@ -140,12 +140,16 @@ mode.cmd: mode.o util.lib
 more.cmd: more.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
 
-util.lib: util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o sub.o subfile.o
+util.lib: util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.o subfile.o
 	rm -f $@
 	$(AR) $@ $^
 
-gfx.o: gfx.asm
-	$(AS) $<
+gfx.o: gfx.c gfx.h util.h conio.h
+	$(CC) $(CPM86_CFLAGS) -o $@ $<
+	$(STRIP) $@
+
+gfxbios.o: gfx.asm
+	$(AS) -o $@ $<
 	$(STRIP) $@
 
 os.o: os.asm

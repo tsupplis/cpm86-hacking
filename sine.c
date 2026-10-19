@@ -148,19 +148,16 @@ int main(argc, argv)
 int main(int argc, char **argv)
 #endif
 {
-    if ((osver() == 0x31 || osver() == 0x30) && (ostype() & OSTYPE_MULTIUSER)) {
-        fprintf(stderr, "INF: No support for direct BIOS access on CCP/M 3.x\n");
-        exit(-1);
-    }
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
-    statline(STATLINE_OFF);
-    gfx_mode(MODE_EGA_640X350);
+    if (gfx_mode(MODE_EGA_640X350) < 0) {
+        fprintf(stderr, "Graphics mode unsupported on this system.\n");
+        return 1;
+    }
 
     sine_demo();
 
     gfx_mode(MODE_TEXT);
-    statline(STATLINE_ON);
     clrscr();
     return 0;
 }

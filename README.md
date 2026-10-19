@@ -40,10 +40,28 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `ver` | Display BDOS and operating-system version | Identifies the CP/M-86 family; `dosver.com` is the DOS-family PC-MODE counterpart, including DR DOS and Concurrent DOS probes. |
 | `mem` | Display available and system memory | DOS PC-MODE counterparts: `dosmem.com` uses the DOS 2+ resize-allocation probe when available, with a PSP fallback for DOS 1. Both show the BIOS conventional-memory total. |
 | `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. Supported on CP/M-86 1.1 PC/XT, DOS Plus, and CCP/M-86 or Concurrent DOS with BDOS > 3.1. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
-| `ballc` | CGA bouncing-ball demo | C implementation of the same demo. |
-| `sine` | EGA sine wave demo | C implementation of high-resolution EGA $640 \times 350$ graphics demo plotting $f(x)=\sin(x)$ over $[-2\pi, +2\pi]$ with labeled coordinate axes and text. |
+| `ballc` | CGA bouncing-ball demo | Runtime graphics backend: BIOS on BDOS `22h`; kernel CGA on Concurrent BDOS `>=31h` and non-Concurrent `41h` (DOS Plus). |
+| `sine` | EGA sine wave demo | 640×350 sine plot with axes and labels. Currently uses the BDOS `22h` BIOS backend; kernel EGA modes are not yet implemented. |
 | `getch` | Keyboard scanner | `dosgetch.com` is the DOS counterpart. |
 | `zpdump` | Dump the zero page | `pspdump.com` is the DOS counterpart and supports `-c` to call DOS `int 21h` function `26h` before dumping the new PSP. |
+
+The C graphics library keeps the `gfx_mode`, `gfx_palette`, `gfx_pixel`, and
+`gfx_text` interface. `gfx_mode` returns `0` when a request is issued or `-1`
+for an unsupported OS or mode. The kernel backend uses `ESC a` for text mode 3
+and CGA modes 4/6, clears CGA memory, and draws directly at `B800:0000`.
+CGA starts with bright graphics colours. The library supports pixel XOR
+(colour bit 7), palette selection, and ASCII text using
+the IBM PC ROM 8×8 font. The BIOS backend retains EGA support. The kernel backend requires an actual
+CGA controller: use `./ccpm86 cga` in PCE. Its CGA register programming does
+not select or restore modes correctly on an EGA/VGA adapter, even when the
+requested resolution is a CGA mode.
+
+Kernel escape requests have no acknowledgement. Kernel-mode CGA graphics are
+confirmed by user testing on Concurrent DOS 3.2, 4.1 and 6.2; DOS Plus still
+needs testing. Graphics memory is shared by the consoles:
+run one graphics application at a time and exit it before switching consoles.
+A normal key exits `ballc` and restores text mode. `ball.cmd` is the separate,
+unchanged assembly demo; it does not use the C graphics library.
 
 ### Clock and Emulator Tools
 

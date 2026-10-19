@@ -16,13 +16,16 @@
 #define MODE_EGA_640X350_MONO   15      /* 0x0F: 640x350, monochrome */
 #define MODE_EGA_640X350        16      /* 0x10: 640x350, 16 colors */
 
+/* gfx_mode returns 0 when issued, -1 for an unsupported OS or mode.
+ * Kernel backend: actual CGA hardware, modes 3, 4, 6; IBM PC ROM ASCII font.
+ */
 #ifndef __STDC__
-gfx_mode();
-gfx_palette();
-gfx_pixel();
-gfx_text();
+int gfx_mode();
+void gfx_palette();
+void gfx_pixel();
+void gfx_text();
 #else
-void gfx_mode(int mode);
+int gfx_mode(int mode);
 void gfx_palette(int palette);
 void gfx_pixel(int x, int y, int palette);
 void gfx_text(int col, int row, char *str, int color);

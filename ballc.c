@@ -69,7 +69,7 @@ void draw_map(int x, int y, int *map, int width, int height)
     int y_offset=0;
     int length=width*height;
     do {
-        gfx_pixel(x + x_offset, y + y_offset, ball[seq/4][offset]);
+        gfx_pixel(x + x_offset, y + y_offset, map[offset]);
         offset++;
         x_offset++;
         x_offset=x_offset%width;
@@ -138,7 +138,7 @@ void ball_demo()
             yinc = -1;
         else if (y <= BOX_Y+BOX_THICKNESS)
             yinc = 1;
-        draw_map(x, y, ball, BALL_WIDTH, BALL_HEIGHT);
+        draw_map(x, y, ball[seq/4], BALL_WIDTH, BALL_HEIGHT);
         seq++;
         if(seq>12) seq=0;
         delay(1);
@@ -159,18 +159,15 @@ int main(int argc, char **argv)
     int xinc = 1;
     int yinc = 1;
 
-    if((osver()==0x31 || osver()==0x30) && (ostype()&OSTYPE_MULTIUSER)) {
-        fprintf(stderr,"INF: No support for direct BIOS access on CCP/M 3.x\n");
-        exit(-1);
-    } 
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
-    statline(STATLINE_OFF);
-    gfx_mode(MODE_CGA_320X200);
+    if (gfx_mode(MODE_CGA_320X200) < 0) {
+        fprintf(stderr, "Graphics mode unsupported on this system.\n");
+        return 1;
+    }
     gfx_palette(CGA_PALETTE_GRY);
     ball_demo();
     gfx_mode(MODE_TEXT);
-    statline(STATLINE_ON);
     clrscr();
     return 0;
 }
