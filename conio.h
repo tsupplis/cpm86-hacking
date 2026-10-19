@@ -23,6 +23,8 @@
 #define SCRMODE_MONO    4
 #define SCRMODE_COLOR   8
 
+/* crtreset also clears/homes the active text mode on DOS Plus to reset
+ * XIOS scrolling state through the installed BIOS interrupt hook. */
 #ifndef __STDC__
 int kbhit();
 int getch();

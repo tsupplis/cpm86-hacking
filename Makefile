@@ -144,6 +144,8 @@ util.lib: util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.
 	rm -f $@
 	$(AR) $@ $^
 
+conio.o: conio.c conio.h util.h
+
 gfx.o: gfx.c gfx.h util.h conio.h
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
 	$(STRIP) $@

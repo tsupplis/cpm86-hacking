@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <conio.h>
+#include <util.h>
+
+/* Internal assembly helper: use the installed DOS Plus INT 10h hook. */
+int dosplus_crtreset();
 
 #ifdef __STDC__
 #include <stdlib.h>
@@ -75,10 +79,14 @@ crtreset()
 void crtreset()
 #endif
 {
-    if(osver()>0x22) {
-        cputs("\x1be\x1bz");
+    int version = osver();
+
+    if(version == 0x41 && !(ostype() & OSTYPE_MULTIUSER))
+        dosplus_crtreset();
+    if(version>0x22) {
+        cputs("\033e\033z");
     } else {
-        cputs("\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu");
+        cputs("\033m\0330\0331\033q\033t\033u");
     }
 }
 

@@ -112,7 +112,7 @@ an abnormal exit is not guaranteed.
 | Bounds | 320x200 or 640x200; out-of-range pixels ignored |
 | XOR | Color bit 7 requests XOR |
 | Initial palette | Bright CGA colors |
-| Palette interface | BIOS-style packed `BX`: high byte 0 for background/intensity, 1 for palette selection |
+| Palette interface | BIOS-style packed `BX`: high byte 0 for background/intensity (foreground in mode 6), 1 for palette selection |
 | Text | Software 8x8 IBM PC ROM font; ASCII 0..127, other bytes become `?` |
 | Status line | Hidden for graphics; restored on return to text |
 | Mode result | `0` means request issued; escape output provides no success acknowledgement |
@@ -130,7 +130,7 @@ with arbitrary application BIOS calls.
 | Legacy CGA path | Existing direct-register path retained; CGA regression checked separately |
 | Concurrent DOS 3.2 and 4.1 | User reported working XIOS graphics before this extension |
 | Concurrent DOS 6.2 | Earlier user tests passed; current policy selects the BIOS backend |
-| DOS Plus | Routing implemented; guest/hardware testing still needed |
+| DOS Plus | crtreset tested in PCE VGA across three consecutive runs after scrolling and BIOS output; full XIOS graphics coverage still pending |
 | Physical EGA/VGA and other video ROMs | Not yet validated |
 | Native EGA on XIOS | Not implemented |
 
@@ -138,3 +138,26 @@ PCE's EGA cursor renderer currently displays the requested two-scan-line
 cursor as one line because of its end-scan-line handling. That is separate
 from graphics mode entry/restoration; the kernel retains the requested
 hardware cursor shape.
+
+
+## DOS Plus cursor reset after direct BIOS output
+
+DOS Plus has a hooked video BIOS and maintains a separate hardware scrolling
+origin. A clear/home escape alone does not reset all of that state.
+After restoring text mode, call the conio function `crtreset()` to re-enter
+the current text mode through the installed `INT 10h` vector. This lets the
+DOS Plus hook reset its console state as the BIOS resets the display.
+
+This behavior is restricted to non-Concurrent BDOS `41h`. It clears the
+text screen, selects the mode's default page and homes the cursor; it does
+not preserve screen contents, custom fonts or custom row counts. Modes
+0..3 and 7 retain their mode number. In graphics modes the extra mode reset
+is skipped. Other systems keep the existing attribute/cursor reset behavior.
+The graphics library does not invoke this destructive reset automatically.
+
+
+DOS Plus validation: a PCE VGA guest ran a probe three times consecutively.
+Each run scrolled 32 lines, wrote through the BIOS, called crtreset and
+printed a marker through BDOS. The marker stayed on row 0 and the CRTC
+display origin stayed zero after every run. Host routing checks also confirm
+that Concurrent 4.1 and other BDOS versions do not enter the new BIOS reset.

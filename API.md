@@ -126,7 +126,7 @@ Implemented in [`conio.c`](conio.c:1). Supports standard CP/M-86 console I/O, VT
 | `textcolor` | `void textcolor(int fg)` | Sets text foreground color via `ESC j ESC b <fg> ESC k`. |
 | `setstatus` | `void setstatus(char *s)` | Sets status line text in CP/M-86 1.1 sysdata area (offset `0x32`, up to 14 chars). Supports escape tokens `\u` (uppercase), `\l` (lowercase), `\s` (space), `\\` (backslash). |
 | `scrmode` | `void scrmode(int m)` | Sets display mode (`SCRMODE_DEFAULT`, `SCRMODE_COL80`, `SCRMODE_COL40`, `SCRMODE_MONO`, `SCRMODE_COLOR`). |
-| `crtreset` | `void crtreset(void)` | Resets terminal attributes and modes to default settings. |
+| `crtreset` | `void crtreset(void)` | Resets terminal attributes and modes to default settings. On DOS Plus (non-Concurrent BDOS 41h), first re-enters the active BIOS text mode through the installed INT 10h hook, clearing the screen and homing the cursor to reset XIOS scrolling state. Graphics modes are not re-entered. |
 
 ### Constants
 

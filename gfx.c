@@ -34,6 +34,7 @@ static int select_backend()
 /* Preserve direct CGA palette writes for existing kernels. The function-30
  * escape back door is accepted by the enhanced XIOS; older XIOS versions
  * consume the complete packet and reject the call without printing it.
+ * Send the extension only to 3.1; keep later XIOS implementations unchanged.
  */
 static void kernel_palette(value)
     int value;
