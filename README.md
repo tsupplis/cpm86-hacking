@@ -52,8 +52,8 @@ for the OS routing, required adapters, supported modes and test coverage.
 | Backend | Systems | Hardware limits |
 | --- | --- | --- |
 | BIOS | BDOS `22h`; BDOS `>=60h`, including Concurrent | BIOS sets modes; CGA modes can run on compatible EGA/VGA adapters. Native EGA modes need suitable hardware and BIOS support. |
-| XIOS | Concurrent BDOS `31h..5Fh`; non-Concurrent `41h` (DOS Plus) | Modes 3/4/6 only. Stock CGA register programming requires a real or emulated CGA adapter; selecting VGA in the emulator does not supply this compatibility. |
-| Patched XIOS | [ccpm86-kernel](https://github.com/tsupplis/ccpm86-kernel), EGA/VGA patch | Exception: CGA modes 4/6 also run on EGA/VGA through kernel-controlled BIOS calls, with text restoration and palette handling. Native EGA modes remain unsupported through XIOS. |
+| XIOS | Concurrent BDOS `31h..5Fh`; non-Concurrent `41h` (DOS Plus) | Stock path: modes 3/4/6 only. Stock CGA register programming requires a real or emulated CGA adapter; selecting VGA in the emulator does not supply this compatibility. |
+| Patched XIOS | [ccpm86-kernel](https://github.com/tsupplis/ccpm86-kernel), EGA/VGA patch | Exception: CGA modes 4/6 run on EGA/VGA; native mode 10h (640x350, 16 colours) runs on EGA with at least 128 KB or VGA. The library checks kernel capability first. |
 
 Graphics memory is shared: exit the graphics application before switching
 consoles. A normal key exits `ballc` and restores text mode.

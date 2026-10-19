@@ -10,6 +10,8 @@
 
 int gfx_bios_mode(), gfx_bios_palette(), gfx_bios_pixel(), gfx_bios_text();
 int gfx_cga_clear(), gfx_cga_byte(), gfx_cga_palette(), gfx_cga_font();
+int gfx_ega_available(), gfx_ega_clear(), gfx_ega_byte(), gfx_ega_font();
+int gfx_bios_palette_entry();
 
 #define BACKEND_BIOS    1
 #define BACKEND_KERNEL  2
@@ -59,11 +61,15 @@ int gfx_mode(mode)
     int mode;
 {
     int selected = select_backend();
+    int native_ega = selected == BACKEND_KERNEL &&
+        mode == MODE_EGA_640X350 && osver() == 0x31;
 
     if (!selected)
         return -1;
+    if (native_ega && !gfx_ega_available())
+        return -1;
     if (mode != MODE_TEXT && mode != MODE_CGA_320X200 &&
-        mode != MODE_CGA_640X200 &&
+        mode != MODE_CGA_640X200 && !native_ega &&
         !(selected == BACKEND_BIOS && mode >= MODE_EGA_320X200 &&
           mode <= MODE_EGA_640X350))
         return -1;
@@ -75,7 +81,9 @@ int gfx_mode(mode)
         cputc((char)27);
         cputc((char)'a');
         cputc((char)mode);
-        if (mode != MODE_TEXT) {
+        if (native_ega) {
+            gfx_ega_clear();
+        } else if (mode != MODE_TEXT) {
             gfx_cga_clear();
             palette_reg = mode == MODE_CGA_320X200 ? 0x30 : 0x0f;
             kernel_palette(palette_reg);
@@ -95,7 +103,8 @@ void gfx_palette(palette)
 
     if (backend == BACKEND_BIOS) {
         gfx_bios_palette(palette);
-    } else if (backend == BACKEND_KERNEL && current_mode != MODE_TEXT) {
+    } else if (backend == BACKEND_KERNEL && current_mode != MODE_TEXT &&
+               current_mode != MODE_EGA_640X350) {
         operation = (palette >> 8) & 255;
         if (operation == 1)
             palette_reg = (palette_reg & ~0x20) | ((palette & 1) << 5);
@@ -105,6 +114,37 @@ void gfx_palette(palette)
             return;
         kernel_palette(palette_reg);
     }
+}
+
+/* Raw six-bit EGA color: bits 0..2 are primary B/G/R, bits 3..5
+ * are their secondary components. Kept separate from CGA palette selection.
+ */
+int gfx_palette_entry(index, color)
+    int index, color;
+{
+    int i;
+    unsigned char request[8];
+
+    if (index < 0 || index > 15 || color < 0 || color > 63)
+        return -1;
+    if (backend == BACKEND_BIOS && current_mode >= MODE_EGA_320X200 &&
+        current_mode <= MODE_EGA_640X350) {
+        gfx_bios_palette_entry(index, color);
+        return 0;
+    }
+    if (backend != BACKEND_KERNEL || current_mode != MODE_EGA_640X350)
+        return -1;
+    for (i = 0; i < 8; i++)
+        request[i] = 0;
+    request[0] = 30;
+    request[4] = index;
+    request[5] = 3;
+    request[7] = color;
+    cputc((char)27);
+    cputc((char)'!');
+    for (i = 0; i < 8; i++)
+        cputc((char)request[i]);
+    return 0;
 }
 
 void gfx_pixel(x, y, color)
@@ -117,7 +157,14 @@ void gfx_pixel(x, y, color)
         return;
     }
     if (backend != BACKEND_KERNEL || current_mode == MODE_TEXT ||
-        x < 0 || y < 0 || y >= 200)
+        x < 0 || y < 0)
+        return;
+    if (current_mode == MODE_EGA_640X350) {
+        if (x < 640 && y < 350)
+            gfx_ega_byte(y * 80 + (x >> 3), 128 >> (x & 7), color);
+        return;
+    }
+    if (y >= 200)
         return;
     if (current_mode == MODE_CGA_320X200) {
         if (x >= 320)
@@ -146,7 +193,7 @@ void gfx_text(col, row, str, color)
     char *str;
     int color;
 {
-    int ch, y, x, bits, columns;
+    int ch, y, x, bits, columns, height;
 
     if (backend == BACKEND_BIOS) {
         gfx_bios_text(col, row, str, color);
@@ -154,6 +201,7 @@ void gfx_text(col, row, str, color)
     }
     if (backend != BACKEND_KERNEL || current_mode == MODE_TEXT)
         return;
+    height = current_mode == MODE_EGA_640X350 ? 14 : 8;
     columns = current_mode == MODE_CGA_320X200 ? 40 : 80;
     if (!color)
         color = 15;
@@ -175,10 +223,10 @@ void gfx_text(col, row, str, color)
             break;
         if (ch >= 128)
             ch = '?';
-        for (y = 0; y < 8; y++) {
-            bits = gfx_cga_font(ch, y);
+        for (y = 0; y < height; y++) {
+            bits = height == 14 ? gfx_ega_font(ch, y) : gfx_cga_font(ch, y);
             for (x = 0; x < 8; x++)
-                gfx_pixel(col * 8 + x, row * 8 + y,
+                gfx_pixel(col * 8 + x, row * height + y,
                           (bits & (128 >> x)) ? color & 15 : 0);
         }
         col++;

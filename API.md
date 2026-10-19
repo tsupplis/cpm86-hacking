@@ -1,6 +1,6 @@
 # util.lib API Reference
 
-`util.lib` is the standard runtime utility library for CP/M-86 tools and programs in this repository. It provides OS detection, low-level BDOS/BIOS/hardware access, console manipulation, directory traversal, CGA graphics, timekeeping, environment variable handling, and submit (`$$$.sub`) batch chaining.
+`util.lib` is the standard runtime utility library for CP/M-86 tools and programs in this repository. It provides OS detection, low-level BDOS/BIOS/hardware access, console manipulation, directory traversal, CGA/EGA graphics, timekeeping, environment variable handling, and submit (`$$$.sub`) batch chaining.
 
 ---
 
@@ -10,7 +10,7 @@
 2. [Environment & String Utilities (`util.h`)](#2-environment--string-utilities-utilh)
 3. [Console I/O & Terminal Control (`conio.h`)](#3-console-io--terminal-control-conioh)
 4. [Directory & Disk FCB Handling (`dirent.h`)](#4-directory--disk-fcb-handling-direnth)
-5. [CGA Graphics (`gfx.h`)](#5-cga-graphics-gfxh)
+5. [Graphics (`gfx.h`)](#5-graphics-gfxh)
 6. [Date, Time & Epoch (`util.h`)](#6-date-time--epoch-utilh)
 7. [Submit Files & Process Chaining (`sub.h`)](#7-submit-files--process-chaining-subh)
 8. [Debug Utilities (`debug.h`)](#8-debug-utilities-debugh)
@@ -236,16 +236,17 @@ rstusr();
 
 ## 5. Graphics (`gfx.h`)
 
-Implemented in [`gfx.asm`](gfx.asm:1). Direct BIOS `INT 10h` primitives for CGA and EGA graphics modes.
+Implemented in [`gfx.c`](gfx.c) and [`gfx.asm`](gfx.asm). BIOS on BDOS 22h or >=60h; XIOS on Concurrent 31h..5Fh and DOS Plus 41h. Native XIOS EGA mode 10h requires the patched ccpm86-kernel capability response and EGA/VGA hardware. See [GRAPHICS.md](GRAPHICS.md).
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `gfx_mode` | `void gfx_mode(int mode)` | Sets video mode via BIOS `INT 10h` (`AH=00h`). E.g. `MODE_CGA_320X200` (4), `MODE_CGA_640X200` (6), `MODE_EGA_640X350` (16), `MODE_TEXT` (3). |
-| `gfx_palette` | `void gfx_palette(int palette)` | Sets CGA color palette via BIOS `INT 10h` (`AH=0Bh`). E.g. `CGA_PALETTE_GRY` (`0x100`), `CGA_PALETTE_CMW` (`0x101`). |
-| `gfx_pixel` | `void gfx_pixel(int x, int y, int palette)` | Plots pixel at coordinates `(x, y)` with color/palette index `palette` via BIOS `INT 10h` (`AH=0Ch`). |
-| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Writes text string `str` at character grid `(col, row)` in graphics mode with specified `color` (e.g. 15 for bright white) via BIOS `INT 10h` (`AH=02h` and `AH=0Eh`). |
+| `gfx_mode` | `int gfx_mode(int mode)` | Returns 0 when issued, -1 for an unsupported request. BIOS supports modes 3/4/6/0Dh..10h; stock XIOS 3/4/6; patched 3.1 XIOS additionally mode 10h after capability/adapter validation. Hides/restores the status line around graphics. |
+| `gfx_palette` | `void gfx_palette(int palette)` | CGA background/intensity and palette selection, using BIOS-style packed BX. Use gfx_palette_entry for native EGA. |
+| `gfx_palette_entry` | `int gfx_palette_entry(int index, int color)` | Set EGA palette index 0..15 to raw six-bit EGA color 0..63. Returns 0 when issued, -1 for invalid arguments or a non-EGA mode. Kernel mode uses owner-checked BIOS calls; BIOS backend uses AH=10h/AL=00h. |
+| `gfx_pixel` | `void gfx_pixel(int x, int y, int color)` | Plot a pixel, with color bit 7 requesting XOR. XIOS uses packed B800 CGA memory or four A000 EGA planes; out-of-bounds coordinates are ignored. |
+| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Character-grid text. XIOS draws ASCII in an opaque black cell: 8x8 in CGA, 8x14 in EGA mode 10h. BIOS backend retains BIOS cursor/teletype drawing. |
 
 ### Constants
 

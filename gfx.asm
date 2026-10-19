@@ -177,5 +177,168 @@ gfx_cga_font_ proc near
             ret
 gfx_cga_font_ endp
 
+; Query only on Concurrent BDOS 31h. The original selector 30 is a no-op:
+; input BX=0 then returns no capability. Save ES (v1 returns SYSDAT there).
+            public gfx_ega_available_
+gfx_ega_available_ proc near
+            push bx
+            push cx
+            push dx
+            push si
+            push di
+            push ds
+            push es
+            mov ax,30
+            xor bx,bx
+            int 0E6h
+            cmp ax,4745h
+            jne ega_unavailable
+            mov ax,bx
+            and ax,1
+            jmp ega_available_done
+ega_unavailable:
+            xor ax,ax
+ega_available_done:
+            pop es
+            pop ds
+            pop di
+            pop si
+            pop dx
+            pop cx
+            pop bx
+            ret
+gfx_ega_available_ endp
+
+; Mode 10h drawing owns the adapter while graphics is active. Original EGA
+; register reads are not portable, so establish/restore known mode-0 defaults
+; instead of attempting to read and restore VGA-only register state.
+; All register/latch transactions run with IRQs disabled.
+            public gfx_ega_clear_
+gfx_ega_clear_ proc near
+            pushf
+            cli
+            push es
+            push di
+            push cx
+            push dx
+            mov dx,03C4h
+            mov ax,0F02h
+            out dx,ax
+            mov dx,03CEh
+            mov ax,0001h
+            out dx,ax
+            mov ax,0003h
+            out dx,ax
+            mov ax,0005h
+            out dx,ax
+            mov ax,0FF08h
+            out dx,ax
+            mov ax,0A000h
+            mov es,ax
+            xor di,di
+            xor ax,ax
+            mov cx,14000
+            cld
+            rep stosw
+            pop dx
+            pop cx
+            pop di
+            pop es
+            popf
+            ret
+gfx_ega_clear_ endp
+
+; egabyte(offset, mask, color): write mode 2 expands the low four color
+; bits into four planes. Reading the destination loads all four latches;
+; the bit mask preserves neighboring pixels. Bit 7 requests XOR.
+            public gfx_ega_byte_
+gfx_ega_byte_ proc near
+            push bp
+            mov bp,sp
+            pushf
+            cli
+            push es
+            push bx
+            push dx
+            mov dx,03C4h
+            mov ax,0F02h
+            out dx,ax
+            mov dx,03CEh
+            mov ax,0205h
+            out dx,ax
+            mov ax,0003h
+            test byte ptr 8[bp],80h
+            jz ega_pixel_replace
+            mov ah,18h
+ega_pixel_replace:
+            out dx,ax
+            mov al,8
+            mov ah,byte ptr 6[bp]
+            out dx,ax
+            mov ax,0A000h
+            mov es,ax
+            mov bx,4[bp]
+            mov al,es:[bx]
+            mov al,byte ptr 8[bp]
+            and al,0Fh
+            mov es:[bx],al
+            mov ax,0003h
+            out dx,ax
+            mov ax,0005h
+            out dx,ax
+            mov ax,0FF08h
+            out dx,ax
+            pop dx
+            pop bx
+            pop es
+            popf
+            pop bp
+            ret
+gfx_ega_byte_ endp
+
+; Mode 10h BIOS sets vector 43h to its 8x14 ROM font. Do not assume
+; that every EGA/VGA ROM stores it at the same fixed address.
+            public gfx_ega_font_
+gfx_ega_font_ proc near
+            push bp
+            mov bp,sp
+            push es
+            push bx
+            push cx
+            push dx
+            xor ax,ax
+            mov es,ax
+            mov bx,es:[010Ch]
+            mov cx,es:[010Eh]
+            mov ax,4[bp]
+            mov dx,14
+            mul dx
+            add ax,6[bp]
+            add bx,ax
+            mov es,cx
+            mov al,es:[bx]
+            xor ah,ah
+            pop dx
+            pop cx
+            pop bx
+            pop es
+            pop bp
+            ret
+gfx_ega_font_ endp
+
+            public gfx_bios_palette_entry_
+gfx_bios_palette_entry_ proc near
+            push bp
+            mov bp,sp
+            push bx
+            mov bl,byte ptr 4[bp]
+            mov bh,byte ptr 6[bp]
+            mov ax,1000h
+            int 10h
+            pop bx
+            pop bp
+            ret
+gfx_bios_palette_entry_ endp
+
 codeseg ends
     end
