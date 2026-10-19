@@ -358,3 +358,16 @@ Implemented in [`debug.c`](debug.c:1).
 | Function | Signature | Description |
 |----------|-----------|-------------|
 | `debug_dump_hex` | `unsigned long debug_dump_hex(FILE *fd, char *data, unsigned int size, unsigned long offset, int raw)` | Formats and prints hexadecimal and ASCII dump of memory buffer `data` of length `size` to file stream `fd`. Displays 6-digit hex offsets, 16 hex bytes per line, and ASCII representation. If `raw` is non-zero, outputs only hex bytes without offset and ASCII sidebar. Returns next updated offset. |
+
+### Raw console input bytes
+
+`getch()` returns byte values in the range 0..255, including bytes read from
+its ring buffer. It does not translate Concurrent CP/M function keys or change
+PFK expansion. An application needing raw XIOS keys must select ESC 6 while
+it owns the console, decode its keys, then restore ESC 7 before exiting or
+handing control to another program. Text readers must not acquire these side
+effects merely by calling `getch()`.
+
+`make test-keys` verifies unsigned direct and buffered returns in `conio.c`
+and the standalone keyboard diagnostic. Rebuild `util.lib` and relink consumers
+to pick up the library change; copies held by other projects are independent.

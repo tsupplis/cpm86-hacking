@@ -58,7 +58,7 @@ int getch()
         getch_buffer=(char*)malloc(GETCH_BUFLEN+1);
     }
     if(s>0) {
-        c=getch_buffer[o];s--;o++;
+        c=(unsigned char)getch_buffer[o];s--;o++;
         o=o%GETCH_BUFLEN;
         return c;
     }

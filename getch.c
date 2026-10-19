@@ -44,7 +44,7 @@ int getch()
     }
     if(s>0) {
         printf(".");
-        c=getch_buffer[o];s--;o++;
+        c=(unsigned char)getch_buffer[o];s--;o++;
         o=o%GETCH_BUFLEN;
         return c;
     }
@@ -73,7 +73,7 @@ int getch()
         getch_buffer=(char*)malloc(GETCH_BUFLEN+1);
     }
     if(s>0) {
-        c=getch_buffer[o];s--;o++;
+        c=(unsigned char)getch_buffer[o];s--;o++;
         o=o%GETCH_BUFLEN;
         return c;
     }

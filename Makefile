@@ -298,3 +298,7 @@ cdos41test: cpmtest.img dostest.img
 
 dostest: dostest.img
 	@./dos
+
+.PHONY: test-keys
+test-keys:
+	python3 testkeys.py
