@@ -17,7 +17,10 @@
 #define MODE_EGA_640X350        16      /* 0x10: 640x350, 16 colors */
 
 /* gfx_mode returns 0 when issued, -1 for an unsupported OS or mode.
- * Kernel backend: actual CGA hardware, modes 3, 4, 6; IBM PC ROM ASCII font.
+ * BIOS: BDOS 22h or >=60h. XIOS: Concurrent 31h..5Fh, DOS Plus 41h.
+ * XIOS modes 3/4/6 require CGA, except patched ccpm86-kernel supports
+ * CGA graphics on EGA/VGA too. No native EGA modes through XIOS.
+ * XIOS text drawing uses the IBM PC ROM ASCII font. See GRAPHICS.md.
  */
 #ifndef __STDC__
 int gfx_mode();

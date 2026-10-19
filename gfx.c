@@ -1,7 +1,7 @@
 /*
  * Licensed under the MIT license. See LICENSE in the project root.
- * IBM PC graphics: BIOS on BDOS 22h, console escape modes on Concurrent
- * BDOS >= 31h and non-Concurrent BDOS 41h (DOS Plus).
+ * IBM PC graphics: BIOS on BDOS 22h or >= 60h; console escape modes on
+ * Concurrent BDOS 31h..5Fh and non-Concurrent BDOS 41h (DOS Plus).
  */
 #include <stdio.h>
 #include <conio.h>
@@ -23,12 +23,32 @@ static int select_backend()
     int version = osver();
     int concurrent = ostype() & OSTYPE_MULTIUSER;
 
-    if (version == 0x22)
+    if (version == 0x22 || version >= 0x60)
         return BACKEND_BIOS;
     if ((version >= 0x31 && concurrent) ||
         (version == 0x41 && !concurrent))
         return BACKEND_KERNEL;
     return 0;
+}
+
+/* Preserve direct CGA palette writes for existing kernels. The function-30
+ * escape back door is accepted by the enhanced XIOS; older XIOS versions
+ * consume the complete packet and reject the call without printing it.
+ */
+static void kernel_palette(value)
+    int value;
+{
+    int i;
+    static unsigned char request[8] = { 30, 0, 0, 0, 0, 2, 0, 0 };
+
+    gfx_cga_palette(value);
+    if (osver() != 0x31)
+        return;
+    request[4] = value;
+    cputc((char)27);
+    cputc((char)'!');
+    for (i = 0; i < 8; i++)
+        cputc((char)request[i]);
 }
 
 /* No display changes on unsupported requests. Escape output itself has
@@ -57,7 +77,7 @@ int gfx_mode(mode)
         if (mode != MODE_TEXT) {
             gfx_cga_clear();
             palette_reg = mode == MODE_CGA_320X200 ? 0x30 : 0x0f;
-            gfx_cga_palette(palette_reg);
+            kernel_palette(palette_reg);
         }
     }
     if (mode == MODE_TEXT && current_mode != MODE_TEXT)
@@ -82,7 +102,7 @@ void gfx_palette(palette)
             palette_reg = (palette_reg & ~0x1f) | (palette & 0x1f);
         else
             return;
-        gfx_cga_palette(palette_reg);
+        kernel_palette(palette_reg);
     }
 }
 
