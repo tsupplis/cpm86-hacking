@@ -204,5 +204,5 @@ Still it is a funny bit of discovery and archeology...
 
 ## License
 
-The whole repository is under MIT (License)[LICENSE.md] unless specified otherwise in a subdirectory.
+The whole repository is under MIT [License](LICENSE.md) unless specified otherwise in a subdirectory.
 
