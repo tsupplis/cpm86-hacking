@@ -1,35 +1,60 @@
 ;
 ; Licensed under the MIT license. See LICENSE file in the project root for details.
 ;
-
+; IBM PC hardware reset. REBOOT defaults to cold; REBOOT W requests warm.
+; Set BIOS data-area word 0040:0072 before jumping to FFFF:0000.
+;
                 title   'Reboot'
 
-reset_flag      equ 1234h
-rombios_seg     equ 40h
-rombios_offs    equ 72h
+reset_flag      equ     1234h
+rombios_seg     equ     40h
+rombios_offs    equ     72h
 
-                cseg     
- 
-                mov bx,5dh
-                mov ch,0bh
-                mov al,[bx]
-                cmp al,'W'
-                jz warmboot
-                cmp al,'w'
-                jz warmboot
-                mov ax,rombios_seg
-                mov ds,ax
-                mov ax,0
-                jmp boot
+                cseg
+
+; The CMD loader supplies DS for the base page. Keep it for the FCB and
+; BDOS call, but give BDOS a private stack in our code segment.
+start:
+                cli
+                mov     ax,cs
+                mov     ss,ax
+                mov     sp,offset stack_top
+                sti
+
+; Preserve the existing interface: first default-FCB character W/w means
+; warm reset; no W means cold. Save the chosen flag across BDOS reset.
+                mov     bx,5dh
+                mov     al,[bx]
+                cmp     al,'W'
+                jz      warmboot
+                cmp     al,'w'
+                jz      warmboot
+                xor     ax,ax
+                jmp     flush_disk
 warmboot:
-                mov ax,rombios_seg
-                mov ds,ax
-                mov ax,reset_flag
+                mov     ax,reset_flag
+flush_disk:
+                push    ax
+                push    es
+                mov     cl,13
+                int     0e0h
+                pop     es
+                pop     ax
+
+; AX still holds 0000h (cold) or 1234h (warm). Store it before resetting;
+; the previous code selected a value but never wrote BIOS memory.
 boot:
-                mov bx,rombios_offs
-                mov ax,cs
-                mov ds,ax
-                mov bx,offset reboot_vec
-                jmpf dword ptr [bx]
-reboot_vec      db   0,0,0ffh,0ffh
+                cli
+                mov     bx,rombios_seg
+                mov     es,bx
+                mov     bx,rombios_offs
+                mov     es:[bx],ax
+                db      0eah            ; Far JMP FFFF:0000.
+                dw      0,0ffffh
+
+; Real storage, included in the CMD code-group allocation.
+                db      0               ; Align the following stack to a word.
+stack_space:
+                rw      256             ; 512 bytes, reserved in the code group.
+stack_top:
                 end

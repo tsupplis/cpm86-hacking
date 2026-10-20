@@ -32,7 +32,7 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 
 | Tool | Purpose | Compatibility or build note |
 | --- | --- | --- |
-| `reboot` | Cold or warm reboot | PC only. |
+| `reboot` | Cold or warm reboot | `reboot [w]`<br>No argument performs a cold reboot; `w` performs a warm reboot (skips the BIOS memory test). Flushes disks first. PC only. |
 | `cls` | Clear the screen | `cls` targets VT52; `clsansi` targets VT100/ANSI terminals. |
 | `pause` | Wait for a keystroke | CP/M-86 submit tool. |
 | `wait` | Wait for n seconds | CP/M-86 submit tool. |
