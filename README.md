@@ -200,7 +200,9 @@ Still it is a funny bit of discovery and archeology...
 | [cpm86-make](https://github.com/tsupplis/cpm86-make)   | A simple submit based make tool for CP/M-86 |
 | [pcdos11-hacking](https://github.com/tsupplis/pcdos11-hacking) | PC-DOS 1.1 distribution, tools and notes |
 
+--
+
 ## License
 
-MIT — see [LICENSE](LICENSE.md).
+The whole repository is under MIT (License)[LICENSE.md] unless specified otherwise in a subdirectory.
 
