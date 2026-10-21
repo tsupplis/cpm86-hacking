@@ -1,3 +1,9 @@
+; CGA bouncing ball for CP/M-86 and CCP/M-86 on the IBM PC.
+; No arguments; press a normal key to return to text mode.
+; BIOS modes on BDOS 22h / >=60h; console modes on Concurrent
+; 31h..5Fh and DOS Plus 41h, matching the C graphics library.
+; Stock CCP/M requires CGA; the patched XIOS also supports EGA/VGA.
+; Run on the foreground console and exit before switching consoles.
     title   'Bouncing Ball'
 
     cseg
@@ -8,11 +14,34 @@
     mov     es, cx
     cli
     mov     ss, cx
-    mov     sp, offset stk + 128
+    mov     sp, offset stk_end
     sti
+    mov     cx, 0Ch             ; BDOS version and system type
+    call    bdos_call
+    mov     version, al
+    cmp     al, 22h
+    jz      bios_start
+    cmp     al, 60h
+    jae     bios_start
+    cmp     al, 31h
+    jb      unsupported
+    test    ah, 4               ; Concurrent system
+    jnz     kernel_start
+    cmp     al, 41h             ; DOS Plus
+    jnz     unsupported
+kernel_start:
+    mov     kernel_mode, 1
+    jmp     start
+bios_start:
     mov     dx, offset status_off
-    mov     cl, 9
-    int     0E0h
+    mov     cx, 9
+    call    bdos_call
+    jmp     start
+unsupported:
+    mov     dx, offset bad_os
+    mov     cx, 9
+    call    bdos_call
+    jmp     quit
 
 BOX_X       EQU 89
 BOX_Y       EQU 59
@@ -23,24 +52,43 @@ BALL_W      EQU 8
 BALL_H      EQU 8
 
 start:
+            cmp     kernel_mode, 0
+            jnz     kernel_video
             mov     ax, 0004h
             int     10h
-            mov     ah, 0Bh
-            mov     bh, 0
-            mov     bl, 0
+            mov     ax, 0B00h
+            xor     bx, bx
             int     10h
-            mov     ah, 0Bh
-            mov     bh, 1
-            mov     bl, 1
+            mov     ax, 0B00h
+            mov     bx, 0101h
             int     10h
-
-flush_keys:
-            mov     ah, 01h
-            int     16h
-            jz      top_loop_init
-            mov     ah, 00h
-            int     16h
             jmp     flush_keys
+kernel_video:
+            mov     dx, offset graphics_mode
+            call    mode_packet
+            push    es
+            mov     ax, 0B800h
+            mov     es, ax
+            xor     di, di
+            xor     ax, ax
+            mov     cx, 8192
+            cld
+            rep     stosw               ; both CGA banks, including padding
+            pop     es
+            mov     dx, 03D9h
+            mov     al, 20h             ; black background, cyan/magenta/white
+            out     dx, al
+            cmp     version, 31h
+            jnz     flush_keys
+            ; Patched 3.1 XIOS translates the palette for EGA/VGA.
+            ; Original 3.1 consumes this packet as a harmless no-op.
+            mov     dx, offset palette_packet
+            mov     cx, 10
+            call    output_packet
+flush_keys:
+            call    read_key
+            or      al, al
+            jnz     flush_keys
 
 top_loop_init:
             mov     si, BOX_X
@@ -161,6 +209,83 @@ xx_loop:
 store_seq:
             mov     seq, al
 
+            call    frame_delay
+            call    read_key
+            or      al, al
+            jz      main_again
+            cmp     kernel_mode, 0
+            jnz     kernel_text
+            mov     ax, 0003h
+            int     10h
+            mov     dx, offset status_on
+            mov     cx, 9
+            call    bdos_call
+            jmp     clear_text
+main_again:
+            jmp     main_loop
+kernel_text:
+            mov     dx, offset text_mode
+            call    mode_packet         ; XIOS restores its console/status
+clear_text:
+            mov     dx, offset cls_hdr
+            mov     cx, 9
+            call    bdos_call
+quit:
+            xor     dx, dx              ; release program memory
+            xor     cx, cx
+            int     0E0h
+            jmp     quit
+
+; BDOS can change ES and scratch registers. Keep animation state intact;
+; only AX is returned (version information or a console byte).
+bdos_call:
+            push    bx
+            push    cx
+            push    dx
+            push    si
+            push    di
+            push    bp
+            push    ds
+            push    es
+            int     0E0h
+            pop     es
+            pop     ds
+            pop     bp
+            pop     di
+            pop     si
+            pop     dx
+            pop     cx
+            pop     bx
+            ret
+
+read_key:
+            mov     cx, 6
+            mov     dx, 0FFh            ; nonblocking, no echo / Ctrl-C abort
+            call    bdos_call
+            ret
+
+mode_packet:
+            mov     cx, 3               ; ESC a followed by raw mode byte
+output_packet:
+            mov     si, dx
+            mov     bx, cx
+output_next:
+            mov     dl, [si]
+            mov     cx, 2
+            call    bdos_call
+            inc     si
+            dec     bx
+            jnz     output_next
+            ret
+
+frame_delay:
+            cmp     kernel_mode, 0
+            jz      bios_delay
+            mov     cx, 8Dh            ; CCP/M delay: three 60 Hz ticks
+            mov     dx, 3
+            call    bdos_call
+            ret
+bios_delay:
             xor     ah, ah
             int     1Ah
             mov     start_tick, dx
@@ -168,35 +293,53 @@ delay_wait:
             xor     ah, ah
             int     1Ah
             mov     ax, dx
-            sub     ax, start_tick
+            sub     ax, start_tick     ; also works across low-word rollover
             cmp     ax, 1
-            jl      delay_wait
+            jb      delay_wait
+            ret
 
-            mov     ah, 01h
-            int     16h
-            jnz     key_available
-            jmp     main_loop
-key_available:
-            mov     ah, 00h
-            int     16h
-
-            mov     ax, 0003h
-            int     10h
-            mov     dx, offset status_on
-            mov     cl, 9
-            int     0E0h
-            mov     dx, offset cls_hdr
-            mov     cl, 9
-            int     0E0h
-            xor     cx, cx
-            int     0E0h
-
+; Mode 4 packs four 2-bit pixels per byte. Odd scanlines use bank 2000h.
+; Preserve adjacent pixels and every drawing-loop register.
 putpix:
+            push    ax
             push    bx
-            mov     ah, 0Ch
-            mov     bh, 0
-            int     10h
+            push    cx
+            push    dx
+            push    di
+            push    es
+            mov     bl, al
+            xor     di, di
+            test    dx, 1
+            jz      pixel_even
+            mov     di, 2000h
+pixel_even:
+            shr     dx, 1
+            mov     ax, 80
+            mul     dx
+            add     di, ax
+            mov     ax, cx
+            shr     ax, 1
+            shr     ax, 1
+            add     di, ax
+            and     cl, 3
+            xor     cl, 3
+            shl     cl, 1
+            mov     al, 3
+            shl     al, cl
+            not     al                  ; mask for neighbouring pixels
+            and     bl, 3
+            shl     bl, cl
+            mov     dx, 0B800h
+            mov     es, dx
+            and     al, es:[di]
+            or      al, bl
+            mov     es:[di], al
+            pop     es
+            pop     di
+            pop     dx
+            pop     cx
             pop     bx
+            pop     ax
             ret
 
 x           dw      0
@@ -206,6 +349,12 @@ yinc        dw      1
 seq         db      0
 frame       db      0
 start_tick  dw      0
+kernel_mode db      0
+version     db      0
+bad_os      db      'BALL: unsupported operating system',13,10,'$'
+graphics_mode db    27,'a',4
+text_mode   db      27,'a',3
+palette_packet db  27,'!',30,0,0,0,20h,2,0,0
 status_off  db      27,'0','$'
 status_on   db      27,'1','$'
 cls_hdr     db      27,'E$'
@@ -243,7 +392,7 @@ ball_data   db      0,0,0,0,0,0,0,0
             db      0,0,1,1,1,1,0,0
             db      0,0,0,0,0,0,0,0
 
-; program stack, 128 zero bytes that are part of the image
+; Private 256-byte stack, included in the image.
             db      0               ; word alignment
 stk         db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
             db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -253,5 +402,8 @@ stk         db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
             db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
             db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
             db      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+
+            rb      128
+stk_end:
 
     end
