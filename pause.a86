@@ -16,13 +16,12 @@
             mov     cl,9            
             int     0E0h    
 pause:
-            mov     ah,1
-            int     16h
-            jnz     got_key
-            jmp     pause
+            mov     cl,6
+            mov     dl,0ffh         ; nonblocking raw input on CP/M-86 and CCP/M-86
+            int     0E0h
+            or      al,al
+            jz      pause
 got_key:
-            mov     ah,0
-            int     16h
             xor     ax,ax
             mov     dx,offset msg_clear
             mov     cl,9
