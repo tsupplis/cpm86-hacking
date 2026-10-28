@@ -20,7 +20,7 @@ RASM86=pcdev_rasm86
 
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
-    atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd getch.cmd \
+    atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd mandel.cmd getch.cmd \
     printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com \
     dosgetch.com
@@ -107,6 +107,13 @@ copycon.cmd: copycon.o
 
 dump.cmd: dump.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+
+mandel.cmd: mandel.o util.lib
+	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
+
+mandel.o: mandel.c gfx.h
+	$(CC) $(CPM86_CFLAGS) -o $@ $<
+	$(STRIP) $@
 
 ballc.cmd: ballc.o util.lib
 	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
@@ -302,3 +309,7 @@ dostest: dostest.img
 .PHONY: test-keys
 test-keys:
 	python3 testkeys.py
+
+.PHONY: check-ball
+check-ball: ball.cmd
+	python3 tools/testball.py

@@ -39,8 +39,9 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `tod` | Replacement date/time utility | Removes the 78-99 year constraint and validates dates, including leap years. CP/M-86 1.1 for PC/XT only. |
 | `ver` | Display BDOS and operating-system version | Identifies the CP/M-86 family; `dosver.com` is the DOS-family PC-MODE counterpart, including DR DOS and Concurrent DOS probes. |
 | `mem` | Display available and system memory | DOS PC-MODE counterparts: `dosmem.com` uses the DOS 2+ resize-allocation probe when available, with a PSP fallback for DOS 1. Both show the BIOS conventional-memory total. |
-| `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. Supported on CP/M-86 1.1 PC/XT, DOS Plus, and CCP/M-86 or Concurrent DOS with BDOS > 3.1. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
+| `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. CP/M-86 1.1 uses BIOS mode setup; CCP/M-86 3.1 and later Concurrent releases use XIOS console modes, BDOS keyboard/delay calls and CGA framebuffer drawing. DOS Plus is also supported. Stock XIOS requires CGA; the patched CCP/M kernel also supports EGA/VGA. Press a normal key to exit. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
 | `ballc` | CGA bouncing-ball demo | Runtime graphics backend: BIOS on BDOS `22h` or `>=60h`; XIOS on Concurrent `31h..5Fh` and non-Concurrent `41h` (DOS Plus). |
+| `mandel` | Simple Ascii art demo | - |
 | `sine` | EGA sine wave demo | 640×350 sine plot with axes and labels. Currently uses the BDOS `22h` BIOS backend; kernel EGA modes are not yet implemented. |
 | `getch` | Keyboard scanner | `dosgetch.com` is the DOS counterpart. |
 | `zpdump` | Dump the zero page | `pspdump.com` is the DOS counterpart and supports `-c` to call DOS `int 21h` function `26h` before dumping the new PSP. |
