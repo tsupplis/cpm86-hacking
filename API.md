@@ -371,3 +371,34 @@ effects merely by calling `getch()`.
 `make test-keys` verifies unsigned direct and buffered returns in `conio.c`
 and the standalone keyboard diagnostic. Rebuild `util.lib` and relink consumers
 to pick up the library change; copies held by other projects are independent.
+
+
+### CDOS 4.1 DOS program launch
+
+`int ms_p_cli(char *opened_fcb, char *cmd)` calls the private PCTMP
+function 1 used by BATCH. Pass a successfully opened 36-byte COM/EXE FCB
+and a NUL-terminated command line including the executable name (at most
+127 characters). The current user is used. It returns the loader status,
+zero on success, or -1 for an unsupported system, missing PCTMP ancestor,
+or an overlong line. This is synchronous and uses static buffers.
+
+The wrapper checks BDOS function 12 (decimal, 0Ch), Concurrent system type
+and **exact version 41h**, then walks the parent process descriptors to
+PCTmp and uses its translator entry at CS:0003, as BATCH does. This private
+interface is deliberately disabled on earlier and later versions. It does
+not implement ORDER searches, shell built-ins, CMD execution or BAT parsing;
+use `p_cli` for native CMD commands. An opened FCB is required, not merely
+one filled by `fcbinit`.
+
+### Directory listings
+
+`dirent_load` accepts `DIRENT_ALL_EXTENTS | DIRENT_INCLUDE_DIRS` in its
+last argument. Directory inclusion is opt-in and requires BDOS version
+41h or later. Each search sets the CDOS include-directory flag anew.
+`dirent_is_dir(entry)` recognizes FAT directory markers; CP/M allocation
+bytes are never interpreted as directory flags. Existing file-only callers
+such as `rm` and `wc` retain their previous searches.
+
+LS uses this mode: `<DIR>` in normal listings, `D` and zero size in long
+listings, and a trailing `/` in basic listings. Directory sizes do not add
+to the displayed total.

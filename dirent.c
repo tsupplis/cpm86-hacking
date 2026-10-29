@@ -16,13 +16,13 @@
 #endif
 
 #ifndef __STDC__
-int dirent_next(fcb, root, last, all_extents) 
+int dirent_next(fcb, root, last, dirent_optionss) 
     char * fcb;
     dirent_t * root;
     dirent_t ** last;
-    int all_extents;
+    int dirent_optionss;
 #else
-int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
+int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int dirent_optionss)
 #endif
 {
     int rc=0;
@@ -30,7 +30,9 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     dirent_t* cursor=0;
     int i;
 
+    if(root->include_dirs) fcb[0] |= 0x80;
     rc=bdos(18,fcb);
+    fcb[0] &= 0x7f;
     if(rc==255) {
         return rc;
     }
@@ -89,6 +91,8 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int all_extents)
     cursor->block_size=root->block_size;
     cursor->drive_blocks=root->drive_blocks;
     cursor->is_fat=root->is_fat;
+    cursor->include_dirs=root->include_dirs;
+    cursor->is_dir=root->is_fat && f[16]==f[17] && (f[16]&0xc0)==0xc0;
     if(root->is_fat) {
         unsigned long * s=(unsigned long *)(f+28);
         cursor->blocks=((unsigned long)(*s)+cursor->block_size-1)/
@@ -133,9 +137,11 @@ int dirent_first(char * fcb, dirent_t ** root)
 {
     int rc=0;
     unsigned char* f=0;
-    int is_fat=dirent_is_fat(fcb[0]-1);
+    int include_dirs=(fcb[0]&0x80)!=0;
+    int is_fat=dirent_is_fat((fcb[0]&0x7f)-1);
 
     rc=bdos(17,fcb);
+    fcb[0] &= 0x7f;
     if(rc==255) {
         *root=0;
         return rc;
@@ -156,6 +162,8 @@ int dirent_first(char * fcb, dirent_t ** root)
     memcpy(root[0]->entry,f,12);
     root[0]->drive=fcb[0]-1;
     root[0]->is_fat=is_fat;
+    root[0]->include_dirs=include_dirs;
+    root[0]->is_dir=is_fat && f[16]==f[17] && (f[16]&0xc0)==0xc0;
     {
         dpb_t dpb;
         dpb_load(root[0]->drive,&dpb);
@@ -332,16 +340,16 @@ int dirent_is_fat(int drive)
 }
 
 #ifndef __STDC__
-int dirent_load(path, root, ouser, odrive, sort_order, all_extents) 
+int dirent_load(path, root, ouser, odrive, sort_order, dirent_optionss) 
     char * path;
     dirent_t ** root;
     int *ouser;
     int *odrive;
     int sort_order;
-    int all_extents;
+    int dirent_optionss;
 #else
 int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive, 
-    int sort_order,int all_extents)
+    int sort_order,int dirent_optionss)
 #endif
 {
     char fcb[40];
@@ -376,7 +384,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
             }
         }
     }
-    if(all_extents) {
+    if(dirent_optionss & DIRENT_ALL_EXTENTS) {
         fcb[12]='?';
         fcb[14]='?';
     }
@@ -388,6 +396,10 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     
     setusr(user);
     bdos(26,(char*)0x80);
+    /* Function 12 is decimal 12 (0Ch), not search-next function 12h.
+       CDOS clears the include-directory bit after each search. */
+    if((dirent_optionss & DIRENT_INCLUDE_DIRS) && bdos(12,0)>=0x41)
+        fcb[0] |= 0x80;
     rc=dirent_first(fcb,root);
     if(rc) {
         rstusr();
@@ -395,7 +407,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     }
     last=*root;
     count=1;
-    while(!(rc=dirent_next(fcb,*root,&last,all_extents))) {
+    while(!(rc=dirent_next(fcb,*root,&last,dirent_optionss))) {
         count++;
     }
     if(rc==255) {

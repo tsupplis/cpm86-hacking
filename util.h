@@ -60,6 +60,7 @@ unsigned int setcmode();
 int gettime();
 int settime();
 int p_cli();
+int ms_p_cli();
 int p_priority();
 int conattach();
 int condetach();
@@ -101,6 +102,8 @@ long epoch(struct sysdt *dt);
 long epoch_now(void);
 
 int p_cli(char *cmd);
+/* CDOS 4.1 only: opened COM/EXE FCB, full command, synchronous. See API.md. */
+int ms_p_cli(char *opened_fcb, char *cmd);
 int p_priority(int priority);
 int conattach(void);
 int condetach(void);

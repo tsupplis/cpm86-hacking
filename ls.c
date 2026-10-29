@@ -144,7 +144,7 @@ int main(int argc, char **argv)
     if(!isatty(fileno(stdout))) {
         flag_pause=0;
     }
-    rc=dirent_load(pat,&root,&user,&drive,sort_order,1);
+    rc=dirent_load(pat,&root,&user,&drive,sort_order,DIRENT_ALL_EXTENTS|DIRENT_INCLUDE_DIRS);
     if(rc) {
         if(rc==255) {
             if(flag_mode!=2) {
@@ -189,11 +189,12 @@ int main(int argc, char **argv)
             if(dirent_is_sys(cursor) && !flag_all) {
                 continue;
             }
-            size=cursor->blocks*block_size/1024;
+            size=dirent_is_dir(cursor)?0:cursor->blocks*block_size/1024;
             all_size+=size;
             count++;
             if(flag_mode==1) {
-                fprintf(stdout,"%c%c ",
+                fprintf(stdout,"%c%c%c ",
+                    dirent_is_dir(cursor)?'D':'-',
                     dirent_is_sys(cursor)?'S':'-',
                     dirent_is_ro(cursor)?'R':'-');
                 dirent_print_name(stdout,cursor,0);
@@ -201,12 +202,13 @@ int main(int argc, char **argv)
                 ctr++;
             } else if(flag_mode==2) {
                 dirent_print_name(stdout,cursor,1);
-                fprintf(stdout,"\n");
+                fprintf(stdout,dirent_is_dir(cursor)?"/\n":"\n");
                 ctr++;
             } else {
                 fprintf(stdout,"%c",dirent_is_sys(cursor)?'*':' ');
                 dirent_print_name(stdout,cursor,0);
-                fprintf(stdout,"%5luK",size);
+                if(dirent_is_dir(cursor)) fprintf(stdout," <DIR>");
+                else fprintf(stdout,"%5luK",size);
                 if(count%4!=0) {
                     fprintf(stdout,",");
                 }

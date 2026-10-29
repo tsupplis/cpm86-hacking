@@ -375,6 +375,98 @@ p_cli_end:
 p_cli_	endp
 
 ;
+; ms_p_cli: private Concurrent DOS 4.1 PCTMP DOS loader (function 1).
+; int ms_p_cli(char *opened_fcb, char *command)
+; FCB must be a successfully opened 36-byte COM/EXE FCB in current user.
+; command includes executable name and arguments (at most 127 characters).
+; Synchronous like BATCH; no ORDER search, built-ins, CMD or BAT dispatch.
+; Returns loader status (0 success), or -1 unsupported/invalid input.
+; Exact version/type gate: private PD/UDA layouts are not assumed on later OSes.
+; Static buffers make this non-reentrant, like p_cli.
+    bss mscli_pb:word,5
+    bss mscli_line:byte,134
+    bss mscli_entry:word,2
+    public ms_p_cli_
+ms_p_cli_ proc near
+    push bp
+    mov bp,sp
+    push es
+    push di
+    push si
+    push bx
+    mov cx,0Ch
+    int 0E0h
+    cmp al,41h
+    je mscli_version
+    jmp mscli_no
+mscli_version:
+    test ah,04h
+    jnz mscli_supported
+    jmp mscli_no
+mscli_supported:
+    mov cx,9Ch
+    int 0E0h
+    mov di,64                 ; bound malformed/cyclic parent chains
+mscli_parent:
+    or bx,bx
+    jz mscli_no
+    cmp word ptr es:8[bx],4350h ; PC
+    jne mscli_next
+    cmp word ptr es:10[bx],6D54h ; Tm
+    jne mscli_next
+    cmp byte ptr es:12[bx],70h ; p
+    je mscli_found
+mscli_next:
+    mov bx,word ptr es:1Eh[bx]
+    dec di
+    jnz mscli_parent
+    jmp mscli_no
+mscli_found:
+    mov es,word ptr es:10h[bx] ; P_UDA
+    mov ax,word ptr es:50h     ; U_INITCS
+    or ax,ax
+    jz mscli_no
+    mov word ptr mscli_entry,3
+    mov word ptr mscli_entry+2,ax
+    push ds
+    pop es
+    mov di,offset mscli_line
+    mov cx,134
+    xor ax,ax
+    rep stosb
+    mov si,word ptr 6[bp]
+    mov di,offset mscli_line+1
+    mov cx,128
+mscli_copy:
+    lodsb
+    or al,al
+    jz mscli_ready
+    stosb
+    loop mscli_copy
+    jmp mscli_no             ; reject truncation
+mscli_ready:
+    mov ax,word ptr 4[bp]
+    mov word ptr mscli_pb,ax
+    mov word ptr mscli_pb+2,ds
+    mov word ptr mscli_pb+4,offset mscli_line
+    mov word ptr mscli_pb+6,ds
+    mov word ptr mscli_pb+8,0 ; default user, as in BATCH
+    mov dx,offset mscli_pb
+    mov cx,1
+    call dword ptr mscli_entry
+    mov ax,bx
+    jmp mscli_end
+mscli_no:
+    mov ax,0FFFFh
+mscli_end:
+    pop bx
+    pop si
+    pop di
+    pop es
+    pop bp
+    ret
+ms_p_cli_ endp
+
 ; p_priority: BDOS fn 145 (91h, P_PRIORITY) -- set the process priority.
 ; MP/M, Concurrent CP/M (ver_mpm). 0 is the highest priority, 0FFh the
 ; lowest; transient programs start at 200.

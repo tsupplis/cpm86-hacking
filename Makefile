@@ -313,3 +313,6 @@ test-keys:
 .PHONY: check-ball
 check-ball: ball.cmd
 	python3 tools/testball.py
+
+# Rebuild directory clients whenever the shared entry layout changes.
+ls.o rm.o wc.o dirent.o: dirent.h util.h
