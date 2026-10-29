@@ -16,13 +16,13 @@
 #endif
 
 #ifndef __STDC__
-int dirent_next(fcb, root, last, dirent_optionss) 
+int dirent_next(fcb, root, last, dirent_options) 
     char * fcb;
     dirent_t * root;
     dirent_t ** last;
-    int dirent_optionss;
+    int dirent_options;
 #else
-int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int dirent_optionss)
+int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int dirent_options)
 #endif
 {
     int rc=0;
@@ -340,16 +340,16 @@ int dirent_is_fat(int drive)
 }
 
 #ifndef __STDC__
-int dirent_load(path, root, ouser, odrive, sort_order, dirent_optionss) 
+int dirent_load(path, root, ouser, odrive, sort_order, dirent_options) 
     char * path;
     dirent_t ** root;
     int *ouser;
     int *odrive;
     int sort_order;
-    int dirent_optionss;
+    int dirent_options;
 #else
 int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive, 
-    int sort_order,int dirent_optionss)
+    int sort_order,int dirent_options)
 #endif
 {
     char fcb[40];
@@ -384,7 +384,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
             }
         }
     }
-    if(dirent_optionss & DIRENT_ALL_EXTENTS) {
+    if(dirent_options & DIRENT_ALL_EXTENTS) {
         fcb[12]='?';
         fcb[14]='?';
     }
@@ -398,7 +398,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     bdos(26,(char*)0x80);
     /* Function 12 is decimal 12 (0Ch), not search-next function 12h.
        CDOS clears the include-directory bit after each search. */
-    if((dirent_optionss & DIRENT_INCLUDE_DIRS) && bdos(12,0)>=0x41)
+    if((dirent_options & DIRENT_INCLUDE_DIRS) && bdos(12,0)>=0x41)
         fcb[0] |= 0x80;
     rc=dirent_first(fcb,root);
     if(rc) {
@@ -407,7 +407,7 @@ int dirent_load(char * path, dirent_t ** root,int * ouser,int * odrive,
     }
     last=*root;
     count=1;
-    while(!(rc=dirent_next(fcb,*root,&last,dirent_optionss))) {
+    while(!(rc=dirent_next(fcb,*root,&last,dirent_options))) {
         count++;
     }
     if(rc==255) {
