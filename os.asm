@@ -383,9 +383,9 @@ p_cli_	endp
 ; Returns loader status (0 success), or -1 unsupported/invalid input.
 ; Exact version/type gate: private PD/UDA layouts are not assumed on later OSes.
 ; Static buffers make this non-reentrant, like p_cli.
-    bss mscli_pb:word,5
+    bss mscli_pb:word,10
     bss mscli_line:byte,134
-    bss mscli_entry:word,2
+    bss mscli_entry:word,4
     public ms_p_cli_
 ms_p_cli_ proc near
     push bp
@@ -409,7 +409,9 @@ mscli_supported:
     mov di,64                 ; bound malformed/cyclic parent chains
 mscli_parent:
     or bx,bx
-    jz mscli_no
+    jnz mscli_name
+    jmp mscli_no
+mscli_name:
     cmp word ptr es:8[bx],4350h ; PC
     jne mscli_next
     cmp word ptr es:10[bx],6D54h ; Tm
@@ -423,7 +425,8 @@ mscli_next:
     jmp mscli_no
 mscli_found:
     mov es,word ptr es:10h[bx] ; P_UDA
-    mov ax,word ptr es:50h     ; U_INITCS
+    mov bx,50h                ; U_INITCS
+    mov ax,word ptr es:[bx]
     or ax,ax
     jz mscli_no
     mov word ptr mscli_entry,3
