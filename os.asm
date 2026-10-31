@@ -375,11 +375,11 @@ p_cli_end:
 p_cli_	endp
 
 ;
-; ms_p_cli: private Concurrent DOS 4.1 PCTMP DOS loader (function 1).
+; ms_p_cli: private CCP/M 3.1 and CDOS 4.1 PCTMP DOS loader (function 1).
 ; int ms_p_cli(char *opened_fcb, char *command)
 ; FCB must be a successfully opened 36-byte COM/EXE FCB in current user.
 ; command includes executable name and arguments (at most 127 characters).
-; Synchronous like BATCH; no ORDER search, built-ins, CMD or BAT dispatch.
+; A successful DOS launch may transfer control back to PCTMP on exit.
 ; Returns loader status (0 success), or -1 unsupported/invalid input.
 ; Exact version/type gate: private PD/UDA layouts are not assumed on later OSes.
 ; Static buffers make this non-reentrant, like p_cli.
@@ -394,43 +394,9 @@ ms_p_cli_ proc near
     push di
     push si
     push bx
-    mov cx,0Ch
-    int 0E0h
-    cmp al,41h
-    je mscli_version
-    jmp mscli_no
-mscli_version:
-    test ah,04h
-    jnz mscli_supported
-    jmp mscli_no
-mscli_supported:
-    mov cx,9Ch
-    int 0E0h
-    mov di,64                 ; bound malformed/cyclic parent chains
-mscli_parent:
-    or bx,bx
-    jnz mscli_name
-    jmp mscli_no
-mscli_name:
-    cmp word ptr es:8[bx],4350h ; PC
-    jne mscli_next
-    cmp word ptr es:10[bx],6D54h ; Tm
-    jne mscli_next
-    cmp byte ptr es:12[bx],70h ; p
-    je mscli_found
-mscli_next:
-    mov bx,word ptr es:1Eh[bx]
-    dec di
-    jnz mscli_parent
-    jmp mscli_no
-mscli_found:
-    mov es,word ptr es:10h[bx] ; P_UDA
-    mov bx,50h                ; U_INITCS
-    mov ax,word ptr es:[bx]
+    call pc_lookup
     or ax,ax
     jz mscli_no
-    mov word ptr mscli_entry,3
-    mov word ptr mscli_entry+2,ax
     push ds
     pop es
     mov di,offset mscli_line
@@ -469,6 +435,127 @@ mscli_end:
     pop bp
     ret
 ms_p_cli_ endp
+
+pc_lookup proc near
+    mov cx,0Ch
+    int 0E0h
+    cmp al,31h                ; CCP/M-86 3.1 PC-MODE
+    jb pc_lookup_no
+    cmp al,41h                ; Concurrent DOS 4.1
+    jbe mscli_version
+    jmp pc_lookup_no
+mscli_version:
+    test ah,04h
+    jnz mscli_supported
+    jmp pc_lookup_no
+mscli_supported:
+    mov cx,9Ch
+    int 0E0h
+    mov di,64                 ; bound malformed/cyclic parent chains
+mscli_parent:
+    or bx,bx
+    jnz mscli_name
+    jmp pc_lookup_no
+mscli_name:
+    cmp word ptr es:8[bx],4350h ; PC
+    jne mscli_next
+    cmp word ptr es:10[bx],6D54h ; Tm
+    jne mscli_next
+    cmp byte ptr es:12[bx],70h ; p
+    je mscli_found
+mscli_next:
+    mov bx,word ptr es:1Eh[bx]
+    dec di
+    jnz mscli_parent
+    jmp pc_lookup_no
+mscli_found:
+    mov es,word ptr es:10h[bx] ; P_UDA
+    mov bx,50h                ; U_INITCS
+    mov ax,word ptr es:[bx]
+    or ax,ax
+    jz pc_lookup_no
+    mov word ptr mscli_entry,3
+    mov word ptr mscli_entry+2,ax
+    ret
+pc_lookup_no:
+    xor ax,ax
+    ret
+pc_lookup endp
+
+    public pcsysdisk_
+pcsysdisk_ proc near
+    push es
+    push bx
+    mov cx,0ch
+    int 0e0h
+    push ax
+    mov cx,9ch
+    int 0e0h
+    pop ax
+    cmp al,31h
+    je pc_disk31
+    cmp al,41h
+    jne pc_disk_unknown
+    mov bx,9dh
+    jmp pc_disk_read
+pc_disk31:
+    mov bx,4bh
+pc_disk_read:
+    xor ax,ax
+    mov al,es:[bx]
+    inc ax
+    jmp pc_disk_end
+pc_disk_unknown:
+    xor ax,ax
+pc_disk_end:
+    pop bx
+    pop es
+    ret
+pcsysdisk_ endp
+
+    public pcorder_
+pcorder_ proc near
+    push bp
+    mov bp,sp
+    push es
+    push bx
+    push si
+    push di
+    call pc_lookup
+    or ax,ax
+    jz pcorder_no
+    mov dx,4[bp]
+    mov cx,6
+    call dword ptr mscli_entry
+    mov ax,bx
+    jmp pcorder_end
+pcorder_no:
+    mov ax,0ffffh
+pcorder_end:
+    pop di
+    pop si
+    pop bx
+    pop es
+    pop bp
+    ret
+pcorder_ endp
+
+    public pcclean_
+pcclean_ proc near
+    push bp
+    push bx
+    push si
+    push di
+    push es
+    xor cx,cx
+    call dword ptr mscli_entry
+    pop es
+    pop di
+    pop si
+    pop bx
+    pop bp
+    ret
+pcclean_ endp
 
 ; p_priority: BDOS fn 145 (91h, P_PRIORITY) -- set the process priority.
 ; MP/M, Concurrent CP/M (ver_mpm). 0 is the highest priority, 0FFh the

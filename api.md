@@ -373,19 +373,37 @@ and the standalone keyboard diagnostic. Rebuild `util.lib` and relink consumers
 to pick up the library change; copies held by other projects are independent.
 
 
-### CDOS 4.1 DOS program launch
+### Concurrent program launch
+     
+`p_spawn(command)` launches a command and reacquires the console before
+returning. Native CCP/M uses P_CLI. With a PCTmp ancestor on Concurrent
+BDOS 31h through 41h inclusive, extensionless filenames are probed on
+the specified or current drive in PCTMP ORDER. An unqualified name can
+also resolve to a system file on the configured system disk on 3.1 and 4.1. COM/EXE use the translator,
+CMD uses P_CLI, and BAT runs through BATCH. Native resident commands can
+also be dispatched by P_CLI. A zero result means launch succeeded and
+console control returned; it is not the child program's exit code.
+
+The DOS path follows BATCH: raise the caller's scheduling priority before
+launch, attach the console again, then call translator service 0 for cleanup.
+The translator consumes the executable FCB. Closing it again on return
+can raise a CDOS close-checksum error.
+
+### Low-level DOS program launch
 
 `int ms_p_cli(char *opened_fcb, char *cmd)` calls the private PCTMP
 function 1 used by BATCH. Pass a successfully opened 36-byte COM/EXE FCB
 and a NUL-terminated command line including the executable name (at most
 127 characters). The current user is used. It returns the loader status,
 zero on success, or -1 for an unsupported system, missing PCTMP ancestor,
-or an overlong line. This is synchronous and uses static buffers.
+or an overlong line. The wrapper uses static buffers. A DOS program can
+launch successfully without the native caller resuming. Do not rely on the
+call returning after DOS termination.
 
 The wrapper checks BDOS function 12 (decimal, 0Ch), Concurrent system type
-and **exact version 41h**, then walks the parent process descriptors to
+and **versions 31h through 41h inclusive**, then walks the parent process descriptors to
 PCTmp and uses its translator entry at CS:0003, as BATCH does. This private
-interface is deliberately disabled on earlier and later versions. It does
+interface is enabled only in that range. It does
 not implement ORDER searches, shell built-ins, CMD execution or BAT parsing;
 use `p_cli` for native CMD commands. An opened FCB is required, not merely
 one filled by `fcbinit`.

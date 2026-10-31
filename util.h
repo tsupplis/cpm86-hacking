@@ -59,6 +59,7 @@ unsigned int getcmode();
 unsigned int setcmode();
 int gettime();
 int settime();
+int p_spawn();
 int p_cli();
 int ms_p_cli();
 int p_priority();
@@ -101,6 +102,7 @@ int setfdatetime(char *fcb, struct sysdt *create_dt, struct sysdt *update_dt);
 long epoch(struct sysdt *dt);
 long epoch_now(void);
 
+int p_spawn(char *cmd);
 int p_cli(char *cmd);
 /* CDOS 4.1 only: opened COM/EXE FCB, full command, synchronous. See API.md. */
 int ms_p_cli(char *opened_fcb, char *cmd);

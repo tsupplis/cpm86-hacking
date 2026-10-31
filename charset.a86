@@ -1,0 +1,83 @@
+        CSEG
+
+        MOV     DX,OFFSET FIRST
+        MOV     CL,9
+        INT     224
+
+        MOV     DL,24H
+        MOV     CL,2
+        INT     224
+
+        MOV     DX,OFFSET SECOND
+        MOV     CL,9
+        INT     224
+
+        MOV     CL,0
+        MOV     DL,0
+        INT     224
+
+        DSEG
+        ORG     100H
+
+FIRST:
+        DB      '    0123456789ABCDEF',13,10
+        DB      '20  ',20H,21H,22H,23H,'$'
+
+SECOND:
+        DB      25H,26H,27H,28H,29H,2AH,2BH
+        DB      2CH,2DH,2EH,2FH,13,10
+
+        DB      '30  '
+        DB      30H,31H,32H,33H,34H,35H,36H,37H
+        DB      38H,39H,3AH,3BH,3CH,3DH,3EH,3FH,13,10
+
+        DB      '40  '
+        DB      40H,41H,42H,43H,44H,45H,46H,47H
+        DB      48H,49H,4AH,4BH,4CH,4DH,4EH,4FH,13,10
+
+        DB      '50  '
+        DB      50H,51H,52H,53H,54H,55H,56H,57H
+        DB      58H,59H,5AH,5BH,5CH,5DH,5EH,5FH,13,10
+
+        DB      '60  '
+        DB      60H,61H,62H,63H,64H,65H,66H,67H
+        DB      68H,69H,6AH,6BH,6CH,6DH,6EH,6FH,13,10
+
+        DB      '70  '
+        DB      70H,71H,72H,73H,74H,75H,76H,77H
+        DB      78H,79H,7AH,7BH,7CH,7DH,7EH,7FH,13,10
+
+        DB      '80  '
+        DB      80H,81H,82H,83H,84H,85H,86H,87H
+        DB      88H,89H,8AH,8BH,8CH,8DH,8EH,8FH,13,10
+
+        DB      '90  '
+        DB      90H,91H,92H,93H,94H,95H,96H,97H
+        DB      98H,99H,9AH,9BH,9CH,9DH,9EH,9FH,13,10
+
+        DB      'A0  '
+        DB      0A0H,0A1H,0A2H,0A3H,0A4H,0A5H,0A6H,0A7H
+        DB      0A8H,0A9H,0AAH,0ABH,0ACH,0ADH,0AEH,0AFH,13,10
+
+        DB      'B0  '
+        DB      0B0H,0B1H,0B2H,0B3H,0B4H,0B5H,0B6H,0B7H
+        DB      0B8H,0B9H,0BAH,0BBH,0BCH,0BDH,0BEH,0BFH,13,10
+
+        DB      'C0  '
+        DB      0C0H,0C1H,0C2H,0C3H,0C4H,0C5H,0C6H,0C7H
+        DB      0C8H,0C9H,0CAH,0CBH,0CCH,0CDH,0CEH,0CFH,13,10
+
+        DB      'D0  '
+        DB      0D0H,0D1H,0D2H,0D3H,0D4H,0D5H,0D6H,0D7H
+        DB      0D8H,0D9H,0DAH,0DBH,0DCH,0DDH,0DEH,0DFH,13,10
+
+        DB      'E0  '
+        DB      0E0H,0E1H,0E2H,0E3H,0E4H,0E5H,0E6H,0E7H
+        DB      0E8H,0E9H,0EAH,0EBH,0ECH,0EDH,0EEH,0EFH,13,10
+
+        DB      'F0  '
+        DB      0F0H,0F1H,0F2H,0F3H,0F4H,0F5H,0F6H,0F7H
+        DB      0F8H,0F9H,0FAH,0FBH,0FCH,0FDH,0FEH,0FFH,13,10
+        DB      '$'
+
+        END

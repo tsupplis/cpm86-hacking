@@ -38,12 +38,12 @@ that family. DOS Plus remains on XIOS pending further testing.
 | `0Dh` | 320x200, 16 EGA colors | Issued to BIOS | Rejected |
 | `0Eh` | 640x200, 16 EGA colors | Issued to BIOS | Rejected |
 | `0Fh` | 640x350, monochrome EGA | Issued to BIOS | Rejected |
-| `10h` | 640x350, 16 EGA colors | Issued to BIOS | Patched CCP/M-86 3.1 only, after capability and adapter check |
+| `10h` | 640x350, 16 EGA colors | Issued to BIOS | Patched CCP/M-86 3.1 and Concurrent DOS 4.1, after capability and adapter check |
 
 A BIOS request still needs a video BIOS and adapter supporting that mode.
 The library does not probe or verify every BIOS mode. On XIOS, unsupported
 native EGA requests are rejected before hiding the status line or changing
-the display. `sine.cmd` needs mode `10h`: use the BIOS backend or the patched 3.1 XIOS with a suitable EGA/VGA adapter.
+the display. `sine.cmd` needs mode `10h`: use the BIOS backend or either patched XIOS with a suitable EGA/VGA adapter.
 
 ## Stock XIOS: match the adapter
 
@@ -93,7 +93,7 @@ kernel stack and restore the original interrupt mask and caller registers.
 The palette extension uses the existing `ESC !` eight-byte register packet
 to XIOS function 30, with `CH=2` and the packed CGA color-select byte in
 `CL`. XIOS supplies the calling console number and checks graphics
-ownership. The library sends it only for BDOS `31h`, after the legacy CGA
+ownership. The library sends it for Concurrent BDOS `31h` and `41h`, after the legacy CGA
 port write. Original 3.1 XIOS rejects that function through the escape back
 door without printing the packet. Releases 3.2 through 5.x and DOS Plus
 retain their previous palette path.
@@ -112,7 +112,7 @@ kernel accepts mode 10h only with an enhanced colour adapter and BIOS-reported
 video memory of at least 128 KB. A 64 KB EGA cannot supply four full planes.
 
 The library probes reserved XIOS v1 selector 30 using INT E6h, only on
-Concurrent BDOS 31h. It requires AX=4745h and BX bit 0 set. Original 3.1
+Concurrent BDOS 31h or 41h. It requires AX=4745h and BX bit 0 set. Original 3.1
 kernels treat this selector as a no-op; the probe supplies BX=0 and rejects
 the mode without hiding the status line or touching video memory.
 CGA/MDA and patched kernels without suitable EGA memory also return no

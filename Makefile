@@ -147,7 +147,7 @@ mode.cmd: mode.o util.lib
 more.cmd: more.o
 	$(LD) -o $@ $< $(CPM86_LDFLAGS)
 
-util.lib: util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.o subfile.o
+util.lib: spawn.o util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.o subfile.o
 	rm -f $@
 	$(AR) $@ $^
 

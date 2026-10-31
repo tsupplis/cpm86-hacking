@@ -36,8 +36,15 @@ static int select_backend()
 /* Preserve direct CGA palette writes for existing kernels. The function-30
  * escape back door is accepted by the enhanced XIOS; older XIOS versions
  * consume the complete packet and reject the call without printing it.
- * Send the extension only to 3.1; keep later XIOS implementations unchanged.
+ * Use this extension on the Concurrent 3.1 and 4.1 XIOS.
  */
+static int enhanced_xios_version()
+{
+    int version = osver();
+    return (version == 0x31 || version == 0x41) &&
+           (ostype() & OSTYPE_MULTIUSER);
+}
+
 static void kernel_palette(value)
     int value;
 {
@@ -45,7 +52,7 @@ static void kernel_palette(value)
     static unsigned char request[8] = { 30, 0, 0, 0, 0, 2, 0, 0 };
 
     gfx_cga_palette(value);
-    if (osver() != 0x31)
+    if (!enhanced_xios_version())
         return;
     request[4] = value;
     cputc((char)27);
@@ -62,7 +69,7 @@ int gfx_mode(mode)
 {
     int selected = select_backend();
     int native_ega = selected == BACKEND_KERNEL &&
-        mode == MODE_EGA_640X350 && osver() == 0x31;
+        mode == MODE_EGA_640X350 && enhanced_xios_version();
 
     if (!selected)
         return -1;
