@@ -31,7 +31,7 @@ PCETOOLS=pce/pceexit.cmd pce/pcever.cmd pce/pcemnt.cmd pce/pcetime.cmd \
 all: binaries
 
 binaries: $(CPM86TOOLS) $(DOSTOOLS) $(EXTRAS)
-	(cd pce;make binaries)
+	(cd pce;$(MAKE) binaries)
 
 dist: cpm86-lib.zip cpm86-bin.zip pce-bin.zip dos-bin.zip disks.zip
 
@@ -254,11 +254,11 @@ clean:
 	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(CPM86TOOLS) $(DOSTOOLS) util.lib
 	$(RM) dosver.exe $(EXTRAS)
 	$(RM) cpmtest.img ccpmtest.img cpm86-bin.img dostest.img dos-bin.img
-	(cd pce;make clean)
+	(cd pce;$(MAKE) clean)
 
 
 dostest.img: binaries Makefile 
-	(cd pce;make binaries)
+	(cd pce;$(MAKE) binaries)
 	cp dosbase.img dostest.img
 	-for i in $(DOSTOOLS) $(CPM86TOOLS);do \
 	    mcopy -o -i dostest.img $$i ::`basename $$i|tr abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ` ; \
@@ -266,7 +266,7 @@ dostest.img: binaries Makefile
 	mdir -w -i dostest.img ::*.*
 
 ccpmtest.img: binaries cpmtest.img startup.0
-	(cd pce;make binaries)
+	(cd pce;$(MAKE) binaries)
 	cp cpmtest.img $@
 	rm -f tmp.img
 	python3 tools/cpm86twist.py untwist $@ tmp.img
@@ -275,7 +275,7 @@ ccpmtest.img: binaries cpmtest.img startup.0
 	rm -f tmp.img
 
 cpmtest.img: binaries Makefile test.txt env.dat
-	(cd pce;make binaries)
+	(cd pce;$(MAKE) binaries)
 	cp cpmbase.img $@
 	rm -f tmp.img
 	python3 tools/cpm86twist.py untwist $@ tmp.img
