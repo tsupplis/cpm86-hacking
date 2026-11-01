@@ -1,5 +1,6 @@
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
+RM=rm -f
 
 TOOLS=pceexit.cmd pcever.cmd pcemnt.cmd pcetime.cmd pceinit.cmd
 

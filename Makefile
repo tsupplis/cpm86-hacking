@@ -16,7 +16,7 @@ DOS11_LDFLAGS=-ld11
 LD=aztec42_link
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
-
+RM=rm -f
 
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
