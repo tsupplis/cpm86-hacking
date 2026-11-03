@@ -226,3 +226,7 @@ CP/M-86 and CCP/M-86 retain their existing SYSTEM/RO semantics; their
 allocation-map bytes are not decoded as FAT flags. Rebuild tools using
 `dirent_t` with the updated header/library; previously linked binaries
 remain independent. Directories remain excluded by RM's file-only scan.
+
+Verification: disposable live tests cover FAT normal/SYSTEM/HIDDEN/READ-ONLY
+listing and deletion, plus original CP/M-86 1.1 and CCP/M-86 3.1 SYSTEM/RO
+selection and force deletion. No BDOS 230 dependency is introduced.
