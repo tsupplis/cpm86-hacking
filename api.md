@@ -236,17 +236,18 @@ rstusr();
 
 ## 5. Graphics (`gfx.h`)
 
-Implemented in [`gfx.c`](gfx.c) and [`gfx.asm`](gfx.asm). BIOS on BDOS 22h or >=60h; XIOS on Concurrent 31h..5Fh and DOS Plus 41h. Native XIOS EGA mode 10h requires the patched ccpm86-kernel capability response and EGA/VGA hardware. See [GRAPHICS.md](GRAPHICS.md).
+Implemented in [`gfx.c`](gfx.c) and [`gfx.asm`](gfx.asm). BIOS on BDOS 22h or >=60h; XIOS on Concurrent 31h..5Fh and DOS Plus 41h. Native XIOS EGA modes 0Dh/0Eh/10h and VGA modes 11h/12h/13h require the patched ccpm86-kernel capability response and matching EGA/VGA hardware. See [GRAPHICS.md](GRAPHICS.md).
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `gfx_mode` | `int gfx_mode(int mode)` | Returns 0 when issued, -1 for an unsupported request. BIOS supports modes 3/4/6/0Dh..10h; stock XIOS 3/4/6; patched 3.1 XIOS additionally mode 10h after capability/adapter validation. Hides/restores the status line around graphics. |
+| `gfx_mode` | `int gfx_mode(int mode)` | Returns 0 when issued, -1 for an unsupported request. BIOS supports modes 3/4/6/0Dh..13h; stock XIOS 3/4/6; patched XIOS additionally 0Dh/0Eh/10h/11h/12h/13h after capability/adapter validation (0Fh is BIOS-only). Hides/restores the status line around graphics. |
 | `gfx_palette` | `void gfx_palette(int palette)` | CGA background/intensity and palette selection, using BIOS-style packed BX. Use gfx_palette_entry for native EGA. |
-| `gfx_palette_entry` | `int gfx_palette_entry(int index, int color)` | Set EGA palette index 0..15 to raw six-bit EGA color 0..63. Returns 0 when issued, -1 for invalid arguments or a non-EGA mode. Kernel mode uses owner-checked BIOS calls; BIOS backend uses AH=10h/AL=00h. |
-| `gfx_pixel` | `void gfx_pixel(int x, int y, int color)` | Plot a pixel, with color bit 7 requesting XOR. XIOS uses packed B800 CGA memory or four A000 EGA planes; out-of-bounds coordinates are ignored. |
-| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Character-grid text. XIOS draws ASCII in an opaque black cell: 8x8 in CGA, 8x14 in EGA mode 10h. BIOS backend retains BIOS cursor/teletype drawing. |
+| `gfx_palette_entry` | `int gfx_palette_entry(int index, int color)` | Set EGA palette index 0..15 to raw six-bit EGA color 0..63 in planar modes 0Dh..12h. Returns 0 when issued, -1 for invalid arguments or another mode (use `gfx_dac_entry` in 13h). Kernel mode uses owner-checked BIOS calls; BIOS backend uses AH=10h/AL=00h. |
+| `gfx_dac_entry` | `int gfx_dac_entry(int index, int red, int green, int blue)` | Set VGA DAC entry 0..255 to 6-bit RGB (0..63) in VGA modes 11h..13h. Returns 0 when issued, -1 for invalid arguments or another mode. XIOS writes DAC ports 3C8h/3C9h; BIOS backend uses AX=1010h. |
+| `gfx_pixel` | `void gfx_pixel(int x, int y, int color)` | Plot a pixel, with color bit 7 requesting XOR (planar/CGA modes). XIOS uses packed B800 CGA memory, A000 planes (0Dh..12h, write mode 2) or one A000 byte per pixel in 13h, where the full colour byte is stored without XOR. Out-of-bounds coordinates are ignored. |
+| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Character-grid text. XIOS draws ASCII in an opaque black cell: 8x8 in CGA, 0Dh, 0Eh and 13h; 8x14 in 10h; 8x16 (30 rows) in 11h/12h. BIOS backend retains BIOS cursor/teletype drawing. |
 
 ### Constants
 
@@ -261,6 +262,9 @@ Implemented in [`gfx.c`](gfx.c) and [`gfx.asm`](gfx.asm). BIOS on BDOS 22h or >=
 #define MODE_EGA_640X200        14     /* 0x0E: 640x200, 16 colors */
 #define MODE_EGA_640X350_MONO   15     /* 0x0F: 640x350, monochrome */
 #define MODE_EGA_640X350        16     /* 0x10: 640x350, 16 colors */
+#define MODE_VGA_640X480_MONO   17     /* 0x11: 640x480, 2 colors */
+#define MODE_VGA_640X480        18     /* 0x12: 640x480, 16 colors */
+#define MODE_VGA_320X200        19     /* 0x13: 320x200, 256 colors */
 ```
 
 ---

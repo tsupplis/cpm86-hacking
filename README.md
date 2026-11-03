@@ -42,22 +42,23 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. CP/M-86 1.1 uses BIOS mode setup; CCP/M-86 3.1 and later Concurrent releases use XIOS console modes, BDOS keyboard/delay calls and CGA framebuffer drawing. DOS Plus is also supported. Stock XIOS requires CGA; the patched CCP/M kernel also supports EGA/VGA. Press a normal key to exit. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
 | `ballc` | CGA bouncing-ball demo | Runtime graphics backend: BIOS on BDOS `22h` or `>=60h`; XIOS on Concurrent `31h..5Fh` and non-Concurrent `41h` (DOS Plus). |
 | `mandel` | Simple Ascii art demo | - |
-| `sine` | EGA sine wave demo | 640×350 sine plot with axes and labels. Currently uses the BDOS `22h` BIOS backend; kernel EGA modes are not yet implemented. |
+| `sine` | EGA sine wave demo | 640×350 sine plot with axes and labels. BIOS backend, or patched XIOS with EGA (>=128 KB)/VGA. |
+| `rose` | VGA mystic rose demo | Mode 12h (640×480, 16 colours): all 45 chords between 10 points on a circle, coloured by span. BIOS backend, or patched XIOS with VGA. |
 | `getch` | Keyboard scanner | `dosgetch.com` is the DOS counterpart. |
 | `zpdump` | Dump the zero page | `pspdump.com` is the DOS counterpart and supports `-c` to call DOS `int 21h` function `26h` before dumping the new PSP. |
 
-The C graphics library provides `gfx_mode`, `gfx_palette`, `gfx_pixel` and
-`gfx_text`. See [Graphics compatibility and hardware limits](GRAPHICS.md)
+The C graphics library provides `gfx_mode`, `gfx_palette`, `gfx_palette_entry`,
+`gfx_dac_entry`, `gfx_pixel` and `gfx_text`. See [Graphics compatibility and hardware limits](GRAPHICS.md)
 for the OS routing, required adapters, supported modes and test coverage.
 
 | Backend | Systems | Hardware limits |
 | --- | --- | --- |
 | BIOS | BDOS `22h`; BDOS `>=60h`, including Concurrent | BIOS sets modes; CGA modes can run on compatible EGA/VGA adapters. Native EGA modes need suitable hardware and BIOS support. |
 | XIOS | Concurrent BDOS `31h..5Fh`; non-Concurrent `41h` (DOS Plus) | Stock path: modes 3/4/6 only. Stock CGA register programming requires a real or emulated CGA adapter; selecting VGA in the emulator does not supply this compatibility. |
-| Patched XIOS | [ccpm86-kernel](https://github.com/tsupplis/ccpm86-kernel), EGA/VGA patch | Exception: CGA modes 4/6 run on EGA/VGA; native mode 10h (640x350, 16 colours) runs on EGA with at least 128 KB or VGA. The library checks kernel capability first. |
+| Patched XIOS | [ccpm86-kernel](https://github.com/tsupplis/ccpm86-kernel), EGA/VGA patch | Exception: CGA modes 4/6 run on EGA/VGA; native modes 0Dh/0Eh run on colour EGA, 10h (640x350, 16 colours) on EGA with at least 128 KB or VGA, and 11h/12h/13h on VGA. The library checks kernel capability first. |
 
 Graphics memory is shared: exit the graphics application before switching
-consoles. A normal key exits `ballc` and restores text mode.
+consoles. A normal key exits `ballc`, `sine` and `rose` and restores text mode.
 `ball.cmd` is the separate assembly demo and does not use the C library.
 
 ### Clock and Emulator Tools
@@ -100,6 +101,8 @@ For the following OSes, only the files tools work well. Interacting with the bio
 Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
 ![SINE demo](images/sine.png)
+
+![ROSE demo](images/rose.png)
 
 ![CP/M-86 1.1 Apps](images/cpmapps.png)
 

@@ -10,8 +10,9 @@
 
 int gfx_bios_mode(), gfx_bios_palette(), gfx_bios_pixel(), gfx_bios_text();
 int gfx_cga_clear(), gfx_cga_byte(), gfx_cga_palette(), gfx_cga_font();
-int gfx_ega_available(), gfx_ega_clear(), gfx_ega_byte(), gfx_ega_font();
-int gfx_bios_palette_entry();
+int gfx_ega_caps(), gfx_ega_clear(), gfx_ega_byte(), gfx_ega_font();
+int gfx_vga_clear(), gfx_vga_byte(), gfx_vga_dac();
+int gfx_bios_palette_entry(), gfx_bios_dac();
 
 #define BACKEND_BIOS    1
 #define BACKEND_KERNEL  2
@@ -19,6 +20,60 @@ int gfx_bios_palette_entry();
 static int backend = 0;
 static int current_mode = MODE_TEXT;
 static int palette_reg = 0;
+
+/* Native XIOS capability bits returned by the selector-30 probe. */
+#define CAP_EGA_350     1
+#define CAP_EGA_200     2
+#define CAP_VGA         4
+
+static int is_cga(mode)
+    int mode;
+{
+    return mode == MODE_CGA_320X200 || mode == MODE_CGA_640X200;
+}
+
+/* Enhanced modes reached through the patched XIOS. 0Fh stays BIOS-only. */
+static int native_cap(mode)
+    int mode;
+{
+    switch (mode) {
+    case MODE_EGA_640X350:
+        return CAP_EGA_350;
+    case MODE_EGA_320X200:
+    case MODE_EGA_640X200:
+        return CAP_EGA_200;
+    case MODE_VGA_640X480_MONO:
+    case MODE_VGA_640X480:
+    case MODE_VGA_320X200:
+        return CAP_VGA;
+    }
+    return 0;
+}
+
+static int mode_width(mode)
+    int mode;
+{
+    return mode == MODE_CGA_320X200 || mode == MODE_EGA_320X200 ||
+           mode == MODE_VGA_320X200 ? 320 : 640;
+}
+
+static int mode_height(mode)
+    int mode;
+{
+    if (mode == MODE_EGA_640X350 || mode == MODE_EGA_640X350_MONO)
+        return 350;
+    if (mode == MODE_VGA_640X480 || mode == MODE_VGA_640X480_MONO)
+        return 480;
+    return 200;
+}
+
+/* ROM graphics font height: 8x14 at 350 lines, 8x16 at 480, else 8x8. */
+static int font_height(mode)
+    int mode;
+{
+    int height = mode_height(mode);
+    return height == 350 ? 14 : height == 480 ? 16 : 8;
+}
 
 static int select_backend()
 {
@@ -68,17 +123,16 @@ int gfx_mode(mode)
     int mode;
 {
     int selected = select_backend();
-    int native_ega = selected == BACKEND_KERNEL &&
-        mode == MODE_EGA_640X350 && enhanced_xios_version();
+    int cap = native_cap(mode);
+    int native = selected == BACKEND_KERNEL && cap && enhanced_xios_version();
 
     if (!selected)
         return -1;
-    if (native_ega && !gfx_ega_available())
+    if (native && !(gfx_ega_caps() & cap))
         return -1;
-    if (mode != MODE_TEXT && mode != MODE_CGA_320X200 &&
-        mode != MODE_CGA_640X200 && !native_ega &&
+    if (mode != MODE_TEXT && !is_cga(mode) && !native &&
         !(selected == BACKEND_BIOS && mode >= MODE_EGA_320X200 &&
-          mode <= MODE_EGA_640X350))
+          mode <= MODE_VGA_320X200))
         return -1;
     if (mode != MODE_TEXT)
         statline(STATLINE_OFF);
@@ -88,8 +142,12 @@ int gfx_mode(mode)
         cputc((char)27);
         cputc((char)'a');
         cputc((char)mode);
-        if (native_ega) {
-            gfx_ega_clear();
+        if (mode == MODE_VGA_320X200) {
+            gfx_vga_clear();
+        } else if (native) {
+            /* Words per plane: 40 or 80 bytes per line. */
+            gfx_ega_clear((unsigned)(mode_width(mode) >> 3) *
+                          mode_height(mode) / 2);
         } else if (mode != MODE_TEXT) {
             gfx_cga_clear();
             palette_reg = mode == MODE_CGA_320X200 ? 0x30 : 0x0f;
@@ -110,8 +168,7 @@ void gfx_palette(palette)
 
     if (backend == BACKEND_BIOS) {
         gfx_bios_palette(palette);
-    } else if (backend == BACKEND_KERNEL && current_mode != MODE_TEXT &&
-               current_mode != MODE_EGA_640X350) {
+    } else if (backend == BACKEND_KERNEL && is_cga(current_mode)) {
         operation = (palette >> 8) & 255;
         if (operation == 1)
             palette_reg = (palette_reg & ~0x20) | ((palette & 1) << 5);
@@ -125,6 +182,7 @@ void gfx_palette(palette)
 
 /* Raw six-bit EGA color: bits 0..2 are primary B/G/R, bits 3..5
  * are their secondary components. Kept separate from CGA palette selection.
+ * Planar modes 0Dh..12h only; mode 13h uses gfx_dac_entry.
  */
 int gfx_palette_entry(index, color)
     int index, color;
@@ -134,12 +192,13 @@ int gfx_palette_entry(index, color)
 
     if (index < 0 || index > 15 || color < 0 || color > 63)
         return -1;
-    if (backend == BACKEND_BIOS && current_mode >= MODE_EGA_320X200 &&
-        current_mode <= MODE_EGA_640X350) {
+    if (current_mode < MODE_EGA_320X200 || current_mode > MODE_VGA_640X480)
+        return -1;
+    if (backend == BACKEND_BIOS) {
         gfx_bios_palette_entry(index, color);
         return 0;
     }
-    if (backend != BACKEND_KERNEL || current_mode != MODE_EGA_640X350)
+    if (backend != BACKEND_KERNEL || current_mode == MODE_EGA_640X350_MONO)
         return -1;
     for (i = 0; i < 8; i++)
         request[i] = 0;
@@ -151,6 +210,27 @@ int gfx_palette_entry(index, color)
     cputc((char)'!');
     for (i = 0; i < 8; i++)
         cputc((char)request[i]);
+    return 0;
+}
+
+/* VGA DAC entry 0..255 with 6-bit red/green/blue (0..63). VGA modes
+ * 11h..13h only. XIOS: direct DAC ports while this program owns graphics.
+ */
+int gfx_dac_entry(index, red, green, blue)
+    int index, red, green, blue;
+{
+    if (index < 0 || index > 255 || red < 0 || red > 63 ||
+        green < 0 || green > 63 || blue < 0 || blue > 63)
+        return -1;
+    if (current_mode < MODE_VGA_640X480_MONO ||
+        current_mode > MODE_VGA_320X200)
+        return -1;
+    if (backend == BACKEND_BIOS)
+        gfx_bios_dac(index, red, green, blue);
+    else if (backend == BACKEND_KERNEL)
+        gfx_vga_dac(index, red, green, blue);
+    else
+        return -1;
     return 0;
 }
 
@@ -166,23 +246,25 @@ void gfx_pixel(x, y, color)
     if (backend != BACKEND_KERNEL || current_mode == MODE_TEXT ||
         x < 0 || y < 0)
         return;
-    if (current_mode == MODE_EGA_640X350) {
-        if (x < 640 && y < 350)
-            gfx_ega_byte(y * 80 + (x >> 3), 128 >> (x & 7), color);
+    if (x >= mode_width(current_mode) || y >= mode_height(current_mode))
+        return;
+    if (current_mode == MODE_VGA_320X200) {
+        gfx_vga_byte((unsigned)y * 320 + x, color);
         return;
     }
-    if (y >= 200)
+    if (!is_cga(current_mode)) {
+        if (current_mode == MODE_VGA_640X480_MONO)
+            color &= 0x81;
+        gfx_ega_byte((unsigned)y * (mode_width(current_mode) >> 3) +
+                     (x >> 3), 128 >> (x & 7), color);
         return;
+    }
     if (current_mode == MODE_CGA_320X200) {
-        if (x >= 320)
-            return;
         shift = (3 - (x & 3)) * 2;
         mask = 3 << shift;
         bits = (color & 3) << shift;
         offset = x >> 2;
     } else {
-        if (x >= 640)
-            return;
         shift = 7 - (x & 7);
         mask = 1 << shift;
         bits = (color & 1) << shift;
@@ -193,14 +275,16 @@ void gfx_pixel(x, y, color)
 }
 
 /* Same cell coordinates as BIOS text, with an opaque black background.
- * The kernel path supports the IBM PC ROM's ASCII font (0..127).
+ * The kernel path supports the IBM PC ROM's ASCII font (0..127): 8x8 in
+ * CGA, 0Dh, 0Eh and 13h; 8x14 in 10h; 8x16 and 30 rows in 11h/12h.
  */
 void gfx_text(col, row, str, color)
     int col, row;
     char *str;
     int color;
 {
-    int ch, y, x, bits, columns, height;
+    int ch, y, x, bits, columns, rows, height, stride;
+    unsigned offset;
 
     if (backend == BACKEND_BIOS) {
         gfx_bios_text(col, row, str, color);
@@ -208,10 +292,14 @@ void gfx_text(col, row, str, color)
     }
     if (backend != BACKEND_KERNEL || current_mode == MODE_TEXT)
         return;
-    height = current_mode == MODE_EGA_640X350 ? 14 : 8;
-    columns = current_mode == MODE_CGA_320X200 ? 40 : 80;
+    height = font_height(current_mode);
+    columns = mode_width(current_mode) >> 3;
+    rows = mode_height(current_mode) / height;
+    stride = columns;
     if (!color)
         color = 15;
+    if (current_mode != MODE_VGA_320X200)
+        color &= current_mode == MODE_VGA_640X480_MONO ? 1 : 15;
     while (*str) {
         ch = *str++ & 255;
         if (ch == '\r') {
@@ -226,15 +314,26 @@ void gfx_text(col, row, str, color)
             col = 0;
             row++;
         }
-        if (row >= 25)
+        if (row >= rows)
             break;
         if (ch >= 128)
             ch = '?';
         for (y = 0; y < height; y++) {
-            bits = height == 14 ? gfx_ega_font(ch, y) : gfx_cga_font(ch, y);
-            for (x = 0; x < 8; x++)
-                gfx_pixel(col * 8 + x, row * height + y,
-                          (bits & (128 >> x)) ? color & 15 : 0);
+            if (is_cga(current_mode)) {
+                bits = gfx_cga_font(ch, y);
+            } else {
+                bits = gfx_ega_font(ch, y, height);
+            }
+            if (is_cga(current_mode) || current_mode == MODE_VGA_320X200) {
+                for (x = 0; x < 8; x++)
+                    gfx_pixel(col * 8 + x, row * height + y,
+                              (bits & (128 >> x)) ? color : 0);
+            } else {
+                /* Planar cells are byte aligned: foreground then background. */
+                offset = (unsigned)(row * height + y) * stride + col;
+                gfx_ega_byte(offset, bits, color);
+                gfx_ega_byte(offset, ~bits & 255, 0);
+            }
         }
         col++;
     }

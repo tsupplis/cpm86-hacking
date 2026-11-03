@@ -177,10 +177,11 @@ gfx_cga_font_ proc near
             ret
 gfx_cga_font_ endp
 
-; Query only on Concurrent BDOS 31h. The original selector 30 is a no-op:
+; Query only on Concurrent BDOS 31h/41h. The original selector 30 is a no-op:
 ; input BX=0 then returns no capability. Save ES (v1 returns SYSDAT there).
-            public gfx_ega_available_
-gfx_ega_available_ proc near
+; Returns BX bits: 1=mode 10h, 2=modes 0Dh/0Eh, 4=VGA 11h/12h/13h and DAC.
+            public gfx_ega_caps_
+gfx_ega_caps_ proc near
             push bx
             push cx
             push dx
@@ -194,7 +195,7 @@ gfx_ega_available_ proc near
             cmp ax,4745h
             jne ega_unavailable
             mov ax,bx
-            and ax,1
+            and ax,7
             jmp ega_available_done
 ega_unavailable:
             xor ax,ax
@@ -207,14 +208,17 @@ ega_available_done:
             pop cx
             pop bx
             ret
-gfx_ega_available_ endp
+gfx_ega_caps_ endp
 
-; Mode 10h drawing owns the adapter while graphics is active. Original EGA
-; register reads are not portable, so establish/restore known mode-0 defaults
-; instead of attempting to read and restore VGA-only register state.
-; All register/latch transactions run with IRQs disabled.
+; Planar drawing (0Dh/0Eh/10h/11h/12h) owns the adapter while graphics is
+; active. Original EGA register reads are not portable, so establish/restore
+; known mode-0 defaults instead of attempting to read and restore VGA-only
+; register state. All register/latch transactions run with IRQs disabled.
+; egaclear(words): clear the first words of all four planes.
             public gfx_ega_clear_
 gfx_ega_clear_ proc near
+            push bp
+            mov bp,sp
             pushf
             cli
             push es
@@ -237,7 +241,7 @@ gfx_ega_clear_ proc near
             mov es,ax
             xor di,di
             xor ax,ax
-            mov cx,14000
+            mov cx,4[bp]
             cld
             rep stosw
             pop dx
@@ -245,6 +249,7 @@ gfx_ega_clear_ proc near
             pop di
             pop es
             popf
+            pop bp
             ret
 gfx_ega_clear_ endp
 
@@ -296,8 +301,9 @@ ega_pixel_replace:
             ret
 gfx_ega_byte_ endp
 
-; Mode 10h BIOS sets vector 43h to its 8x14 ROM font. Do not assume
-; that every EGA/VGA ROM stores it at the same fixed address.
+; egafont(ch, line, height): EGA/VGA BIOS points vector 43h at the mode's
+; graphics font: 8x8 for 0Dh/0Eh/13h, 8x14 for 10h, 8x16 for 11h/12h.
+; Do not assume that every EGA/VGA ROM stores it at the same fixed address.
             public gfx_ega_font_
 gfx_ega_font_ proc near
             push bp
@@ -311,8 +317,7 @@ gfx_ega_font_ proc near
             mov bx,es:[010Ch]
             mov cx,es:[010Eh]
             mov ax,4[bp]
-            mov dx,14
-            mul dx
+            mul word ptr 8[bp]
             add ax,6[bp]
             add bx,ax
             mov es,cx
@@ -339,6 +344,90 @@ gfx_bios_palette_entry_ proc near
             pop bp
             ret
 gfx_bios_palette_entry_ endp
+
+; Mode 13h: BIOS-configured chain-4, one byte per pixel at A000:y*320+x.
+; GC mode 40h must keep its 256-colour shift, so no planar registers are
+; touched; the full colour byte is stored without an XOR interpretation.
+            public gfx_vga_clear_
+gfx_vga_clear_ proc near
+            push es
+            push di
+            push cx
+            mov ax,0A000h
+            mov es,ax
+            xor di,di
+            xor ax,ax
+            mov cx,32000
+            cld
+            rep stosw
+            pop cx
+            pop di
+            pop es
+            ret
+gfx_vga_clear_ endp
+
+; vgabyte(offset, color)
+            public gfx_vga_byte_
+gfx_vga_byte_ proc near
+            push bp
+            mov bp,sp
+            push es
+            push bx
+            mov ax,0A000h
+            mov es,ax
+            mov bx,4[bp]
+            mov al,byte ptr 6[bp]
+            mov es:[bx],al
+            pop bx
+            pop es
+            pop bp
+            ret
+gfx_vga_byte_ endp
+
+; vgadac(index, red, green, blue): one VGA DAC entry, 6-bit components.
+            public gfx_vga_dac_
+gfx_vga_dac_ proc near
+            push bp
+            mov bp,sp
+            pushf
+            push dx
+            cli
+            mov dx,03C8h
+            mov al,byte ptr 4[bp]
+            out dx,al
+            inc dx
+            mov al,byte ptr 6[bp]
+            out dx,al
+            mov al,byte ptr 8[bp]
+            out dx,al
+            mov al,byte ptr 10[bp]
+            out dx,al
+            pop dx
+            popf
+            pop bp
+            ret
+gfx_vga_dac_ endp
+
+; biosdac(index, red, green, blue): INT 10h AX=1010h.
+            public gfx_bios_dac_
+gfx_bios_dac_ proc near
+            push bp
+            mov bp,sp
+            push bx
+            push cx
+            push dx
+            mov bx,4[bp]
+            mov dh,byte ptr 6[bp]
+            mov ch,byte ptr 8[bp]
+            mov cl,byte ptr 10[bp]
+            mov ax,1010h
+            int 10h
+            pop dx
+            pop cx
+            pop bx
+            pop bp
+            ret
+gfx_bios_dac_ endp
 
 codeseg ends
     end

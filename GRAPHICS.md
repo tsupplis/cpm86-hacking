@@ -5,7 +5,7 @@ That choice affects which video adapters work. An EGA/VGA card's ability to run
 CGA software through its BIOS does not make it compatible with every CGA
 register sequence issued by an older XIOS.
 
-This applies to `ballc.cmd`, `sine.cmd` and programs using `gfx.c`/`gfx.asm`.
+This applies to `ballc.cmd`, `sine.cmd`, `rose.cmd` and programs using `gfx.c`/`gfx.asm`.
 The separate `ball.cmd` assembly demo has its own graphics code; changes to the
 C library do not change its behavior.
 
@@ -35,15 +35,18 @@ that family. DOS Plus remains on XIOS pending further testing.
 | `03h` | 80-column text | Issued to BIOS | Issued to XIOS |
 | `04h` | 320x200, four CGA colors | Issued to BIOS | Supported |
 | `06h` | 640x200, two CGA colors | Issued to BIOS | Supported |
-| `0Dh` | 320x200, 16 EGA colors | Issued to BIOS | Rejected |
-| `0Eh` | 640x200, 16 EGA colors | Issued to BIOS | Rejected |
+| `0Dh` | 320x200, 16 EGA colors | Issued to BIOS | Patched XIOS, capability bit 1 (colour EGA, 64 KB is enough, or VGA) |
+| `0Eh` | 640x200, 16 EGA colors | Issued to BIOS | Patched XIOS, capability bit 1 |
 | `0Fh` | 640x350, monochrome EGA | Issued to BIOS | Rejected |
-| `10h` | 640x350, 16 EGA colors | Issued to BIOS | Patched CCP/M-86 3.1 and Concurrent DOS 4.1, after capability and adapter check |
+| `10h` | 640x350, 16 EGA colors | Issued to BIOS | Patched CCP/M-86 3.1 and Concurrent DOS 4.1, capability bit 0 (EGA >=128 KB or VGA) |
+| `11h` | 640x480, 2 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
+| `12h` | 640x480, 16 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
+| `13h` | 320x200, 256 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
 
 A BIOS request still needs a video BIOS and adapter supporting that mode.
 The library does not probe or verify every BIOS mode. On XIOS, unsupported
 native EGA requests are rejected before hiding the status line or changing
-the display. `sine.cmd` needs mode `10h`: use the BIOS backend or either patched XIOS with a suitable EGA/VGA adapter.
+the display. `sine.cmd` needs mode `10h` and `rose.cmd` mode `12h`: use the BIOS backend or either patched XIOS with a suitable EGA/VGA adapter.
 
 ## Stock XIOS: match the adapter
 
@@ -68,7 +71,7 @@ Other Concurrent/DOS Plus releases contain their own XIOS implementations.
 Do not assume their mode-setting or adapter support matches 3.1, or that
 every BIOS-compatible adapter is supported. User tests confirmed the earlier
 CGA path on Concurrent DOS 3.2 and 4.1; broader hardware coverage is not
-established. The library does not assume that these releases support its native EGA extension; mode 10h remains rejected there. Modes 0Dh..0Fh remain unsupported through XIOS everywhere.
+established. The library does not assume that these releases support its native EGA/VGA extension; modes 0Dh..13h remain rejected there. Mode 0Fh remains unsupported through XIOS everywhere.
 
 ## Exception: patched ccpm86-kernel
 
@@ -104,35 +107,54 @@ standard BIOS text modes, not arbitrary custom fonts, row counts or
 application-defined video state. Finish the demo normally; recovery after
 an abnormal exit is not guaranteed.
 
-## Native EGA mode 10h
+## Native EGA/VGA modes
 
-The first native XIOS EGA mode is 640x350 with 16 colours. Other native EGA
-modes (0Dh..0Fh) remain available only through the BIOS backend. The patched
-kernel accepts mode 10h only with an enhanced colour adapter and BIOS-reported
-video memory of at least 128 KB. A 64 KB EGA cannot supply four full planes.
+| BIOS mode | Size | Colours | XIOS mode | Capability bit | Memory layout | Text font |
+| --- | --- | --- | --- | --- | --- | --- |
+| `0Dh` | 320x200 | 16 | 60h | 1 | Four planes, 40 bytes/line | 8x8, 40x25 |
+| `0Eh` | 640x200 | 16 | 70h | 1 | Four planes, 80 bytes/line | 8x8, 80x25 |
+| `10h` | 640x350 | 16 | 50h | 0 | Four planes, 80 bytes/line | 8x14, 80x25 |
+| `11h` | 640x480 | 2 | 80h | 2 | Plane 0, 80 bytes/line | 8x16, 80x30 |
+| `12h` | 640x480 | 16 | 90h | 2 | Four planes, 80 bytes/line | 8x16, 80x30 |
+| `13h` | 320x200 | 256 | A0h | 2 | Chain-4, one byte per pixel | 8x8, 40x25 |
+
+Mode 0Fh (EGA monochrome) remains BIOS-only. The patched kernel accepts
+mode 10h only with an enhanced colour adapter and BIOS-reported video memory
+of at least 128 KB; a 64 KB EGA cannot supply four full planes. Modes
+0Dh/0Eh work on any colour EGA. Modes 11h..13h need a VGA identified by
+INT 10h AX=1A00h, so a 256 KB EGA is not mistaken for VGA.
 
 The library probes reserved XIOS v1 selector 30 using INT E6h, only on
-Concurrent BDOS 31h or 41h. It requires AX=4745h and BX bit 0 set. Original 3.1
-kernels treat this selector as a no-op; the probe supplies BX=0 and rejects
-the mode without hiding the status line or touching video memory.
-CGA/MDA and patched kernels without suitable EGA memory also return no
+Concurrent BDOS 31h or 41h. It requires AX=4745h and the requested mode's
+BX bit: bit 0 for 10h, bit 1 for 0Dh/0Eh, bit 2 for 11h/12h/13h. Original
+3.1 kernels treat this selector as a no-op; the probe supplies BX=0 and
+rejects the mode without hiding the status line or touching video memory.
+CGA/MDA and patched kernels without a suitable adapter also return no
 native capability.
 
-Mode entry remains ESC a followed by byte 10h. Internally XIOS records it as
-graphics mode 50h. Text restoration and graphics ownership use the existing
+Mode entry is ESC a followed by the BIOS mode byte; XIOS translates it
+into the native mode above. Text restoration and graphics ownership use the existing
 enhanced-adapter path. No raw application BIOS mode call is needed.
 
-Pixel drawing uses EGA write mode 2: the CPU color's four bits expand into
+Planar pixel drawing (0Dh..12h) uses EGA write mode 2: the CPU color's four bits expand into
 four planes, while destination latches and a bit mask preserve adjacent
 pixels. XOR uses the graphics controller's logical XOR operation. Each
 register/latch transaction masks interrupts and restores the library's
 normal write-mode-0, replace-operation and full-bit-mask defaults afterward.
 The library owns these drawing registers while its graphics mode is active;
 it does not preserve arbitrary register changes made by other drawing code.
-No VGA-only register reads or write mode 3 are used.
+No VGA-only register reads or write mode 3 are used. Mode 11h keeps
+colour bit 0 (and the XOR bit) only, like CGA mode 6.
 
-Text uses the BIOS-selected ROM font pointer at vector 43h, with 8x14 cells
-and 25 rows. It does not assume a font offset inside a particular EGA ROM.
+Mode 13h uses a separate backend: one byte per pixel at `A000:y*320+x`
+in the BIOS-configured chain-4 layout. No graphics-controller register is
+touched (its mode register keeps the 256-colour shift bit), and the full
+colour byte is stored, so bit 7 does not request XOR.
+
+Text uses the BIOS-selected ROM font pointer at vector 43h, with the cell
+heights in the table above. It does not assume a font offset inside a
+particular EGA ROM. Planar text writes each glyph line as two byte-wide
+write-mode-2 operations (foreground, then black background).
 
 For native EGA palette changes, call:
 
@@ -146,19 +168,27 @@ B/G/R in bits 0/1/2 and secondary B/G/R in bits 3/4/5. This is an attribute
 palette value, not a VGA DAC RGB triple. Invalid arguments return -1 without
 changing the display. On XIOS, function 30 CH=3 carries CL=index and DH=color;
 the escape back door supplies DL=calling console. The kernel checks mode and
-graphics ownership before issuing BIOS function 1000h. Keep gfx_palette for
-CGA selection; the XIOS mode-10h path ignores that CGA-only operation.
+graphics ownership before issuing BIOS function 1000h. The same call applies to all planar
+modes 0Dh..12h; mode 13h rejects it. Keep gfx_palette for CGA selection;
+the XIOS EGA/VGA path ignores that CGA-only operation.
+
+For VGA modes 11h..13h, `gfx_dac_entry(index, red, green, blue)` sets DAC
+entry 0..255 with 6-bit components. The BIOS backend uses INT 10h
+AX=1010h. On XIOS the library writes ports 3C8h/3C9h directly while it owns
+graphics, as it already does for planar drawing; restoring text mode
+reloads the BIOS default DAC. In planar VGA modes, attribute palette values
+select DAC entries 0..63.
 
 ## Drawing and console behavior
 
 | Detail | XIOS path |
 | --- | --- |
-| Pixel memory | CGA: packed pixels in alternating 8 KB banks at `B800:0000`. EGA mode 10h: four 28,000-byte planes at `A000:0000`. |
-| Bounds | CGA: 320x200 or 640x200. EGA: 640x350. Out-of-range pixels ignored. |
-| XOR | Color bit 7 requests XOR |
+| Pixel memory | CGA: packed pixels in alternating 8 KB banks at `B800:0000`. EGA/VGA planar: four planes at `A000:0000` (8,000..38,400 bytes each). Mode 13h: 64,000 bytes at `A000:0000`. |
+| Bounds | Mode width x height from the tables above. Out-of-range pixels ignored. |
+| XOR | Color bit 7 requests XOR, except mode 13h |
 | Initial palette | Bright CGA colors |
 | Palette interface | BIOS-style packed `BX`: high byte 0 for background/intensity (foreground in mode 6), 1 for palette selection |
-| Text | Software 8x8 PC ROM font in CGA; 8x14 BIOS-selected ROM font in EGA mode 10h. ASCII 0..127; other bytes become `?`. |
+| Text | Software 8x8 PC ROM font in CGA; BIOS-selected ROM font (vector 43h) in EGA/VGA modes. ASCII 0..127; other bytes become `?`. |
 | Status line | Hidden for graphics; restored on return to text |
 | Mode result | `0` means request issued; escape output provides no success acknowledgement |
 | Concurrency | One graphics owner; no per-console graphics framebuffer save/restore |
@@ -177,6 +207,9 @@ with arbitrary application BIOS calls.
 | Concurrent DOS 6.2 | Earlier user tests passed; current policy selects the BIOS backend |
 | DOS Plus | crtreset tested in PCE VGA across three consecutive runs after scrolling and BIOS output; full XIOS graphics coverage still pending |
 | Physical EGA/VGA and other video ROMs | Not yet validated |
+| Patched CCP/M-86 3.1, PCE VGA | Modes 0Dh/0Eh/10h/11h/12h/13h: colour bars, edge clipping, XOR, ROM-font text, EGA palette entry and VGA DAC changes, text restoration; ROSE in mode 12h |
+| Patched CCP/M-86 3.1, PCE EGA | Modes 0Dh/0Eh/10h as above; 11h/12h/13h correctly rejected before any display change |
+| CP/M-86 1.1 BIOS backend, PCE VGA | ROSE in mode 12h |
 | Native EGA on other XIOS versions | Not enabled; no compatibility claim for Concurrent 3.2..5.x or DOS Plus |
 
 PCE's EGA cursor renderer currently displays the requested two-scan-line

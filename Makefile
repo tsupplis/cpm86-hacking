@@ -21,7 +21,7 @@ RM=rm -f
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd mandel.cmd getch.cmd \
-    printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd
+    printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd rose.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com \
     dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
@@ -126,6 +126,13 @@ sine.cmd: sine.o util.lib
 	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
 
 sine.o: sine.c gfx.h
+	$(CC) $(CPM86_CFLAGS) -o $@ $<
+	$(STRIP) $@
+
+rose.cmd: rose.o util.lib
+	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
+
+rose.o: rose.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -o $@ $<
 	$(STRIP) $@
 	
