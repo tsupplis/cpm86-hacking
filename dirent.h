@@ -13,6 +13,7 @@ typedef struct _dirent_t {
     unsigned long block_size;
     int is_fat;
     int is_dir;
+    int is_hidden; /* FAT only; never stored in CP/M filename bits */
     int include_dirs;
     unsigned long fcbs;
     struct _dirent_t * next;
@@ -41,6 +42,11 @@ void dirent_sort(dirent_t ** root, int sort_order);
 #define DIRENT_ALL_EXTENTS 1
 #define DIRENT_INCLUDE_DIRS 2
 #define dirent_is_dir(a) ((a)->is_dir)
+
+/* Raw FAT search metadata is decoded once by dirent.c. On CP/M this
+   separate flag is always zero; allocation bytes retain their meaning. */
+#define dirent_is_hidden(a) ((a)->is_hidden)
+#define dirent_is_system_group(a) (dirent_is_sys(a) || dirent_is_hidden(a))
 
 #define dirent_is_sys(a) (a->entry[10]&~0x7F)
 #define dirent_is_ro(a) (a->entry[9]&~0x7F)

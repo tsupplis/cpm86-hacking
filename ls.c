@@ -90,11 +90,11 @@ int main(int argc, char **argv)
             fprintf(stderr,"INF: File listing utility\n");
             fprintf(stderr,"INF: where filepat is [user/]filespec with wildcard\n");
             fprintf(stderr,"INF:     -h for help\n");
-            fprintf(stderr,"INF:     -a for all files (including system)\n");
+            fprintf(stderr,"INF:     -a for all files (including system/hidden)\n");
             fprintf(stderr,"INF:     -p for for pausing one screen at a time\n");
             fprintf(stderr,"INF:     -s for alphabetic sorting\n");
             fprintf(stderr,"INF:     -r for reverse alphabetic sorting\n");
-            fprintf(stderr,"INF:     -l for long listing\n");
+            fprintf(stderr,"INF:     -l for long listing (D/S/H/R flags)\n");
             fprintf(stderr,"INF:     -b for basic listing\n");
             exit(0);
         }
@@ -184,18 +184,19 @@ int main(int argc, char **argv)
             }
         }
 
-        if(!dirent_is_sys(cursor) || flag_all) {
+        if(!dirent_is_system_group(cursor) || flag_all) {
             unsigned long size;
-            if(dirent_is_sys(cursor) && !flag_all) {
+            if(dirent_is_system_group(cursor) && !flag_all) {
                 continue;
             }
             size=dirent_is_dir(cursor)?0:cursor->blocks*block_size/1024;
             all_size+=size;
             count++;
             if(flag_mode==1) {
-                fprintf(stdout,"%c%c%c ",
+                fprintf(stdout,"%c%c%c%c ",
                     dirent_is_dir(cursor)?'D':'-',
                     dirent_is_sys(cursor)?'S':'-',
+                    dirent_is_hidden(cursor)?'H':'-',
                     dirent_is_ro(cursor)?'R':'-');
                 dirent_print_name(stdout,cursor,0);
                 fprintf(stdout," %4luK %4lu FCB(s) %4lu Block(s)\n",size,cursor->fcbs, cursor->blocks);

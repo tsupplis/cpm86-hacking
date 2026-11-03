@@ -53,7 +53,7 @@ int main(int argc, char **argv)
             fprintf(stderr,"INF: File delete utility \n");
             fprintf(stderr,"INF: where filepat is [user/]filespec with wildcard\n");
             fprintf(stderr,"INF:     -h for help\n");
-            fprintf(stderr,"INF:     -a to include both dir and sys files \n");
+            fprintf(stderr,"INF:     -a to include system/hidden files \n");
             fprintf(stderr,"INF:     -i for user validation per file \n");
             fprintf(stderr,"INF:     -f force file deletion even if read only \n");
             exit(0);
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
         }
         path[offset]=0; 
         
-        if(dirent_is_sys(cursor) && !all) {
+        if(dirent_is_system_group(cursor) && !all) {
             cursor=cursor->next;
             continue;
         }
@@ -187,7 +187,9 @@ int main(int argc, char **argv)
                     u=dirent_fcb(ro_fcb,cursor);
                     fcb_clear_ro(ro_fcb);
                     setusr(u);
-                    debug_dump_hex(stderr, (unsigned char*)(ro_fcb), 33, 0L, 0);
+                    /* Force clears READ-ONLY only. Preserve SYS/HIDDEN and
+                       every other returned attribute; BDOS 19 deletes the
+                       selected file directly, without a 230 call. */
                     bdos(30,ro_fcb);
                     setusr(ou);;
                 }

@@ -93,6 +93,7 @@ int dirent_next(char * fcb, dirent_t * root, dirent_t ** last, int dirent_option
     cursor->is_fat=root->is_fat;
     cursor->include_dirs=root->include_dirs;
     cursor->is_dir=root->is_fat && f[16]==f[17] && (f[16]&0xc0)==0xc0;
+    cursor->is_hidden=root->is_fat && f[16]==f[17] && (f[16]&0xa0)==0xa0;
     if(root->is_fat) {
         unsigned long * s=(unsigned long *)(f+28);
         cursor->blocks=((unsigned long)(*s)+cursor->block_size-1)/
@@ -164,6 +165,7 @@ int dirent_first(char * fcb, dirent_t ** root)
     root[0]->is_fat=is_fat;
     root[0]->include_dirs=include_dirs;
     root[0]->is_dir=is_fat && f[16]==f[17] && (f[16]&0xc0)==0xc0;
+    root[0]->is_hidden=is_fat && f[16]==f[17] && (f[16]&0xa0)==0xa0;
     {
         dpb_t dpb;
         dpb_load(root[0]->drive,&dpb);
@@ -333,7 +335,7 @@ int dirent_is_fat(int drive)
     debug_dump_hex(stderr, (unsigned char*)(0x80), 32*4, 0L, 0);
     getchar();
 #endif
-    if(f[0x0F]==0x80 && f[0]==' ') {
+    if(f[0x0F]==0x80 && f[0]==' ' && f[16]==0x80 && f[17]==0x80) {
         return 1;
     }
     return 0;

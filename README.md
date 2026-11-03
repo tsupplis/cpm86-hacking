@@ -18,14 +18,14 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 
 | Tool | Purpose | Usage and options |
 | --- | --- | --- |
-| `ls` | Directory listing | `ls [-h] \| [-a] [-p] [-s\|-r] [-l\|-b] filepat`<br>`filepat` is `[user/]filespec` with wildcards. `-a` includes system files, `-p` pauses, `-s`/`-r` sort, and `-l`/`-b` select long/basic output. |
-| `rm` | File deletion | `rm [-h] \| [-a][-i] filepat`<br>`-a` includes directory and system files, `-i` asks for confirmation, and `-f` deletes read-only files. |
+| `ls` | Directory listing | `ls [-h] \| [-a] [-p] [-s\|-r] [-l\|-b] filepat`<br>`filepat` is `[user/]filespec` with wildcards. `-a` includes system/hidden files, `-p` pauses, `-s`/`-r` sort, and `-l`/`-b` select long/basic output. |
+| `rm` | File deletion | `rm [-h] \| [-a][-i][-f] filepat`<br>`-a` includes system/hidden files, `-i` asks for confirmation, and `-f` deletes read-only files. |
 | `more` | Paginated file display | `more -h \| [infile]`<br>`infile` is a `[user/]filespec`. |
 | `copycon` | Copy console input to a file | `copycon -h \| [-a] filename`<br>`filename` is a `[user/]filespec`; `-a` appends. Ctrl-C or Ctrl-Z finishes input. |
 | `dump` | Hexadecimal dump | `dump -h \| [-p][-r] [infile]`<br>`-p` pauses each page and `-r` selects raw output. |
 | `mode` | Screen configuration | `mode -h \| option option ...`<br>Supports `cls`, `cursor=on/off`, `statln=on/off`, `status=`, `fg=`, and `bg=`. CP/M-86 1.1 for PC/XT only. |
 | `touch` | Empty file creation | `touch [-h] \| filespec` |
-| `wc` | Count file contents | `wc [-h] \| [-a] filepat [filepat] ...`<br>Counts words, lines, and characters. `-a` includes directory and system files. |
+| `wc` | Count file contents | `wc [-h] \| [-a] filepat [filepat] ...`<br>Counts words, lines, and characters. `-a` includes system/hidden files. |
 | `printenv` | Display environment variables | `printenv [-h]`<br>Status text supports `\\s` for space, `\\` for backslash, `\\u` for upper case, and `\\l` for lower case. |
 
 ### System and Demo Tools
@@ -209,3 +209,20 @@ Still it is a funny bit of discovery and archeology...
 
 The whole repository is under MIT [License](LICENSE.md) unless specified otherwise in a subdirectory.
 
+
+## FAT SYSTEM/HIDDEN files
+
+LS and RM group FAT SYSTEM or HIDDEN together for selection. Default LS/RM
+omit that group; `-a` includes it. `ls -al` prints four separate flags in
+D/S/H/R order (directory, system, hidden, read-only). `rm -f` clears only
+READ-ONLY, so `rm -af` includes and removes protected group files after that
+explicit RO override. Writable SYSTEM/HIDDEN files require only `rm -a`.
+HIDDEN deletion requires the corrected CDOS BDOS 19 backend; older kernels
+can still refuse it. No BDOS 230 calls are used.
+
+The directory library recognizes the actual FAT metadata marker before
+reading flag bytes 16/17, and stores HIDDEN in a separate structure field.
+CP/M-86 and CCP/M-86 retain their existing SYSTEM/RO semantics; their
+allocation-map bytes are not decoded as FAT flags. Rebuild tools using
+`dirent_t` with the updated header/library; previously linked binaries
+remain independent. Directories remain excluded by RM's file-only scan.
