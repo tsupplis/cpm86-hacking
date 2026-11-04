@@ -3,6 +3,7 @@
  * See util.h.
  */
 #include <stdio.h>
+#include <limits.h>
 #include "util.h"
 
 static int month_days[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -186,8 +187,10 @@ int getdatetime(dt)
         s = gettime(stamp);
         if (s < 0)
             return -1;
+        if (stamp_to_sysdt(stamp, dt) < 0)
+            return -1;
         dt->sec = bcd(s);
-        return stamp_to_sysdt(stamp, dt);
+        return 0;
     }
     if (v != 0x22)
         return -1;
@@ -293,12 +296,12 @@ int setfdatetime(fcb, create_dt, update_dt)
 
 /*
  * epoch: convert a struct sysdt to Unix epoch (seconds since 1970-01-01 UTC).
- * Returns EPOCH_ERR (-1L) if dt is NULL or out of range (year < 1970 or > 2099).
+ * Returns EPOCH_ERR (-1L) if dt is invalid or the result does not fit in long.
  */
 long epoch(dt)
     struct sysdt *dt;
 {
-    long days;
+    long days, seconds;
     int i;
 
     if (!dt || dt->year < 1970 || dt->year > 2099
@@ -316,7 +319,11 @@ long epoch(dt)
         days += month_days[i] + (i == 1 && isleap(dt->year));
     days += dt->day - 1;
 
-    return days * 86400L + dt->hour * 3600L + dt->min * 60L + dt->sec;
+    seconds = dt->hour * 3600L + dt->min * 60L + dt->sec;
+    if (days > LONG_MAX / 86400L ||
+        (days == LONG_MAX / 86400L && seconds > LONG_MAX % 86400L))
+        return EPOCH_ERR;
+    return days * 86400L + seconds;
 }
 
 /*

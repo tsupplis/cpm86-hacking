@@ -36,7 +36,7 @@ struct sysdt {
     int sec;    /* 0..59      */
 };
 
-#define EPOCH_ERR  (-1L)    /* returned by now()/epoch() on error */
+#define EPOCH_ERR  (-1L)    /* epoch errors, including signed long overflow */
 
 
 #define OSTYPE_MULTIUSER 0x04

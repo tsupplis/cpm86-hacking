@@ -317,6 +317,10 @@ dostest: dostest.img
 test-keys:
 	python3 testkeys.py
 
+.PHONY: check-c
+check-c: test-keys
+	python3 tools/testc.py
+
 .PHONY: check-ball
 check-ball: ball.cmd
 	python3 tools/testball.py

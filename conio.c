@@ -23,7 +23,7 @@ int kbhit() {
 
 #define GETCH_BUFLEN (64)
 
-static char * getch_buffer=0;
+static char getch_buffer[GETCH_BUFLEN];
 
 #ifndef __STDC__
 int cputc(c)
@@ -54,9 +54,6 @@ int getch()
     static int s=0;
     static int o=0;
 
-    if(getch_buffer==0) {
-        getch_buffer=(char*)malloc(GETCH_BUFLEN+1);
-    }
     if(s>0) {
         c=(unsigned char)getch_buffer[o];s--;o++;
         o=o%GETCH_BUFLEN;

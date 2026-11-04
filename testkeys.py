@@ -2,6 +2,7 @@
 """Test the actual getch function bodies with queued high-bit bytes."""
 from pathlib import Path
 import os
+import re
 import subprocess
 import tempfile
 root=Path(__file__).resolve().parent
@@ -12,11 +13,12 @@ for filename in ('conio.c','getch.c'):
     while depth:
         depth += (text[end]=='{')-(text[end]=='}'); end+=1
     body=text[start:end]
+    declaration=re.search(r'^static char .*getch_buffer.*;',text,re.M).group()
     source=r'''
 #include <stdio.h>
 #include <stdlib.h>
 #define GETCH_BUFLEN 64
-static char *getch_buffer;
+''' + declaration + r'''
 static int pos;
 int bdos(int fn,int arg) { static int keys[]={0x41,0xC8,0xD0,0xFF,0}; return keys[pos++]; }
 ''' + body + r'''

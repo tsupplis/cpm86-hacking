@@ -27,7 +27,7 @@ unsigned long debug_dump_hex(FILE *fd, char*data, unsigned int size,
     ascii[16] = '\0';
     for (i = 0; i < size; ++i) {
         if (i % 16 == 0 && !raw) {
-            fprintf(fd, "%06x: ", offset);
+            fprintf(fd, "%06lx: ", offset);
         }
         offset++;
         fprintf(fd, "%02x ", ((unsigned char *)data)[i]);
@@ -69,4 +69,3 @@ unsigned long debug_dump_hex(FILE *fd, char*data, unsigned int size,
 #endif
     return offset;
 }
-

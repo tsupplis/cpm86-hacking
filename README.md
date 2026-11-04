@@ -162,6 +162,14 @@ preservation when program chaining fails. `bioskey()` returns -1 on
 MP/M and Concurrent systems instead of invoking their unavailable BIOS
 keyboard interrupt; use console input on those systems.
 
+`make check-c` runs the keyboard checks and Aztec C/emu2 regressions for
+system-clock seconds, signed epoch limits, environment comments at EOF,
+heap-independent keyboard buffering, allocation failures, WC line endings
+and hidden/system filtering, long dump offsets, and background colors.
+WC counts CRLF as one line ending and also accepts CR-only and LF-only text.
+The signed 32-bit epoch API returns `EPOCH_ERR` after
+2038-01-19 03:14:07 UTC instead of wrapping.
+
 
 ## Test Environment
 

@@ -28,7 +28,7 @@ unsigned long dump_hex(FILE *fd, char*data, unsigned int size,
     ascii[16] = '\0';
     for (i = 0; i < size; ++i) {
         if (i % 16 == 0 && !raw) {
-            fprintf(fd, "%06x: ", offset);
+            fprintf(fd, "%06lx: ", offset);
         }
         offset++;
         fprintf(fd, "%02x ", ((unsigned char *)data)[i]);
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
     char *infile = 0;
     FILE *infp = 0;
     int process = 1;
-    char *buffer=malloc(BUFLEN);
+    char *buffer;
 
 
     i = 1;
@@ -167,6 +167,14 @@ int main(int argc, char **argv)
         fclose(stdin);
     }
 
+    buffer=malloc(BUFLEN);
+    if(!buffer) {
+        fprintf(stderr,"ERR: Not enough memory\n");
+        if(infile) {
+            fclose(infp);
+        }
+        return 1;
+    }
     while (process) {
         c = fread(buffer, 1, flag_pause ? 16 : BUFLEN, infp);
         if (c < 1) {
@@ -226,5 +234,6 @@ int main(int argc, char **argv)
     if (infile) {
         fclose(infp);
     }
+    free(buffer);
     exit(0);
 }

@@ -30,6 +30,7 @@ static int loaded=0;
 #define STATE_ERROR     6
 #define STATE_EOF       7       
 #define STATE_COMMENT   8       
+#define STATE_DONE      9
 
 #ifndef __STDC__
 static st_val(c,val,state,offset) 
@@ -184,6 +185,10 @@ static void st_init(int c, char * var, int * state, int * offset)
 #ifdef DEBUG_LOW
     fprintf(stderr,"DBG: %d:%d[%c]\n",*state,*offset,(char)c>=' '?c:'.');
 #endif
+    if(c==EOF) {
+        *state=STATE_DONE;
+        return;
+    }
     if(c==';') {
         *state=STATE_COMMENT;
         *offset=0;
@@ -224,7 +229,7 @@ static void st_comment(int c, int * state, int * offset)
     fprintf(stderr,"DBG: %d:%d[%c]\n",*state,*offset,(char)c>=' '?c:'.');
 #endif
     if(c==EOF) {
-        *state=EOF;
+        *state=STATE_DONE;
     } else if(c=='\n' || c=='\r') {
         *state=STATE_INIT;
     }
@@ -338,6 +343,7 @@ static int lef(char * path)
             }
             loop=0;
             break;
+        case STATE_DONE:
         case STATE_ERROR:
             loop=0;
             break;
@@ -456,4 +462,3 @@ char* getenv(const char *v)
     }
     return 0;
 }
-

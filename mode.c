@@ -148,7 +148,7 @@ int bg(char* arg)
     } else if(arg[0]>='a' && arg[0]<='f') {
         bg=arg[0]-'a'+10;       
     } else if(arg[0]>='A' && arg[0]<='F') {
-        bg=arg[0]='A'+10;
+        bg=arg[0]-'A'+10;
     } else {
         return -1;
     }
@@ -234,4 +234,3 @@ int main(int argc, char **argv)
     }
     exit(0);
 }
-

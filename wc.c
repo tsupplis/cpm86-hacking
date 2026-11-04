@@ -31,12 +31,18 @@ int parse_file(char * filename, unsigned long *w, unsigned long *l,
     int ic;
     int state=0;
     int eof=0;
+    int prev_cr=0;
     char * buffer;
 
     if (!(infp = fopen(filename, "r"))) {
         return -1;
     }
     buffer=malloc(BUFLEN);
+    if(!buffer) {
+        fprintf(stderr,"ERR: Not enough memory\n");
+        fclose(infp);
+        return -1;
+    }
 
     *w = 0;
     *l = 0;
@@ -49,9 +55,10 @@ int parse_file(char * filename, unsigned long *w, unsigned long *l,
                 eof=1;
                 break;
             }
-            if(ic == '\r') {
+            if(ic == '\r' || (ic == '\n' && !prev_cr)) {
                 l[0]++;
             }
+            prev_cr=(ic == '\r');
             if(isalnum(ic)) {
                 if (state != 1) {
                     state = 1;
@@ -127,8 +134,6 @@ int main(int argc, char **argv)
     while(i<argc && !ctrlc) {
         dirent_t * cursor;
         int rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
-        rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
-        rc=dirent_load(argv[i],&root,(int*)0,(int*)0,0,0);
         if(rc) {
             if(rc==255) {
                 fprintf(stderr,"INF: No file found for '%s'\n",argv[i]);
@@ -166,7 +171,7 @@ int main(int argc, char **argv)
             }
             path[offset]=0; 
             
-            if(dirent_is_sys(cursor) && !all) {
+            if(dirent_is_system_group(cursor) && !all) {
                 cursor=cursor->next;
                 continue;
             }
