@@ -157,11 +157,125 @@ print_dec:
          add	    sp, 6
          ret
 
+system_memory:
+        push    bx
+        push    cx
+        push    dx
+        push    si
+        push    di
+        push    bp
+        push    ds
+        push    es
+        call    concurrent_equipment
+        jc      system_memory_bios
+        mov     ax,ds:word ptr 14[bx] ; XIOS equipment: main memory in KB
+        jmp     system_memory_end
+system_memory_bios:
+        int     12h
+system_memory_end:
+        pop     es
+        pop     ds
+        pop     bp
+        pop     di
+        pop     si
+        pop     dx
+        pop     cx
+        pop     bx
+        ret
+
+; Return the INT 11h fields used by the banners from cached XIOS counts.
+system_equipment:
+        push    bx
+        push    cx
+        push    dx
+        push    si
+        push    di
+        push    bp
+        push    ds
+        push    es
+        call    concurrent_equipment
+        jc      system_equipment_bios
+        xor     ax,ax
+        cmp     ds:word ptr 12[bx],0
+        jz      equipment_floppies
+        or      ax,2
+equipment_floppies:
+        mov     dx,ds:word ptr [bx]
+        or      dx,dx
+        jz      equipment_ports
+        dec     dx
+        and     dx,3
+        mov     cl,6
+        shl     dx,cl
+        or      ax,dx
+        or      ax,1
+equipment_ports:
+        mov     dx,ds:word ptr 4[bx]
+        and     dx,3
+        mov     cl,14
+        shl     dx,cl
+        or      ax,dx
+        mov     dx,ds:word ptr 6[bx]
+        and     dx,7
+        mov     cl,9
+        shl     dx,cl
+        or      ax,dx
+        jmp     system_equipment_end
+system_equipment_bios:
+        int     11h
+system_equipment_end:
+        pop     es
+        pop     ds
+        pop     bp
+        pop     di
+        pop     si
+        pop     dx
+        pop     cx
+        pop     bx
+        ret
+
+; CF clear: DS = SYSDAT, BX = equipment block; CF set: use BIOS.
+concurrent_equipment:
+        mov     cx,0Ch
+        int     0E0h
+        cmp     ah,14h
+        jnz     concurrent_equipment_no
+        cmp     al,31h
+        jb      concurrent_equipment_no
+        mov     cx,9Ah
+        int     0E0h
+        push    es
+        mov     cx,9Ch
+        int     0E0h
+        mov     ax,es:word ptr 10h[bx]
+        mov     es,ax
+        pop     ds
+        mov     ax,14
+        xor     cx,cx
+        xor     dx,dx
+        xor     si,si
+        callf   ds:dword ptr .28h
+        mov     bx,ax
+        clc
+        ret
+concurrent_equipment_no:
+        stc
+        ret
+
 disk_count:
         push    bx
         push    cx
+        push    dx
+        push    si
+        push    di
+        push    bp
         push    ds
         push    es
+        call    concurrent_equipment
+        jc      disk_count_legacy
+        mov     ax,ds:word ptr 2[bx]
+        jmp     disk_count_end
+disk_count_legacy:
         mov     cx,0Ch
         int     0E0h
         cmp     ax,1041h
@@ -188,6 +302,10 @@ disk_count_dosplus:
 disk_count_end:
         pop     es
         pop     ds
+        pop     bp
+        pop     di
+        pop     si
+        pop     dx
         pop     cx
         pop     bx
         ret

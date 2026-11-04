@@ -35,7 +35,7 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `reboot` | Cold or warm reboot | `reboot [w]`<br>No argument performs a cold reboot; `w` performs a warm reboot (skips the BIOS memory test). Flushes disks first. PC only. |
 | `cls` | Clear the screen | `cls` targets VT52; `clsansi` targets VT100/ANSI terminals. |
 | `pause` | Wait for a keystroke | CP/M-86 submit tool. |
-| `wait` | Wait for n seconds | CP/M-86 submit tool. |
+| `wait` | Wait for n seconds (1-9) | BIOS timer on BDOS `22h`; BDOS delay on later CP/M-family systems, including Concurrent. |
 | `tod` | Replacement date/time utility | Removes the 78-99 year constraint and validates dates, including leap years. CP/M-86 1.1 for PC/XT only. |
 | `ver` | Display BDOS and operating-system version | Identifies the CP/M-86 family; `dosver.com` is the DOS-family PC-MODE counterpart, including DR DOS and Concurrent DOS probes. |
 | `mem` | Display available and system memory | DOS PC-MODE counterparts: `dosmem.com` uses the DOS 2+ resize-allocation probe when available, with a PSP fallback for DOS 1. Both show the BIOS conventional-memory total. |
@@ -94,9 +94,40 @@ Unless mentioned otherwise, all the tools are working on
 - Personal CP/M 2.04
 - Concurrent DOS 3.2, DOS 4.1 6.21
 
-For the following OSes, only the files tools work well. Interacting with the bios is generally prohibited (ATINIT/ATTIME and PCEINIT/PCETIME)...
+The file tools work on the following OSes, but hardware tools need care:
+stock CCP/M generally prohibits direct BIOS calls. PCE host hooks are not BIOS
+interrupts, so this restriction does not apply to the `pcetime` time source.
 - Concurrent CP/M 3.0
 - Concurrent CP/M 3.1
+
+The clock tools distinguish Concurrent BDOS 3.0 from 3.1 and later.
+On the tested CCP/M-86 1.0 image (BDOS `1430h`), the banners skip the
+unsupported hardware dump with a message. `pceinit` still synchronizes from
+the PCE clock; `attime` and `atinit` report unsupported AT RTC access without
+calling the blocked BIOS interrupt.
+
+`atinit` and `pceinit` read total memory, coprocessor presence, floppy/hard-disk
+counts and port counts through XIOS equipment information on Concurrent systems
+(system type `14h`, BDOS >= `31h`); CP/M and DOS Plus retain BIOS `INT 12h` and
+`INT 11h`. Floppy counts decode the BIOS presence bit and zero-based count,
+including zero and four drives. Concurrent disk counts also avoid `INT 13h`;
+CP/M retains the BIOS disk-count call and DOS Plus retains its existing XIOS
+path. On the supplied patched CCP/M 3.1 image, both banners now complete,
+reporting 640 KB, no coprocessor, two floppies and zero hard disks.
+`attime` also completes on that image because its RTC interrupt is preserved.
+These results do not establish stock CCP/M 3.1 RTC compatibility.
+All three tools also complete on DOS Plus 1.2, CDOS 3.2 and CDOS 4.1
+(640 KB configured for 4.1), and CP/M-86 1.0/1.1. Both CP/M images use the
+BIOS memory/equipment/disk-count path and report four floppies. The CP/M-86
+1.0 image is identified as 1.1 by the existing banner because both return
+BDOS `22h`; that label is not a kernel-version probe.
+The tested configurations have no hard disk; nonzero hard-disk counts
+have not been runtime-verified by these checks.
+
+AT clock reads check BIOS errors before decoding and preserve the decoder's
+registers. Both AT/RTC and PCE clock synchronization calculate Gregorian
+leap days, including the 2000 and 2100 century rules. `mem` retains the
+reported CCP/M memory size below its 640 KB display cap.
 
 Those OSes work incredibly well on PCE on floppy and HD images. This emulator is simple, small and works a treat. Fantastic...
 
@@ -117,6 +148,19 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
 ## Build Environment
 
 For this cross development environment, please use (https://github.com/tsupplis/cpm86-crossdev). It comes with wrappers for all the tools necesary.
+
+`make check-clock` runs focused assembly regressions with NASM and emu2:
+clock error handling/register preservation, BDOS date stamps at leap-year
+boundaries, BIOS/BDOS wait routing and timer wraparound, and memory-size
+reporting. The date tests execute routines extracted from both clock sources;
+the wait tests execute the built command. PCE clock include changes rebuild
+both `pcetime` and `pceinit`.
+
+`make check-asm` also checks TOD date validation throughout 2000-2099,
+BIOS keyboard routing and register preservation, and register/stack
+preservation when program chaining fails. `bioskey()` returns -1 on
+MP/M and Concurrent systems instead of invoking their unavailable BIOS
+keyboard interrupt; use console input on those systems.
 
 
 ## Test Environment

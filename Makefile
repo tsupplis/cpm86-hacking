@@ -321,5 +321,12 @@ test-keys:
 check-ball: ball.cmd
 	python3 tools/testball.py
 
+.PHONY: check-asm check-clock
+check-asm: check-clock
+	python3 tools/testasm.py
+
+check-clock: wait.cmd
+	python3 tools/testclock.py
+
 # Rebuild directory clients whenever the shared entry layout changes.
 ls.o rm.o wc.o dirent.o: dirent.h util.h

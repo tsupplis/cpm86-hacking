@@ -50,6 +50,8 @@ ccpm3x:
             mov     es,bx
             mov     bx,13h
             mov     ax, es:[bx]
+            cmp     ax,640
+            jbe     prram
 fixax:      
             mov     ax, 640
 prram:

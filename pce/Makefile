@@ -8,9 +8,9 @@ all: binaries
 
 binaries: $(TOOLS)
 
-pceinit.obj: pceinit.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
+pceinit.obj: pceinit.a86 pceclock.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 
-pcetime.obj: pcetime.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
+pcetime.obj: pcetime.a86 pceclock.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 
 pcemnt.obj: pcemnt.a86 pce.a86 pcelib.a86 baselib.a86 tinylib.a86
 

@@ -32,7 +32,7 @@ Implemented across [`os.asm`](os.asm:1) and [`dpb.c`](dpb.c:1).
 | `getccpdrv` | `int getccpdrv(void)` | Returns the drive the running command/transient was loaded from across CP/M-86 1.1 (sysdata `+17h`), CCP/M 3.x (SCB `+4Bh`), and DOS Plus (SCB `+86h`). Returns drive index (0 = `A:` … 15 = `P:`) or `0x0FFF` if unknown. |
 | `bdosx` | `int bdosx(int cx, int dx, int *es, int *bx)` | Invokes extended BDOS call (`INT 0E0h`) with `CX` (function) and `DX` (parameter). Returns `AX & 0xFF`, and writes returned `ES` and `BX` into `*es` and `*bx`. |
 | `delay` | `void delay(unsigned int ticks)` | Delays execution for `ticks` timer ticks. Uses BIOS `INT 1Ah` on CP/M-86 1.1, or BDOS fn 141 (`8Dh`) on multitasking OSes. |
-| `bioskey` | `int bioskey(void)` | Reads key directly from ROM BIOS via `INT 16h` (`AH=00h`). Returns `AX` (`AH` = scan code, `AL` = ASCII character). |
+| `bioskey` | `int bioskey(void)` | Reads key directly from ROM BIOS via `INT 16h` (`AH=00h`). Returns `AX` (`AH` = scan code, `AL` = ASCII character), or -1 without accessing the BIOS on MP/M and Concurrent systems. Use console input there; it does not provide the same BIOS scan-code contract. |
 | `pckey` | `int pckey(void)` | Direct PC keyboard hardware read from port `0x60`, followed by keyboard acknowledge and 8259 PIC EOI (`0x20`). Returns raw scan code. |
 | `xstatline` | `void xstatline(int mode)` | Toggles status line display on DOS Plus and CCP/M via OS system call table. |
 | `dpb_load` | `void dpb_load(int drive, dpb_t *dpb)` | Reads the Disk Parameter Block (DPB) for `drive` (0 = `A:`, etc.) via BDOS fn 31 (`1Fh`) into `dpb_t`. |

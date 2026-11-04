@@ -82,25 +82,32 @@ print_time:
 
 leap_days:
                 push    si
+                push    bx
                 push    cx
                 push    dx
-                mov     cl, 2
-                shr     ax, cl
-                mov     dx, ax
-                and     ax, 3
-                jnz     leap_days_end
-                lea     cx, month_day
-                add     cx, bx
-                add     cx, bx
-                mov     si, cx
-                mov     cx, [si]
-                cmp     cx, 59
-                jae     leap_days_end
-                dec     dx
+                ; Count Gregorian leap days through this month (BX is zero-based).
+                cmp     bx,2
+                jae     leap_days_year
+                dec     ax
+leap_days_year:
+                mov     si,ax
+                mov     cl,2
+                shr     ax,cl
+                mov     bx,ax
+                mov     ax,si
+                xor     dx,dx
+                mov     cx,100
+                div     cx
+                sub     bx,ax
+                mov     ax,si
+                xor     dx,dx
+                mov     cx,400
+                div     cx
+                add     ax,bx
 leap_days_end:
-                mov     ax,dx
                 pop     dx
                 pop     cx
+                pop     bx
                 pop     si
                 ret
 
@@ -274,4 +281,3 @@ cpm_set_time:
                 pop     ax
                 pop     es
                 ret
-

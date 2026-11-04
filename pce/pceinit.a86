@@ -30,17 +30,14 @@ include pce.a86
             mov     cx,0Ch
             int     0E0h
             cmp     ax,1430h
-            jz      wrg_os
-            cmp     ax,1431h
-            jz      wrg_os
+            jz      hw_unsupported
             sub     ax,1462h
             ja      hw_end
             call    print_hw
             jmp     hw_end
-wrg_os:
-            lea	    si, msg_wrg_os
-            call	print_str
-            call    quit
+hw_unsupported:
+            lea     si,msg_hw_unsupported
+            call    print_str
 hw_end:
             lea     si, msg_rtc
             call    print_str
@@ -73,7 +70,7 @@ print_hw:
             call    print_str  
             lea     si, msg_hw_mem
             call    print_str  
-            int     12h
+            call    system_memory
             mov     bx,10
             call    print_uint16
             lea     si, msg_hw_kb
@@ -94,9 +91,7 @@ print_hw:
             call    print_str  
             lea     si, msg_hw_87
             call    print_str  
-            int     11h
- 	        add	    ax,0040h
-	        and	    ax,0fff3h
+            call    system_equipment
             push    ax
             and     al,2
             jz      no_87
@@ -111,9 +106,16 @@ done_87:
             pop     ax
             push    ax
             xor     ah,ah
+            test    al,01h
+            jnz     count_floppies
+            xor     ax,ax
+            jmp     print_flp_count
+count_floppies:
             mov     cl,06h
             shr     al,cl
-            and     al,07h
+            and     al,03h
+            inc     ax
+print_flp_count:
             mov     bx,10
             call    print_uint16
             lea     si, msg_nl
@@ -262,8 +264,8 @@ mlen         dw     65534
 mext         db     0
 month_siz    db     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 month_day    dw     000,031,059,090,120,151,181,212,243,273,304,334
-msg_wrg_os   db     'Not supported by this operating system.',13,10,0
 msg_notpce   db     'Not running under PCE ...',13,10,0
+msg_hw_unsupported db 'Hardware dump requires Concurrent BDOS 3.1 or later.',13,10,0
 msg_hookerr  db     'No PCE RTC clock ...',13,10,0
 msg_rtc      db     'Date now: ',0
 msg_cpm86   db      'CP/M-86, ',0

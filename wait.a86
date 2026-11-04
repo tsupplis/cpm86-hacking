@@ -17,17 +17,31 @@ skip_sp:
             jl      quit
             sub     al,'0'          ; al = seconds (1-9)
             xor     ah,ah
+            push    ax
+            mov     cx,0Ch
+            int     0E0h
+            cmp     al,22h
+            pop     ax
+            je      wait_bios
+            mov     bx,60           ; BDOS delay uses 60 ticks/second
+            mul     bx
+            mov     dx,ax
+            mov     cx,8Dh
+            int     0E0h
+            jmp     quit
+wait_bios:
             mov     bx,18           ; ~18.2 BIOS timer ticks/second
             mul     bx
             mov     di,ax           ; int 1Ah preserves di, clobbers ax/cx/dx
             mov     ah,0
             int     1Ah             ; dx = current tick count
-            add     di,dx           ; di = target tick count
+            mov     bx,dx           ; start tick (low word)
 wait_loop:
             mov     ah,0
             int     1Ah
+            sub     dx,bx           ; elapsed ticks, including low-word wrap
             cmp     dx,di
-            jnz     wait_loop
+            jb      wait_loop
 quit:
             xor     cx,cx
             int     0E0h

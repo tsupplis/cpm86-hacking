@@ -1044,8 +1044,22 @@ bioskey_	proc	near
             push	bp
             mov 	bp,sp
             push    ds
+            push    es
+            push    di
+            push    si
+            push    bx
+            call    ver_mpm
+            jnc     bioskey_no
             mov     ah, 0
             int     16h
+            jmp     bioskey_end
+bioskey_no:
+            mov     ax,-1
+bioskey_end:
+            pop     bx
+            pop     si
+            pop     di
+            pop     es
             pop     ds
             pop     bp
             ret
@@ -1277,6 +1291,7 @@ sub_cmddrv_	endp
 p_chain_	proc	near
 	push	bp
 	mov	bp,sp
+	push	bx
 	push	si
 	push	di
 	push	es
@@ -1316,6 +1331,7 @@ p_chain_go:
 	pop	es
 	pop	di
 	pop	si
+	pop	bx
 	pop	bp
 	ret
 p_chain_	endp
