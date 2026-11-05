@@ -145,6 +145,139 @@ def function(text, name, last=False):
     return text[start:end]
 
 
+def terminal_console(folder):
+    text = (ROOT / "conio.c").read_text().replace("bdos(", "test_bdos(")
+    text, count = re.subn(
+        r"#asm(.*?)#endasm",
+        lambda match: "test_video_mode(%d);" %
+        (3 if "mov al, 3" in match.group(1) else 0),
+        text, flags=re.S,
+    )
+    assert count == 2, "expected two BIOS video-mode blocks"
+    (folder / "conio.c").write_text(text)
+    (folder / "test.c").write_text(r'''
+#include <stdio.h>
+#include <string.h>
+static unsigned char output[256];
+static int used, version, system_type, resets, status, video;
+static int status_writes;
+static char status_text[14];
+int test_bdos(fn, arg) int fn, arg; {
+    if (fn == 2) output[used++] = arg;
+    return 0;
+}
+int osver() { return version; }
+int ostype() { return system_type; }
+int dosplus_crtreset() { resets++; return 0; }
+void xstatline(mode) int mode; { status = mode; }
+int test_video_mode(mode) int mode; { video = mode; return 0; }
+int segread(segs) int *segs; { return 0; }
+int bdosx(fn, arg, es, bx) int fn, arg, *es, *bx; {
+    *es = *bx = 0;
+    return 0;
+}
+int pokeb(offset, segment, value) int offset, segment, value; {
+    status_text[offset - 0x32] = value;
+    status_writes++;
+    return 0;
+}
+#include "conio.c"
+''' + CHECK + r'''
+void expect(bytes, label) char *bytes, *label; {
+    int i;
+    if (used != strlen(bytes) || (used && memcmp(output, bytes, used))) {
+        fprintf(stderr, "%s: got %d bytes, expected %d:",
+                label, used, strlen(bytes));
+        for (i = 0; i < used; i++) fprintf(stderr, " %02x", output[i]);
+        fprintf(stderr, "\n");
+    }
+    check(used == strlen(bytes) && (!used || !memcmp(output, bytes, used)), label);
+    used = 0;
+}
+int main() {
+    int i, j;
+    static int versions[] = {0x21, 0x22, 0x30, 0x31, 0x32, 0x41, 0x60};
+    static char position[] = {27, 'Y', 35, 39, 0};
+    static char foreground[] = {27, 'j', 27, 'b', 15, 27, 'k', 0};
+    static char truncated[] = {27, 'j', 27, 'b', 0};
+
+    check(terminal.input.keys == 0 && terminal.input.key_count == 0,
+          "raw input has no key decoder");
+    for (i = 0; i < 7; i++) {
+        version = versions[i];
+        for (j = 0; j < 2; j++) {
+            system_type = j ? OSTYPE_MULTIUSER : 0;
+            resets = 0;
+            crtreset();
+            expect(version > 0x22 ? "\033e\033z" :
+                   "\033m\0330\0331\033q\033t\033u", "reset bytes");
+            check(resets == (version == 0x41 && !j), "DOS Plus reset");
+        }
+        cursor(CURSOR_ON);
+        expect(version > 0x22 ? "\x1be" : "\x1bm", "cursor on");
+        cursor(CURSOR_OFF);
+        expect(version > 0x22 ? "\x1bf" : "\x1bn", "cursor off");
+        cursor(CURSOR_SAVE); expect("\x1bj", "cursor save");
+        cursor(CURSOR_RESTORE); expect("\x1bk", "cursor restore");
+        cursor(99); expect("", "unknown cursor command");
+        status = 0;
+        statline(STATLINE_ON);
+        expect(version == 0x22 ? "\x1b1" : "", "status on bytes");
+        check(status == (version > 0x31 ? 2 : 0), "status on service");
+        status = 0;
+        statline(STATLINE_OFF);
+        expect(version == 0x22 ? "\x1b0" : "", "status off bytes");
+        check(status == (version > 0x31 ? 1 : 0), "status off service");
+    }
+    clrscr(); expect("\x1bE", "clear screen");
+    clreos(); expect("\x1bJ", "clear screen tail");
+    clreol(); expect("\x1bK", "clear line tail");
+    insline(); expect("\x1bL", "insert line");
+    delline(); expect("\x1bM", "delete line");
+    delchar(); expect("\x1bN", "delete character");
+    wrapline(1); expect("\x1bv", "wrap on");
+    wrapline(0); expect("\x1bw", "wrap off");
+    gotoxy(3, 7); expect(position, "unchanged coordinate order");
+    gotoxy(-32, 7); expect("\033Y", "zero coordinate byte");
+    textcolor(15); expect(foreground, "foreground");
+    foreground[4] = (char)255;
+    textcolor(255); expect(foreground, "high-bit foreground");
+    textcolor(256); expect(truncated, "zero color byte");
+    textcolor(0); textcolor(-1); expect("", "ignored foreground");
+    version = 0x22;
+    system_type = 0;
+    video = -1;
+    scrmode(SCRMODE_COL80);
+    expect("\x1b0\x1b1\x1bE", "80-column bytes");
+    check(video == 3, "80-column BIOS mode");
+    scrmode(SCRMODE_COL40);
+    expect("\x1b0\x1bE", "40-column bytes");
+    check(video == 0, "40-column BIOS mode");
+    scrmode(SCRMODE_MONO); expect("\x1by", "monochrome");
+    scrmode(SCRMODE_COLOR); expect("\x1bx", "color");
+    scrmode(SCRMODE_DEFAULT);
+    expect("\033m\0330\0331\033q\033t\033u\x1bE", "default mode");
+    scrmode(99); expect("", "unknown screen mode");
+    version = 0x41;
+    video = -1;
+    for (i = 0; i <= 8; i++) scrmode(i);
+    expect("", "screen modes ignored on later OS");
+    check(video == -1, "no later BIOS mode change");
+    status_writes = 0;
+    setstatus("ignored");
+    check(status_writes == 0, "later status text ignored");
+    version = 0x22;
+    setstatus("Ab\\uCd\\lEf\\sGh");
+    check(status_writes == 14 && !memcmp(status_text, "abCdef gh     ", 14),
+          "status text unchanged");
+    printf("TEST-PASS\n");
+    return 0;
+}
+''')
+    build(folder, ["test.c"])
+    execute(folder)
+
+
 def keyboard(folder):
     for name, dos in (("conio.c", False), ("getch.c", False), ("getch.c", True)):
         text = (ROOT / name).read_text()
@@ -346,7 +479,8 @@ int main() {
 
 
 def check():
-    tests = (clock, environment, keyboard, word_count, directory, dump, colors)
+    tests = (clock, environment, terminal_console, keyboard, word_count,
+             directory, dump, colors)
     selected = sys.argv[1:]
     for test in tests:
         if selected and test.__name__ not in selected:

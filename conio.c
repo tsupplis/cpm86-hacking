@@ -16,6 +16,64 @@ int dosplus_crtreset();
 char * malloc();
 #endif
 
+typedef struct terminal_key {
+    unsigned char *bytes;
+    unsigned int length;
+    int key;
+} terminal_key_t;
+
+typedef struct terminal_output {
+    char *reset[2];
+    char *clear_screen;
+    char *clear_eos;
+    char *clear_eol;
+    char *insert_line;
+    char *delete_line;
+    char *delete_char;
+    char *cursor_on[2];
+    char *cursor_off[2];
+    char *cursor_save;
+    char *cursor_restore;
+    char *wrap_on;
+    char *wrap_off;
+    char *status_on;
+    char *status_off;
+    char *mono;
+    char *color;
+    char *position_prefix;
+    unsigned char position_bias;
+    char *foreground_prefix;
+    char *foreground_suffix;
+} terminal_output_t;
+
+typedef struct terminal_input {
+    terminal_key_t *keys;
+    unsigned int key_count;
+} terminal_input_t;
+
+typedef struct terminal_cfg {
+    terminal_output_t output;
+    terminal_input_t input;
+} terminal_cfg_t;
+
+/* VT52 console data; paired entries select early/later OS variants.
+ * Raw byte input has no key decoder or verified terminal key map yet. */
+static terminal_cfg_t terminal = {
+    {
+        {"\033m\0330\0331\033q\033t\033u", "\033e\033z"},
+        "\x1bE", "\x1bJ", "\x1bK",
+        "\x1bL", "\x1bM", "\x1bN",
+        {"\x1bm", "\x1be"}, {"\x1bn", "\x1bf"},
+        "\x1bj", "\x1bk",
+        "\x1bv", "\x1bw",
+        "\x1b1", "\x1b0",
+        "\x1by", "\x1bx",
+        "\033Y", 32,
+        "\033j\033b", "\033k"
+    },
+    {0, 0}
+};
+
 
 int kbhit() {   
     return bdos(6,254);
@@ -80,11 +138,7 @@ void crtreset()
 
     if(version == 0x41 && !(ostype() & OSTYPE_MULTIUSER))
         dosplus_crtreset();
-    if(version>0x22) {
-        cputs("\033e\033z");
-    } else {
-        cputs("\033m\0330\0331\033q\033t\033u");
-    }
+    cputs(terminal.output.reset[version>0x22]);
 }
 
 #ifndef __STDC__
@@ -93,7 +147,7 @@ clrscr()
 void clrscr()
 #endif
 {
-    cputs("\x1bE");
+    cputs(terminal.output.clear_screen);
 }
 
 #ifndef __STDC__
@@ -102,7 +156,7 @@ clreos()
 void clreos()
 #endif
 {
-    cputs("\x1bJ");
+    cputs(terminal.output.clear_eos);
 }
 
 #ifndef __STDC__
@@ -111,7 +165,7 @@ clreol()
 void clreol()
 #endif
 {
-    cputs("\x1bK");
+    cputs(terminal.output.clear_eol);
 }
 
 #ifndef __STDC__
@@ -120,7 +174,7 @@ delchar()
 void delchar()
 #endif
 {
-    cputs("\x1bN");
+    cputs(terminal.output.delete_char);
 }
 
 #ifndef __STDC__
@@ -129,7 +183,7 @@ insline()
 void insline()
 #endif
 {
-    cputs("\x1bL");
+    cputs(terminal.output.insert_line);
 }
 
 #ifndef __STDC__
@@ -138,7 +192,7 @@ delline()
 void delline()
 #endif
 {
-    cputs("\x1bM");
+    cputs(terminal.output.delete_line);
 }
 
 #ifndef __STDC__
@@ -150,11 +204,11 @@ void gotoxy(int x, int y)
 #endif
 {
     char msg[5];
-    msg[0]=27;
-    msg[1]='Y';
-    msg[2]=x+32;
-    msg[3]=y+32;
-    msg[4]=0;
+    int n=strlen(terminal.output.position_prefix);
+    strcpy(msg,terminal.output.position_prefix);
+    msg[n++]=x+terminal.output.position_bias;
+    msg[n++]=y+terminal.output.position_bias;
+    msg[n]=0;
     cputs(msg);
 }
 
@@ -167,22 +221,16 @@ void cursor(int cmd)
 {
     switch(cmd) {
     case CURSOR_ON:
-        if(osver()>0x22)
-            cputs("\x1be");
-        else
-            cputs("\x1bm");
+        cputs(terminal.output.cursor_on[osver()>0x22]);
         break;
     case CURSOR_OFF:
-        if(osver()>0x22)
-            cputs("\x1bf");
-        else
-            cputs("\x1bn");
+        cputs(terminal.output.cursor_off[osver()>0x22]);
         break;
     case CURSOR_SAVE:
-        cputs("\x1bj");
+        cputs(terminal.output.cursor_save);
         break;
     case CURSOR_RESTORE:
-        cputs("\x1bk");
+        cputs(terminal.output.cursor_restore);
         break;
     }
 }
@@ -194,7 +242,7 @@ wrapline(on)
 void wrapline(int on)
 #endif
 {
-    cputs(on?"\x1bv":"\x1bw");
+    cputs(on?terminal.output.wrap_on:terminal.output.wrap_off);
 }
 
 #ifndef __STDC__
@@ -249,10 +297,10 @@ void scrmode(int m)
         clrscr();
         break;
     case SCRMODE_MONO:
-        cputs("\x1by");
+        cputs(terminal.output.mono);
         break;
     case SCRMODE_COLOR:
-        cputs("\x1bx");
+        cputs(terminal.output.color);
         break;
     }
 }
@@ -270,7 +318,7 @@ void statline(int on)
         return;
     }
     if(os==0x22) {
-        cputs(on?"\x1b1":"\x1b0");
+        cputs(on?terminal.output.status_on:terminal.output.status_off);
         return;
     }
 }
@@ -282,19 +330,16 @@ textcolor(fg)
 void textcolor(int fg)
 #endif
 {
-    unsigned char msg[8];
+    char msg[8];
+    int n;
     if(fg<1) {
         return;
     }
-    msg[0]=27;
-    msg[1]='j';
-    msg[2]=27;
-    msg[3]='b';
-    msg[4]=((unsigned char)fg);
-    msg[5]=27;
-    msg[6]='k';
-    msg[7]=0;
-    cputs((char*)msg);
+    n=strlen(terminal.output.foreground_prefix);
+    strcpy(msg,terminal.output.foreground_prefix);
+    msg[n++]=(unsigned char)fg;
+    strcpy(msg+n,terminal.output.foreground_suffix);
+    cputs(msg);
 }
 
 

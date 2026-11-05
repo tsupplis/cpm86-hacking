@@ -1,6 +1,6 @@
 # util.lib API Reference
 
-`util.lib` is the standard runtime utility library for CP/M-86 tools and programs in this repository. It provides OS detection, low-level BDOS/BIOS/hardware access, console manipulation, directory traversal, CGA/EGA graphics, timekeeping, environment variable handling, and submit (`$$$.sub`) batch chaining.
+`util.lib` provides CP/M-86 system services, console I/O, directories, graphics, clocks, environment variables, and command chaining.
 
 ---
 
@@ -19,45 +19,82 @@
 
 ## 1. Operating System & Low-Level Services (`util.h`)
 
-Implemented across [`os.asm`](os.asm:1) and [`dpb.c`](dpb.c:1).
-
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `osver` | `int osver(void)` | Returns the OS version number (BDOS fn 12 / `0Ch`, low byte in `AL`). E.g. `0x22` = CP/M-86 1.1 / CP/M 2.2, `0x30` = CP/M Plus, `0x31` = Personal CP/M, `0x41` = DOS Plus. |
-| `ostype` | `int ostype(void)` | Returns the OS type byte (BDOS fn 12 / `0Ch`, high byte in `AH`). E.g. `0x00` = CP/M single-user, `0x14` = Concurrent CP/M-86. Returns `0x10` if `AH` is 0. Check against `OSTYPE_MULTIUSER` (`0x04`). |
-| `getcurdrv` | `int getcurdrv(void)` | Returns current default drive via BDOS fn 25 / `19h` (0 = `A:`, 1 = `B:`, ...). |
-| `setcurdrv` | `int setcurdrv(int drv)` | Selects default drive via BDOS fn 14 / `0Eh` (0 = `A:`, 1 = `B:`, ...). |
-| `getccpdrv` | `int getccpdrv(void)` | Returns the drive the running command/transient was loaded from across CP/M-86 1.1 (sysdata `+17h`), CCP/M 3.x (SCB `+4Bh`), and DOS Plus (SCB `+86h`). Returns drive index (0 = `A:` … 15 = `P:`) or `0x0FFF` if unknown. |
-| `bdosx` | `int bdosx(int cx, int dx, int *es, int *bx)` | Invokes extended BDOS call (`INT 0E0h`) with `CX` (function) and `DX` (parameter). Returns `AX & 0xFF`, and writes returned `ES` and `BX` into `*es` and `*bx`. |
-| `delay` | `void delay(unsigned int ticks)` | Delays execution for `ticks` timer ticks. Uses BIOS `INT 1Ah` on CP/M-86 1.1, or BDOS fn 141 (`8Dh`) on multitasking OSes. |
-| `bioskey` | `int bioskey(void)` | Reads key directly from ROM BIOS via `INT 16h` (`AH=00h`). Returns `AX` (`AH` = scan code, `AL` = ASCII character), or -1 without accessing the BIOS on MP/M and Concurrent systems. Use console input there; it does not provide the same BIOS scan-code contract. |
-| `pckey` | `int pckey(void)` | Direct PC keyboard hardware read from port `0x60`, followed by keyboard acknowledge and 8259 PIC EOI (`0x20`). Returns raw scan code. |
-| `xstatline` | `void xstatline(int mode)` | Toggles status line display on DOS Plus and CCP/M via OS system call table. |
-| `dpb_load` | `void dpb_load(int drive, dpb_t *dpb)` | Reads the Disk Parameter Block (DPB) for `drive` (0 = `A:`, etc.) via BDOS fn 31 (`1Fh`) into `dpb_t`. |
-| `getftime` | `int getftime(char *fcb)` | BDOS fn 102 (`66h`, `F_TIMEDATE`): reads the date/time stamps and password mode of an open FCB. Stamps land in the FCB: create/access at `+18h`, update at `+1Ch`; password mode at `+0Ch`. Requires version >= `30h` (MP/M II, CP/M 3, DOS Plus ...). Returns 0-3 on success, `0xFF` on failure or if unsupported (e.g. CP/M-86 1.1). |
-| `setftime` | `int setftime(char *fcb, char *stamps)` | BDOS fn 116 (`74h`): sets the file date/time stamps. CP/M-86 v4 / DOS Plus only (version >= `41h`). `stamps` is 8 bytes (create/access stamp, then update stamp), each `DW` days since 1/1/78, `DB` BCD hour, `DB` BCD minute. The DMA address is pointed at `stamps` for the call and restored afterwards. Returns 0-3 on success, `0xFF` on failure or if unsupported. |
-| `getpcode` | `unsigned int getpcode(void)` | BDOS fn 108 (`6Ch`, `P_CODE`): returns the program return code. CP/M 3 and above (version >= `30h`, not MP/M II). Returns `0xFFFF` if unsupported. |
-| `setpcode` | `unsigned int setpcode(unsigned int code)` | BDOS fn 108 (`6Ch`): sets the program return code and returns it. `0x0000`-`0xFEFF` = no fatal error, `0xFF00`-`0xFF7F` = fatal error (a following `:` command is not run), `0xFFFD` = hardware error, `0xFFFE` = Control-C. `setpcode(0xFFFF)` is a read. Returns `0xFFFF` if unsupported. |
-| `getcmode` | `unsigned int getcmode(void)` | BDOS fn 109 (`6Dh`, `C_MODE`): returns the console mode bitmap. CP/M 3 and above (version >= `30h`, not MP/M II). CP/M 3 bits: 0 fn 11 detects only ^C, 1 ^S does not pause, 2 no tab expansion / no ^P echo, 3 ^C does not terminate, 4 like bit 2, 7 CCP/M ^O not a byte bucket, 8-9 GET/SUBMIT behaviour of fn 11 (0 conditional, 1 always true, 2 always false, 3 input from keyboard). Personal CP/M uses bit 4 only. Returns `0xFFFF` if unsupported. |
-| `setcmode` | `unsigned int setcmode(unsigned int mode)` | BDOS fn 109: sets the console mode bitmap and returns it (`setcmode(0xFFFF)` is a read). Returns `0xFFFF` if unsupported. |
-| `p_cli` | `int p_cli(char *cmd)` | BDOS fn 150 (`96h`, `P_CLI`): sends a command line (max 127 chars) to the CLI, i.e. a resident system process or a program load. MP/M and Concurrent CP/M only (system type bit 0 or 2 set). Returns 0 on success, `0xFF` on failure or if unsupported. |
-| `p_priority` | `int p_priority(int priority)` | BDOS fn 145 (`91h`, `P_PRIORITY`): sets the process priority; `0` is the highest, `0xFF` the lowest, transient programs start at 200. MP/M and Concurrent CP/M only (system type bit 0 or 2 set). Returns 0, or -1 if unsupported. |
-| `conattach` | `int conattach(void)` | BDOS fn 146 (`92h`, `C_ATTACH`): blocks until the process's default console is available, then attaches to it. Done automatically by any console I/O while detached. MP/M and Concurrent CP/M only. Returns 0, or -1 if unsupported. |
-| `condetach` | `int condetach(void)` | BDOS fn 147 (`93h`, `C_DETACH`): disconnects the program from screen and keyboard so that it runs in the background. MP/M, Concurrent CP/M and CP/M-86 v4 (version >= `41h`). Under CP/M-86 v4 using the keyboard while detached terminates the program, and only `INT 0E0h` calls may be used (no `INT 2nh` DOS-like calls); under MP/M and CCP/M screen output re-attaches (fn 146). Returns 0, or -1 if unsupported. |
-| `getpid` | `unsigned int getpid(void)` | Process ID: the address (offset in the system data segment) of this process's descriptor (PD), from BDOS fn 156 (`9Ch`, `P_PDADR`, returned in `ES:BX`). MP/M and Concurrent CP/M only. Returns `0xFFFF` if unsupported (never a valid descriptor address). Unsigned, because addresses above `0x7FFF` are valid: compare PIDs for equality and print them with `%x`/`%u`. |
-| `getppid` | `unsigned int getppid(void)` | Process ID of the parent process (PD field `p_parent`, offset `1Eh`). Returns 0 if the process has no parent, `0xFFFF` if unsupported. |
-| `getpriority` | `int getpriority(void)` | Priority of this process (PD field `p_prior`, offset `05h`): 0 = highest ... 255 = lowest, 200 = normal transient. Returns -1 if unsupported. |
-| `getppriority` | `int getppriority(void)` | Priority of the parent process, read from the parent's PD (the parent PD lies in the same segment). Returns -1 if there is no parent or if unsupported. Typical use, as in `submit.a86`: `p_priority(getppriority() - 1)` to run just better than the parent. |
+| `osver` | `int osver(void)` | Returns the operating system version. |
+| `ostype` | `int ostype(void)` | Returns the operating system type flags. |
+| `getcurdrv` | `int getcurdrv(void)` | Returns the default drive (0 = `A:`, 1 = `B:`, ...). |
+| `setcurdrv` | `int setcurdrv(int drv)` | Selects the default drive (0 = `A:`, 1 = `B:`, ...). |
+| `getccpdrv` | `int getccpdrv(void)` | Returns the command's load drive (0..15), or `0x0FFF` if unknown. |
+| `bdosx` | `int bdosx(int cx, int dx, int *es, int *bx)` | Calls a BDOS service and retrieves its results. |
+| `delay` | `void delay(unsigned int ticks)` | Waits for the requested number of timer ticks. |
+| `bioskey` | `int bioskey(void)` | Reads a key with its character and scan code. |
+| `pckey` | `int pckey(void)` | Reads a raw PC keyboard scan code. |
+| `xstatline` | `void xstatline(int mode)` | Controls the DOS Plus / CCP/M status line (1 = off, 2 = on). |
+| `dpb_load` | `void dpb_load(int drive, dpb_t *dpb)` | Reads disk geometry for `drive` into `*dpb` (0 = `A:`, etc.). |
+| `getftime` | `int getftime(char *fcb)` | Reads an open file's dates, times, and password mode. |
+| `setftime` | `int setftime(char *fcb, char *stamps)` | Sets an open file's creation/access and modification times. |
+| `getpcode` | `unsigned int getpcode(void)` | Returns the program return code. |
+| `setpcode` | `unsigned int setpcode(unsigned int code)` | Sets the program return code. |
+| `getcmode` | `unsigned int getcmode(void)` | Returns the console-mode flags. |
+| `setcmode` | `unsigned int setcmode(unsigned int mode)` | Sets the console-mode flags. |
+| `p_cli` | `int p_cli(char *cmd)` | Launches a native command and transfers console control. |
+| `p_spawn` | `int p_spawn(char *cmd)` | Launches a native or DOS command, then reacquires the console. |
+| `ms_p_cli` | `int ms_p_cli(char *opened_fcb, char *cmd)` | Launches a DOS program identified by an open file. |
+| `p_priority` | `int p_priority(int priority)` | Sets the process's scheduling priority. |
+| `conattach` | `int conattach(void)` | Waits for and acquires the default console. |
+| `condetach` | `int condetach(void)` | Releases the console for background execution. |
+| `getpid` | `unsigned int getpid(void)` | Returns this process's ID, or `0xFFFF` if unsupported. |
+| `getppid` | `unsigned int getppid(void)` | Returns the parent's ID, 0 if none, or `0xFFFF` if unsupported. |
+| `getpriority` | `int getpriority(void)` | Returns this process's priority (0..255), or -1 if unsupported. |
+| `getppriority` | `int getppriority(void)` | Returns the parent's priority (0..255), or -1 if absent/unsupported. |
 
-> Already provided by the Aztec C base library, so not part of `util.lib`: `getusr()` / `setusr(n)` / `rstusr()` (BDOS fn 32, get/set user number), `fcbinit(name, fcb)` (file name to FCB) and `bdos(fn, dx)`. They are documented in [section 4](#aztec-c-base-library-companions-fcbinit-getusr-setusr-rstusr) because the FCB-based functions here (`getftime`, `setftime`, `dirent_*`) work on FCBs built that way. `p_chain` (BDOS fn 47) is documented in [section 7](#7-submit-files--process-chaining-subh).
->
-> `getftime`, `setftime`, `getpcode`, `setpcode`, `getcmode`, `setcmode`, `gettime`, `settime`, `p_cli`, `p_priority`, `conattach`, `condetach`, `getpid`, `getppid`, `getpriority` and `getppriority` check the OS via BDOS fn 12 before calling.
->
-> Time stamp format shared by `getftime`, `setftime`, `gettime` and `settime`: `DW` day count (day 1 = 1 January 1978, little endian), `DB` hour (packed BCD), `DB` minute (packed BCD). `getftime` leaves two stamps in the FCB (`+18h`, `+1Ch`), `setftime` takes the same two back-to-back (8 bytes), `gettime`/`settime` use one stamp plus an optional fifth seconds byte (DOS Plus only; elsewhere `gettime` returns the BCD seconds in its result and `settime` resets them to zero).
->
-> Note: `getpcode`/`setpcode`/`getcmode`/`setcmode` use a 16-bit result, so `0xFFFF` doubles as the "unsupported" marker (it is never a valid return code).
+### Usage notes
+
+- `osver`: e.g. `0x22` = CP/M-86 1.1, `0x41` = DOS Plus.
+- `ostype`: a zero system type is reported as `0x10`; test `OSTYPE_MULTIUSER` for Concurrent systems.
+- `bdosx`: `cx` selects the service, `dx` supplies its parameter. Returns AX's low byte; writes ES/BX through the pointers.
+- `bioskey`: character in the low byte, scan code in the high byte; -1 on MP/M/Concurrent.
+- `getftime`/`setftime`: return 0..3 on success, `0xFF` on failure/unsupported. Require versions >= `0x30`/`0x41`, respectively. See [date formats](#date-formats).
+- `getpcode`/`setpcode`/`getcmode`/`setcmode`: require CP/M 3 or later, excluding MP/M II; return `0xFFFF` if unsupported. Setters return the resulting value; passing `0xFFFF` reads without changing it.
+- `p_priority`/`conattach`: MP/M/Concurrent only. `condetach` also supports versions >= `0x41`. Return 0, or -1 if unsupported.
+- Priorities range from 0 (highest) to 255 (lowest); default 200.
+- Process IDs require MP/M/Concurrent; treat them as unsigned values.
+
+Program return codes: `0x0000`..`0xFEFF` are nonfatal; `0xFF00`..`0xFF7F` stop
+subsequent `:` commands; `0xFFFD` means hardware error, `0xFFFE` means Ctrl-C.
+Console-mode flags are OS-specific.
+
+After `condetach`, console I/O reattaches on MP/M/Concurrent. On CP/M-86 v4,
+keyboard use terminates the detached program; only native BDOS calls are allowed.
+
+For FCB construction and user selection, see [base-library companions](#aztec-c-base-library-companions-fcbinit-getusr-setusr-rstusr).
+For chaining, see [section 7](#7-submit-files--process-chaining-subh).
+
+### Concurrent program launch
+
+`p_cli` requires MP/M/Concurrent and accepts up to 127 characters.
+Returns 0, or `0xFF` on failure/unsupported.
+
+`p_spawn` accepts a nonempty command of at most 127 characters and an
+executable name of at most 15 characters; BAT commands are limited to 121.
+With PCTMP on Concurrent versions `0x31`..`0x41`, it supports CMD, COM, EXE,
+and BAT files, using PCTMP ORDER for extensionless names. Unqualified names
+may also find system files on the system disk on versions `0x31` and `0x41`.
+Otherwise, native command resolution applies.
+Returns loader status (0 = success), or -1 for invalid input/resolution
+failure; this is not the child's exit code.
+
+### Low-level DOS program launch
+
+`ms_p_cli` requires PCTMP on Concurrent versions `0x31`..`0x41`, an open
+36-byte COM/EXE FCB, and a full NUL-terminated command of at most 127 characters.
+Uses the current user; consumes the FCB, which must not be closed again.
+No filename search, built-ins, CMD, or BAT support. Not reentrant; return
+after DOS termination is not guaranteed. Prefer `p_spawn` for ordinary launches.
+Returns loader status (0 = success), or -1 if unsupported/overlong.
 
 ### Structures & Macros
 
@@ -89,7 +126,8 @@ typedef struct dpb_t {
 
 ## 2. Environment & String Utilities (`util.h`)
 
-Implemented in [`util.c`](util.c:1). Environment variables are loaded from `ENV.DAT` (searched on current drive, user 0, and CCP drive).
+Environment variables come from `ENV.DAT`, searched on the current drive/user,
+then user 0, then the command drive's user 0. Values are cached.
 
 ### Functions
 
@@ -103,30 +141,44 @@ Implemented in [`util.c`](util.c:1). Environment variables are loaded from `ENV.
 
 ## 3. Console I/O & Terminal Control (`conio.h`)
 
-Implemented in [`conio.c`](conio.c:1). Supports standard CP/M-86 console I/O, VT52 terminal escape sequences, status line management, and screen modes.
+Raw console I/O and display control for the PC's VT52-style console.
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `kbhit` | `int kbhit(void)` | Checks if a console key is waiting via BDOS fn 6 (`DL=0xFE`). Returns non-zero if key available. |
-| `getch` | `int getch(void)` | Reads character from console via BDOS fn 6 (`DL=0xFF`) with internal 64-byte lookahead buffer. |
-| `cputc` | `int cputc(char c)` | Writes single character `c` to console via BDOS fn 2. |
-| `cputs` | `int cputs(char *str)` | Writes NUL-terminated string `str` to console via BDOS fn 2. |
-| `gotoxy` | `void gotoxy(int x, int y)` | Positions cursor at `(x, y)` (0-based) using VT52 direct cursor positioning sequence `ESC Y y+32 x+32`. |
-| `clrscr` | `void clrscr(void)` | Clears the entire screen (`ESC E`). |
-| `clreos` | `void clreos(void)` | Clears from cursor position to end of screen (`ESC J`). |
-| `clreol` | `void clreol(void)` | Clears from cursor position to end of line (`ESC K`). |
-| `insline` | `void insline(void)` | Inserts a blank line at cursor position (`ESC L`). |
-| `delline` | `void delline(void)` | Deletes line at cursor position (`ESC M`). |
-| `delchar` | `void delchar(void)` | Deletes character at cursor position (`ESC N`). |
+| `kbhit` | `int kbhit(void)` | Checks whether console input is waiting. |
+| `getch` | `int getch(void)` | Reads a console character without echo. |
+| `cputc` | `int cputc(char c)` | Writes one console character; returns OS output status. |
+| `cputs` | `int cputs(char *str)` | Writes a NUL-terminated console string. Returns 0. |
+| `gotoxy` | `void gotoxy(int x, int y)` | Positions the cursor at zero-based row `x`, column `y`. Coordinates must fit the screen. |
+| `clrscr` | `void clrscr(void)` | Clears the entire screen. |
+| `clreos` | `void clreos(void)` | Clears from cursor position to end of screen. |
+| `clreol` | `void clreol(void)` | Clears from cursor position to end of line. |
+| `insline` | `void insline(void)` | Inserts a blank line at cursor position. |
+| `delline` | `void delline(void)` | Deletes line at cursor position. |
+| `delchar` | `void delchar(void)` | Deletes character at cursor position. |
 | `cursor` | `void cursor(int cmd)` | Controls cursor state (`CURSOR_OFF`, `CURSOR_ON`, `CURSOR_SAVE`, `CURSOR_RESTORE`). |
-| `statline` | `void statline(int on)` | Enables (`STATLINE_ON` = 1) or disables (`STATLINE_OFF` = 0) the 25th status line across CP/M-86 1.1 (`ESC 1`/`ESC 0`) and CCP/M / DOS Plus (`xstatline`). |
-| `wrapline` | `void wrapline(int on)` | Enables (`WRAPLINE_ON` = 1, `ESC v`) or disables (`WRAPLINE_OFF` = 0, `ESC w`) line wrapping at column 80. |
-| `textcolor` | `void textcolor(int fg)` | Sets text foreground color via `ESC j ESC b <fg> ESC k`. |
-| `setstatus` | `void setstatus(char *s)` | Sets status line text in CP/M-86 1.1 sysdata area (offset `0x32`, up to 14 chars). Supports escape tokens `\u` (uppercase), `\l` (lowercase), `\s` (space), `\\` (backslash). |
-| `scrmode` | `void scrmode(int m)` | Sets display mode (`SCRMODE_DEFAULT`, `SCRMODE_COL80`, `SCRMODE_COL40`, `SCRMODE_MONO`, `SCRMODE_COLOR`). |
-| `crtreset` | `void crtreset(void)` | Resets terminal attributes and modes to default settings. On DOS Plus (non-Concurrent BDOS 41h), first re-enters the active BIOS text mode through the installed INT 10h hook, clearing the screen and homing the cursor to reset XIOS scrolling state. Graphics modes are not re-entered. |
+| `statline` | `void statline(int on)` | Shows or hides the status line. |
+| `wrapline` | `void wrapline(int on)` | Enables (`WRAPLINE_ON` = 1) or disables (`WRAPLINE_OFF` = 0) terminal line wrapping. |
+| `textcolor` | `void textcolor(int fg)` | Sets the foreground color without moving the cursor. |
+| `setstatus` | `void setstatus(char *s)` | Sets the status-line text. |
+| `scrmode` | `void scrmode(int m)` | Selects a display mode. |
+| `crtreset` | `void crtreset(void)` | Restores default console settings. |
+
+### Usage notes
+
+- `kbhit` returns nonzero for waiting input, but may return zero while `getch` has buffered input.
+- `getch` waits for input, preserves high-bit bytes, and does no editing or key decoding.
+- `statline` supports version `0x22` or versions greater than `0x31`; otherwise no effect.
+- `textcolor` ignores values below 1; positive values use their low byte.
+- `setstatus` supports CP/M-86 1.1: 14 cells, space-padded, lowercase by default. Tokens: `\u` preserves case, `\l` resumes lowercase, `\s` and `\\` insert spaces. Tokens are case-insensitive; unknown tokens are discarded.
+- `scrmode` supports CP/M-86 1.1 only. Choose one `SCRMODE_*` value; default resets/clears the console.
+- `crtreset` also clears/homes DOS Plus text screens; leaves graphics modes unchanged.
+
+`getch()` leaves programmable function-key expansion unchanged. Applications
+selecting raw-key mode must decode keys and restore expanded-key mode before
+releasing the console.
 
 ### Constants
 
@@ -153,17 +205,17 @@ Implemented in [`conio.c`](conio.c:1). Supports standard CP/M-86 console I/O, VT
 
 ## 4. Directory & Disk FCB Handling (`dirent.h`)
 
-Implemented in [`dirent.c`](dirent.c:1). Provides high-level directory reading, multi-extent aggregation, sorting, and FAT filesystem detection.
+Lists files, aggregates extents, sorts entries, and identifies FAT disks.
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `dirent_load` | `int dirent_load(char *path, dirent_t **root, int *ouser, int *odrive, int sort_order, int all_extents)` | Parses `path` (e.g. `[user/][drv:]filespec`), searches directory, constructs linked list of `dirent_t` entries at `*root`, aggregates file blocks, and optionally sorts. Returns 0 on success. |
-| `dirent_first` | `int dirent_first(char *fcb, dirent_t **root)` | Finds first directory match (BDOS fn 17 / `11h`) and allocates initial `dirent_t` structure. |
-| `dirent_next` | `int dirent_next(char *fcb, dirent_t *root, dirent_t **last, int all_extents)` | Finds next match (BDOS fn 18 / `12h`), merges extent blocks into existing matching entry or appends new entry. Returns 0 on success, 255 at end of directory. |
-| `dirent_sort` | `void dirent_sort(dirent_t **root, int sort_order)` | Sorts linked list of `dirent_t` entries in-place using merge sort (`sort_order` > 0 for ascending, < 0 for descending). |
-| `dirent_free` | `int dirent_free(dirent_t *root)` | Frees all dynamically allocated memory in `dirent_t` linked list. |
+| `dirent_load` | `int dirent_load(char *path, dirent_t **root, int *ouser, int *odrive, int sort_order, int dirent_options)` | Lists files matching a path or pattern. |
+| `dirent_first` | `int dirent_first(char *fcb, dirent_t **root)` | Starts a directory search and retrieves the first match. |
+| `dirent_next` | `int dirent_next(char *fcb, dirent_t *root, dirent_t **last, int dirent_options)` | Retrieves the next match and updates the entry list. |
+| `dirent_sort` | `void dirent_sort(dirent_t **root, int sort_order)` | Sorts entries by filename: positive = ascending, negative = descending. |
+| `dirent_free` | `int dirent_free(dirent_t *root)` | Releases an entry list. Returns 0. |
 | `dirent_is_fat` | `int dirent_is_fat(int drive)` | Probes whether `drive` (0 = `A:`, etc.) is an MS-DOS / FAT formatted disk (returns 1) or native CP/M filesystem (returns 0). |
 | `dirent_fcb` | `int dirent_fcb(char *fcb, dirent_t *d)` | Populates FCB buffer `fcb` (12 bytes) from directory entry `d`. Returns entry status byte (user number). |
 
@@ -177,35 +229,57 @@ typedef struct _dirent_t {
     unsigned long drive_blocks;  /* Total disk capacity in blocks */
     unsigned long block_size;    /* Block size in bytes (e.g. 1024, 2048, 4096) */
     int is_fat;                  /* 1 if drive is FAT, 0 if CP/M */
+    int is_dir;                  /* FAT directory marker */
+    int is_hidden;               /* FAT hidden marker; always 0 on CP/M */
+    int include_dirs;            /* Retained search option */
     unsigned long fcbs;          /* Number of directory extents aggregated */
     struct _dirent_t *next;      /* Pointer to next directory entry */
 } dirent_t;
 
 #define dirent_is_sys(a) ((a)->entry[10] & 0x80)
 #define dirent_is_ro(a)  ((a)->entry[9] & 0x80)
+#define dirent_is_dir(a) ((a)->is_dir)
+#define dirent_is_hidden(a) ((a)->is_hidden)
+#define dirent_is_system_group(a) (dirent_is_sys(a) || dirent_is_hidden(a))
+
+#define DIRENT_ALL_EXTENTS 1
+#define DIRENT_INCLUDE_DIRS 2
 ```
+
+### Usage notes
+
+- Search results: 0 = success, 255 = no match/end, -2 = allocation failure.
+- `dirent_load` accepts `[user/][drv:]filespec`; returns the list at `*root`. Optional outputs receive user/zero-based drive. Release results with `dirent_free`.
+- `dirent_next` uses settings established by `dirent_first` and updates the list tail.
+- For `dirent_load`, zero `sort_order` preserves search order.
+
+Combine `DIRENT_ALL_EXTENTS` (all file extents) and `DIRENT_INCLUDE_DIRS`
+(include directories; OS version >= `0x41`). Directory and hidden flags
+apply only to FAT entries.
 
 ### Aztec C base-library companions (`fcbinit`, `getusr`, `setusr`, `rstusr`)
 
-These four routines are **not** part of `util.lib`: they come from the Aztec C86 runtime (`fcbinit.asm`, `user.asm` in `aztec42/src/cpm86`) and are linked from `-lc86`. `util.lib` deliberately does not reimplement them; every FCB-based function in this library (`dirent_*`, `getftime`, `setftime`, `rm`, ...) expects an FCB built by `fcbinit` and the user area selected with `setusr`. `fcbinit` is declared in Aztec's `<cpm.h>`; `getusr`/`setusr`/`rstusr` have no header declaration and are used with implicit `int` return (as `dirent.c` and `rm.c` do).
+Provided by Aztec C's `-lc86`, not `util.lib`. Declare `fcbinit` through
+`<cpm.h>`; the user-selection routines have no supplied header declaration.
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `fcbinit` | `int fcbinit(char *name, void *fcb)` | Parses `[user/][d:]name[.ext]` into the CP/M FCB at `fcb`. Returns the **user number** from the prefix (`0`-`255`), `255` if there is no `user/` prefix (meaning "keep the current user"), or `-1` if the drive letter is invalid (not a letter). |
-| `getusr` | `int getusr(void)` | BDOS fn 32 (`20h`) with `E=0FFh`: returns the current user number. |
-| `setusr` | `int setusr(int user)` | Remembers the current user number in a single static byte, then selects `user` with BDOS fn 32. `setusr(255)` only remembers the current user and does not change it, so it can be called directly with the value returned by `fcbinit`. |
+| `fcbinit` | `int fcbinit(char *name, void *fcb)` | Prepares a filename for file operations and returns its user number. |
+| `getusr` | `int getusr(void)` | Returns the current user number. |
+| `setusr` | `int setusr(int user)` | Saves the current user, then selects `user`. With 255, saves without changing it. |
 | `rstusr` | `int rstusr(void)` | Restores the user number saved by the last `setusr`. |
 
 **`fcbinit` details**
 
+- Returns the specified user (0..255), 255 if omitted, or -1 for an invalid drive letter.
 - Name syntax: optional `NN/` user prefix (decimal digits followed by `/`), optional `d:` drive (upper or lower case), then `NAME[.EXT]`. Name and extension are upper-cased; a `*` is expanded to `?` for the rest of the field; a name longer than 8 characters or an extension longer than 3 is truncated.
-- FCB bytes written: `+0` drive (`0` = default, `1` = `A:` ... `16` = `P:`), `+1..+8` name and `+9..+11` extension (blank padded), and `+12..+15` (`EX`, `S1`, `S2`, `RC`) cleared to zero. **Bytes `+16` and above are not touched**: clear the whole buffer first (`memset(fcb, 0, 40)`), as `dirent_load` does, before using the FCB with `getftime`/`setftime` (which use `+18h`..`+1Fh`) or random/sequential I/O.
-- Wildcards are not interpreted: an all-blank name stays blank (`dirent_load` replaces it by `????????.???` itself).
+- Only FCB bytes 0..15 are initialized. Clear the full FCB before calling.
+- Wildcards are encoded, not searched; an empty filename stays blank.
 
 **`setusr` / `rstusr` details**
 
-- There is only **one** saved user, so the pair does not nest: a second `setusr` overwrites the value that the first `rstusr` would restore. Always bracket one FCB operation with one `setusr` ... `rstusr`.
-- The user number is not stored in the FCB: it must be selected with `setusr` around every BDOS call that uses that FCB (including `getftime`/`setftime`).
+- Calls do not nest: each `setusr` replaces the saved user.
+- Select the file's user before FCB operations; restore it afterwards.
 
 **Typical use together with the functions of this library**
 
@@ -236,18 +310,28 @@ rstusr();
 
 ## 5. Graphics (`gfx.h`)
 
-Implemented in [`gfx.c`](gfx.c) and [`gfx.asm`](gfx.asm). BIOS on BDOS 22h or >=60h; XIOS on Concurrent 31h..5Fh and DOS Plus 41h. Native XIOS EGA modes 0Dh/0Eh/10h and VGA modes 11h/12h/13h require the patched ccpm86-kernel capability response and matching EGA/VGA hardware. See [GRAPHICS.md](GRAPHICS.md).
+Graphics modes depend on OS and adapter support; see [graphics.md](graphics.md).
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `gfx_mode` | `int gfx_mode(int mode)` | Returns 0 when issued, -1 for an unsupported request. BIOS supports modes 3/4/6/0Dh..13h; stock XIOS 3/4/6; patched XIOS additionally 0Dh/0Eh/10h/11h/12h/13h after capability/adapter validation (0Fh is BIOS-only). Hides/restores the status line around graphics. |
-| `gfx_palette` | `void gfx_palette(int palette)` | CGA background/intensity and palette selection, using BIOS-style packed BX. Use gfx_palette_entry for native EGA. |
-| `gfx_palette_entry` | `int gfx_palette_entry(int index, int color)` | Set EGA palette index 0..15 to raw six-bit EGA color 0..63 in planar modes 0Dh..12h. Returns 0 when issued, -1 for invalid arguments or another mode (use `gfx_dac_entry` in 13h). Kernel mode uses owner-checked BIOS calls; BIOS backend uses AH=10h/AL=00h. |
-| `gfx_dac_entry` | `int gfx_dac_entry(int index, int red, int green, int blue)` | Set VGA DAC entry 0..255 to 6-bit RGB (0..63) in VGA modes 11h..13h. Returns 0 when issued, -1 for invalid arguments or another mode. XIOS writes DAC ports 3C8h/3C9h; BIOS backend uses AX=1010h. |
-| `gfx_pixel` | `void gfx_pixel(int x, int y, int color)` | Plot a pixel, with color bit 7 requesting XOR (planar/CGA modes). XIOS uses packed B800 CGA memory, A000 planes (0Dh..12h, write mode 2) or one A000 byte per pixel in 13h, where the full colour byte is stored without XOR. Out-of-bounds coordinates are ignored. |
-| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Character-grid text. XIOS draws ASCII in an opaque black cell: 8x8 in CGA, 0Dh, 0Eh and 13h; 8x14 in 10h; 8x16 (30 rows) in 11h/12h. BIOS backend retains BIOS cursor/teletype drawing. |
+| `gfx_mode` | `int gfx_mode(int mode)` | Selects a display mode. |
+| `gfx_palette` | `void gfx_palette(int palette)` | Selects the CGA background or palette. |
+| `gfx_palette_entry` | `int gfx_palette_entry(int index, int color)` | Changes an EGA palette color. |
+| `gfx_dac_entry` | `int gfx_dac_entry(int index, int red, int green, int blue)` | Changes a VGA palette color. |
+| `gfx_pixel` | `void gfx_pixel(int x, int y, int color)` | Draws a pixel. |
+| `gfx_text` | `void gfx_text(int col, int row, char *str, int color)` | Draws text at a character-grid position. |
+
+### Usage notes
+
+- `gfx_mode`: returns 0 when requested, -1 if unsupported; hides/restores the status line around graphics.
+- `gfx_palette`: high byte selects background/intensity or palette operation, low byte its value.
+- `gfx_palette_entry`: index 0..15, color 0..63, modes `0x0D`..`0x12`.
+- `gfx_dac_entry`: index 0..255, RGB components 0..63, modes `0x11`..`0x13`.
+- Both palette-entry functions return 0, or -1 for invalid arguments/mode.
+- `gfx_pixel`: ignores out-of-bounds coordinates; color bit 7 requests XOR except in mode `0x13`.
+- `gfx_text`: Concurrent/DOS Plus cells have black backgrounds; 8x8 normally, 8x14 in `0x10`, 8x16 in `0x11`/`0x12`.
 
 ### Constants
 
@@ -271,20 +355,36 @@ Implemented in [`gfx.c`](gfx.c) and [`gfx.asm`](gfx.asm). BIOS on BDOS 22h or >=
 
 ## 6. Date, Time & Epoch (`util.h`)
 
-Implemented in [`time.c`](time.c:1). Provides system clock read/write, file timestamp read/write, and Unix epoch conversion. On CP/M-86 1.1 the clock comes from the sysdata area; on OSes with version > `22h` it comes from `gettime()` / `settime()` (BDOS fn 105/104). File timestamps use `getftime()` / `setftime()` (BDOS fn 102/116). `time.o` depends on `os.o` and must precede it in `util.lib` (see the `Makefile`).
+Reads/writes clocks and file timestamps; converts dates to Unix seconds.
+Times are treated as UTC.
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `getdatetime` | `int getdatetime(struct sysdt *dt)` | Reads system date and time into `*dt`. On CP/M-86 1.1 (version `22h`) reads from sysdata area (`BDOS 31h` + offset `20h`); on version > `22h` uses `gettime()` (BDOS fn 105). Returns 0 on success, -1 on failure (unsupported OS or unset clock). |
-| `setdatetime` | `int setdatetime(struct sysdt *dt)` | Sets system date and time from `*dt`. On CP/M-86 1.1 (version `22h`) writes directly to the sysdata area (same as `tod.a86`); on version > `22h` uses `settime()` (BDOS fn 104). Returns 0 on success, -1 if unsupported. |
-| `getfdatetime` | `int getfdatetime(char *fcb, struct sysdt *dt, int which)` | Reads a file timestamp from an open FCB via `getftime()` (BDOS fn 102). `which=0` reads the create/access stamp (FCB+`18h`); `which=1` reads the update stamp (FCB+`1Ch`). Returns 0 on success, -1 on failure or unsupported. |
-| `setfdatetime` | `int setfdatetime(char *fcb, struct sysdt *create_dt, struct sysdt *update_dt)` | Sets file timestamps on an open FCB via `setftime()` (BDOS fn 116, CP/M-86 v4 only). Either pointer may be `NULL` to leave that stamp unchanged (the current stamp is read back from the FCB first). Returns 0..3 on success, -1 on failure or unsupported. |
-| `epoch` | `long epoch(struct sysdt *dt)` | Converts `*dt` to a Unix epoch timestamp (seconds since 1970-01-01 00:00:00 UTC). Returns `EPOCH_ERR` (`-1L`) if `dt` is `NULL`, invalid, outside years 1970..2099, or the result exceeds `LONG_MAX`. With the target's signed 32-bit `long`, the last supported instant is 2038-01-19 03:14:07 UTC. System and file clocks retain their separate date ranges. |
-| `epoch_now` | `long epoch_now(void)` | Reads the system clock via `getdatetime()` and returns the Unix epoch timestamp. Returns `EPOCH_ERR` (`-1L`) on error. |
-| `gettime` | `int gettime(char *stamp)` | BDOS fn 105 (`69h`, `T_GET`): reads the system date/time into `stamp` (5 bytes): `DW` days since 1/1/78 (day 1 = 1 January 1978), `DB` BCD hour, `DB` BCD minute, and on DOS Plus `DB` BCD seconds. Returns BCD seconds, or -1 if unsupported (version <= `22h`). Low-level; prefer `getdatetime()`. |
-| `settime` | `int settime(char *stamp)` | BDOS fn 104 (`68h`, `T_SET`): sets the system date/time from a `gettime`-style stamp. Seconds are reset to zero except on DOS Plus. Returns 0, or -1 if unsupported. Low-level; prefer `setdatetime()`. |
+| `getdatetime` | `int getdatetime(struct sysdt *dt)` | Gets the current date and time. |
+| `setdatetime` | `int setdatetime(struct sysdt *dt)` | Sets the current date and time. |
+| `getfdatetime` | `int getfdatetime(char *fcb, struct sysdt *dt, int which)` | Gets a file's creation/access or modification time. |
+| `setfdatetime` | `int setfdatetime(char *fcb, struct sysdt *create_dt, struct sysdt *update_dt)` | Sets a file's creation/access and modification times. |
+| `epoch` | `long epoch(struct sysdt *dt)` | Converts a date and time to Unix seconds. |
+| `epoch_now` | `long epoch_now(void)` | Gets the current time in Unix seconds. |
+| `gettime` | `int gettime(char *stamp)` | Gets the current date and time in native format. |
+| `settime` | `int settime(char *stamp)` | Sets the current date and time from native format. |
+
+### Usage notes
+
+- `getdatetime`/`setdatetime`: return 0, or -1 on failure/unsupported. Supply valid dates; reads do not fully validate them or detect an unset CP/M-86 1.1 clock.
+- File operations require an open FCB. `getfdatetime`: `which=0` selects creation/access, nonzero selects modification; returns 0 or -1 on failure/unsupported.
+- `setfdatetime`: NULL preserves a time. Requires version >= `0x41`; returns 0..3 on success, -1 for read failure, or `0xFF` for write failure/unsupported.
+- `epoch`/`epoch_now`: return `EPOCH_ERR` on failure. `epoch` rejects NULL, invalid dates, years outside 1970..2099, and overflow. With 32-bit `long`, the last supported instant is 2038-01-19 03:14:07 UTC.
+- `gettime`/`settime`: require version > `0x22`. `gettime` returns BCD seconds or -1; `settime` returns 0 or -1. Setting seconds is supported only on DOS Plus; elsewhere they become zero.
+
+### Date formats
+
+Packed stamps contain a little-endian 16-bit day count (1 = 1978-01-01),
+then BCD hour and minute. Clock buffers reserve a fifth byte for DOS Plus
+BCD seconds. File-stamp buffers contain two four-byte stamps: create/access,
+then update. Prefer the `sysdt` functions unless packed data is needed.
 
 ### Structures & Constants
 
@@ -298,37 +398,47 @@ struct sysdt {
     int sec;    /* 0..59 */
 };
 
-#define EPOCH_ERR  (-1L)   /* returned by now() / epoch() on error */
+#define EPOCH_ERR  (-1L)   /* returned by epoch_now() / epoch() on error */
 ```
 
 ---
 
 ## 7. Submit Files & Process Chaining (`sub.h`)
 
-Implemented across [`sub.c`](sub.c:1), [`subfile.c`](subfile.c:1), and [`os.asm`](os.asm:1). Enables creating, appending, and expanding `$$$.sub` batch files and chaining program execution under the CP/M-86 CCP.
+Builds `$$$.sub` command stacks, expands submit files, and chains programs.
 
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `sub_open` | `int sub_open(int flags)` | Opens or creates `$$$.sub`. `SUB_CREATE`: deletes any existing `$$$.sub` and starts fresh. `SUB_APPEND`: opens existing `$$$.sub` to push commands on top (creates if absent). Returns 0 on success, -1 on error. |
-| `sub_append` | `int sub_append(char *cmd)` | Pushes one 128-byte record (command line uppercased, max 125 chars) to open `$$$.sub`. Returns 0 on success, -1 on error (or if file reaches 128 record CCP limit). |
+| `sub_open` | `int sub_open(int flags)` | Opens a new or existing submit command stack. |
+| `sub_append` | `int sub_append(char *cmd)` | Adds a command to the stack. |
 | `sub_close` | `int sub_close(void)` | Closes open `$$$.sub`. Returns 0 on success, -1 on error. |
 | `sub_records` | `int sub_records(void)` | Returns number of records in existing `$$$.sub` (0 if none). Read-only; leaves file unchanged. |
-| `sub_abort` | `int sub_abort(void)` | Undoes changes since `sub_open`: deletes file if created, or restores original record count if appended. Returns 0 on success, -1 on error. |
-| `sub_delete` | `int sub_delete(void)` | Deletes `$$$.sub` via BDOS fn 19 (`13h`). |
-| `sub_exit` | `void sub_exit(void)` | Sets CCP submit flag (`MDSUBE` at offset `0805h`) and executes warm boot (BDOS fn 0): the CCP immediately executes the top command in `$$$.sub`. Does not return. |
-| `p_chain` | `void p_chain(char *cmd, int submode)` | Chains directly to `cmd` via BDOS fn 47 (`2Fh`). If `submode` is non-zero, sets CCP submit flag so `$$$.sub` resumes after `cmd` terminates. |
+| `sub_abort` | `int sub_abort(void)` | Undoes changes made since opening the stack. |
+| `sub_restore` | `int sub_restore(int records)` | Restores a previous stack length. |
+| `sub_delete` | `int sub_delete(void)` | Attempts to delete `$$$.sub`. Always returns 0, including on failure. |
+| `sub_exit` | `void sub_exit(void)` | Exits to the CCP to run the top submit command. Does not return. |
+| `p_chain` | `void p_chain(char *cmd, int submode)` | Replaces the program with `cmd`; nonzero `submode` requests submit processing after it finishes. |
 | `sub_active` | `int sub_active(void)` | Checks whether CCP is currently in submit mode (returns 1 if program was started from `$$$.sub`, 0 if interactive keyboard, -1 if unknown CCP). |
 | `sub_cmddrv` | `int sub_cmddrv(void)` | Drive prefix of the running CCP command line (1 = `A:`, ..., 16 = `P:`), or 0 if none/unknown. |
-| `sub_load` | `int sub_load(char *cmd)` | Reads and expands `"[d:]file[.typ] [p1 p2 ...]"` following DR SUBMIT substitution rules (`$1`..`$9`, `$$`, `^A`..`^Z`). Returns number of expanded lines (> 0) or `SUBERR_*` code (≤ 0). |
-| `sub_line` | `char *sub_line(int i)` | Returns pointer to expanded command line `i` (0 = first line). |
-| `sub_lineno` | `int sub_lineno(int i)` | Returns original source line number for loaded line `i`. |
+| `sub_load` | `int sub_load(char *cmd)` | Loads a submit file and substitutes its parameters. |
+| `sub_line` | `char *sub_line(int i)` | Returns expanded line `i` (zero-based), or an empty string for an invalid index. |
+| `sub_lineno` | `int sub_lineno(int i)` | Returns the line's source number, or 0 for an invalid index. |
 | `sub_name` | `char *sub_name(void)` | Returns actual file name opened by `sub_load` (e.g. `B:BACKUP.SUB`). |
 | `sub_errline` | `int sub_errline(void)` | Returns source line number of last parsing error (0 if none). |
 | `sub_errmsg` | `char *sub_errmsg(int err)` | Returns human-readable error prefix for a `SUBERR_*` code. |
-| `sub_pushall` | `int sub_pushall(void)` | Pushes all lines loaded by `sub_load` onto open `$$$.sub` in reverse order (stack order). Returns 0 on success, -1 on error. |
-| `sub_readln` | `int sub_readln(FILE *fp, char *buf, int size)` | Reads one text line (accepts CR LF, LF, or CR; stops at `^Z` or EOF). Returns line length, `SUB_RD_EOF` (-1), or `SUB_RD_LONG` (-2). |
+| `sub_pushall` | `int sub_pushall(void)` | Adds loaded lines to the open stack for execution in source order. Returns 0, or -1 on error. |
+| `sub_readln` | `int sub_readln(FILE *fp, char *buf, int size)` | Reads one text line. |
+
+### Usage notes
+
+- `sub_open`: `SUB_CREATE` replaces any existing stack; `SUB_APPEND` preserves it, creating one if absent. Returns 0 or -1 on failure.
+- `sub_append`: uppercases commands and truncates to 125 characters; maximum 128 commands. Returns 0 or -1 on write failure/full stack.
+- `sub_abort`: deletes a newly created stack or restores its original length. Returns 0 or -1 on failure.
+- `sub_restore`: current drive/user, 1..128 existing records; 0 deletes the stack. Preserves rollback state. Returns 0 or -1 on failure/invalid count.
+- `sub_load`: accepts `"[d:]file[.typ] [p1 p2 ...]"`; substitutions are `$1`..`$9`, `$$`, and `^A`..`^Z`. Returns a positive line count or `SUBERR_*`.
+- `sub_readln`: `size` includes NUL. Accepts CR/LF/CRLF; stops at Ctrl-Z/EOF. Returns length, `SUB_RD_EOF`, or `SUB_RD_LONG` (retains prefix, skips remainder).
 
 ### Constants
 
@@ -355,72 +465,11 @@ Implemented across [`sub.c`](sub.c:1), [`subfile.c`](subfile.c:1), and [`os.asm`
 
 ## 8. Debug Utilities (`debug.h`)
 
-Implemented in [`debug.c`](debug.c:1).
-
 ### Functions
 
 | Function | Signature | Description |
 |----------|-----------|-------------|
-| `debug_dump_hex` | `unsigned long debug_dump_hex(FILE *fd, char *data, unsigned int size, unsigned long offset, int raw)` | Formats and prints hexadecimal and ASCII dump of memory buffer `data` of length `size` to file stream `fd`. Displays 6-digit hex offsets, 16 hex bytes per line, and ASCII representation. If `raw` is non-zero, outputs only hex bytes without offset and ASCII sidebar. Returns next updated offset. |
+| `debug_dump_hex` | `unsigned long debug_dump_hex(FILE *fd, char *data, unsigned int size, unsigned long offset, int raw)` | Writes a hexadecimal and ASCII dump. |
 
-### Raw console input bytes
-
-`getch()` returns byte values in the range 0..255, including bytes read from
-its ring buffer. It does not translate Concurrent CP/M function keys or change
-PFK expansion. An application needing raw XIOS keys must select ESC 6 while
-it owns the console, decode its keys, then restore ESC 7 before exiting or
-handing control to another program. Text readers must not acquire these side
-effects merely by calling `getch()`.
-
-`make test-keys` verifies unsigned direct and buffered returns in `conio.c`
-and the standalone keyboard diagnostic. Rebuild `util.lib` and relink consumers
-to pick up the library change; copies held by other projects are independent.
-
-
-### Concurrent program launch
-     
-`p_spawn(command)` launches a command and reacquires the console before
-returning. Native CCP/M uses P_CLI. With a PCTmp ancestor on Concurrent
-BDOS 31h through 41h inclusive, extensionless filenames are probed on
-the specified or current drive in PCTMP ORDER. An unqualified name can
-also resolve to a system file on the configured system disk on 3.1 and 4.1. COM/EXE use the translator,
-CMD uses P_CLI, and BAT runs through BATCH. Native resident commands can
-also be dispatched by P_CLI. A zero result means launch succeeded and
-console control returned; it is not the child program's exit code.
-
-The DOS path follows BATCH: raise the caller's scheduling priority before
-launch, attach the console again, then call translator service 0 for cleanup.
-The translator consumes the executable FCB. Closing it again on return
-can raise a CDOS close-checksum error.
-
-### Low-level DOS program launch
-
-`int ms_p_cli(char *opened_fcb, char *cmd)` calls the private PCTMP
-function 1 used by BATCH. Pass a successfully opened 36-byte COM/EXE FCB
-and a NUL-terminated command line including the executable name (at most
-127 characters). The current user is used. It returns the loader status,
-zero on success, or -1 for an unsupported system, missing PCTMP ancestor,
-or an overlong line. The wrapper uses static buffers. A DOS program can
-launch successfully without the native caller resuming. Do not rely on the
-call returning after DOS termination.
-
-The wrapper checks BDOS function 12 (decimal, 0Ch), Concurrent system type
-and **versions 31h through 41h inclusive**, then walks the parent process descriptors to
-PCTmp and uses its translator entry at CS:0003, as BATCH does. This private
-interface is enabled only in that range. It does
-not implement ORDER searches, shell built-ins, CMD execution or BAT parsing;
-use `p_cli` for native CMD commands. An opened FCB is required, not merely
-one filled by `fcbinit`.
-
-### Directory listings
-
-`dirent_load` accepts `DIRENT_ALL_EXTENTS | DIRENT_INCLUDE_DIRS` in its
-last argument. Directory inclusion is opt-in and requires BDOS version
-41h or later. Each search sets the CDOS include-directory flag anew.
-`dirent_is_dir(entry)` recognizes FAT directory markers; CP/M allocation
-bytes are never interpreted as directory flags. Existing file-only callers
-such as `rm` and `wc` retain their previous searches.
-
-LS uses this mode: `<DIR>` in normal listings, `D` and zero size in long
-listings, and a trailing `/` in basic listings. Directory sizes do not add
-to the displayed total.
+Output goes to `fd`, 16 bytes per row. Nonzero `raw` omits offsets/ASCII.
+Returns the next offset.
