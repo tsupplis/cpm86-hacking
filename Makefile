@@ -1,19 +1,15 @@
-AS=aztec42_as
-CC=aztec42_cc
+CC=aztec42_acc
+LD=aztec42_acc
 AR=aztec42_lib
-STRIP=aztec42_sqz
 ASM86=cpm86_asm86
 GENCMD=cpm86_gencmd
 MASM=pcdev_masm
 LINK=pcdev_link
 EXE2BIN=pcdev_exe2bin
-CPM86_CFLAGS=-I. -B +0 
-CPM86_CFLAGS=-I. -B +0 -D__CPM86__
-CPM86_LDFLAGS=-lc86
-DOS_CFLAGS=-I. -B +0 -D__DOS__
-DOS_LDFLAGS=-lc
-DOS11_LDFLAGS=-ld11
-LD=aztec42_link
+CPM86_CFLAGS=-target=cpm86 -I. -squeeze
+CPM86_LDFLAGS=-target=cpm86
+DOS_CFLAGS=-target=dos1 -I. -squeeze
+DOS_LDFLAGS=-target=dos1
 LINK86=pcdev_linkcmd
 RASM86=pcdev_rasm86
 RM=rm -f
@@ -69,72 +65,67 @@ cls.h86: cls.a86
 	$(ASM86) $< 
 
 wc.cmd: wc.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 prepoch.cmd: prepoch.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 printenv.cmd: printenv.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 dosgetch.com: dosgetch.o
-	$(LD) -o $@ $^ $(DOS11_LDFLAGS)
+	$(LD) $(DOS_LDFLAGS) -o $@ $^
 
 dosgetch.o: getch.c
-	$(CC) $(DOS_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(DOS_CFLAGS) -c -o $@ $<
 
 getch.cmd: getch.o
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 ls.cmd: ls.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 ciotest.cmd: ciotest.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 cp.cmd: cp.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 touch.cmd: touch.o
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 rm.cmd: rm.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 copycon.cmd: copycon.o
-	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $<
 
 dump.cmd: dump.o
-	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $<
 
 mandel.cmd: mandel.o util.lib
-	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
 
 mandel.o: mandel.c gfx.h
-	$(CC) $(CPM86_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 ballc.cmd: ballc.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 ballc.o: ballc.c gfx.h
-	$(CC) $(CPM86_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 sine.cmd: sine.o util.lib
-	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
 
 sine.o: sine.c gfx.h
-	$(CC) $(CPM86_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 rose.cmd: rose.o util.lib
-	$(LD) -o $@ $^ -lm $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
 
 rose.o: rose.c gfx.h
-	$(CC) $(CPM86_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 	
 ball.cmd: ball.h86
 	$(GENCMD) $< 8080
@@ -149,10 +140,10 @@ wait.h86: wait.a86
 	$(ASM86) $<
 
 mode.cmd: mode.o util.lib
-	$(LD) -o $@ $^ $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
 more.cmd: more.o
-	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $<
 
 util.lib: spawn.o util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.o subfile.o
 	rm -f $@
@@ -161,30 +152,25 @@ util.lib: spawn.o util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbio
 conio.o: conio.c conio.h util.h
 
 gfx.o: gfx.c gfx.h util.h conio.h
-	$(CC) $(CPM86_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 gfxbios.o: gfx.asm
-	$(AS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 os.o: os.asm
-	$(AS) $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 zpdump.cmd: zpdump.o
-	$(LD) -o $@ $< $(CPM86_LDFLAGS)
+	$(LD) $(CPM86_LDFLAGS) -o $@ $<
 
 zpdump.o: pspdump.c
-	$(CC) $(CPM86_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 	
 pspdump.com: pspdump.o
-	$(LD) -o $@ $< $(DOS11_LDFLAGS)
+	$(LD) $(DOS_LDFLAGS) -o $@ $<
 
 pspdump.o: pspdump.c
-	$(CC) $(DOS_CFLAGS) -o $@ $<
-	$(STRIP) $@
+	$(CC) $(DOS_CFLAGS) -c -o $@ $<
 
 dosenv.com: dosenv.exe
 	$(EXE2BIN) dosenv.exe dosenv.com
@@ -253,8 +239,7 @@ dosver.obj: dosver.asm
 	[ -f "$@" ]
 
 %.o: %.c
-	$(CC) $(CPM86_CFLAGS) $<
-	$(STRIP) $@
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 	[ -f "$@" ]
 
 clean:

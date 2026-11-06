@@ -24,10 +24,10 @@ def build(folder, sources):
     objects = []
     for source in sources:
         obj = Path(source).with_suffix(".o").name
-        checked(["aztec42_cc", "-I.", "-B", "+0", "-D__CPM86__",
-                 "-o", obj, source], folder)
+        checked(["aztec42_acc", "-I.", "-squeeze", "-D__CPM86__",
+                 "-c", "-o", obj, source], folder)
         objects.append(obj)
-    checked(["aztec42_link", "-o", "test.cmd"] + objects + ["-lc86"], folder)
+    checked(["aztec42_acc", "-o", "test.cmd"] + objects, folder)
 
 
 def execute(folder, args=()):

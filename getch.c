@@ -6,7 +6,7 @@
 
 static char getch_buffer[GETCH_BUFLEN];
 
-#ifdef __DOS__
+#if defined(__MSDOS__)
 int dos_key() {
 #asm
     push cx
@@ -104,7 +104,7 @@ int main(int argc, char **argv)
         } else {
             if(c==32) {
                 fprintf(stderr, "INF: 0x%02x [%-3d] -> 'space'\n",c,c);
-#if defined(__DOS__)
+#if defined(__MSDOS__)
             } else if(c==0x00 || c==0x0E) {
                 fprintf(stderr, "INF: 0x%02x [%-3d] -> 'fnkeynext'\n",c,c);
                 fnkey=1;
