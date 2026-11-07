@@ -1,6 +1,6 @@
 CC=aztec43_acc
 LD=aztec43_acc
-AR=aztec42_lib
+AR=aztec43_lib
 ASM86=cpm86_asm86
 GENCMD=cpm86_gencmd
 MASM=pcdev_masm
