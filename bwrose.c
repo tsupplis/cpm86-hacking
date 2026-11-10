@@ -1,8 +1,9 @@
 /*
   Licensed under the MIT license. See LICENSE file in the project root for details.
 
-  Mystic rose for Hercules (720x348, monochrome). Needs the CDOS 4.1 kernel
-  Hercules extension: ESC a 7Fh, capability bit 4.
+  Mystic rose for Hercules (720x348, monochrome). Runs on CP/M-86 (card
+  programmed directly by the library) and on the patched Concurrent XIOS
+  (CCP/M-86, CDOS 4.1) through its Hercules mode.
 */
 #include <stdio.h>
 #include <math.h>

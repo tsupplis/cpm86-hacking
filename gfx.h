@@ -18,12 +18,14 @@
 #define MODE_VGA_640X480_MONO   17      /* 0x11: 640x480, 2 colors */
 #define MODE_VGA_640X480        18      /* 0x12: 640x480, 16 colors */
 #define MODE_VGA_320X200        19      /* 0x13: 320x200, 256 colors */
-#define MODE_HERCULES           127     /* 0x7F: 720x348, monochrome (CDOS 4.1 kernel) */
+#define MODE_HERCULES           127     /* 0x7F: 720x348, monochrome */
 
 /* gfx_mode returns 0 when issued, -1 for an unsupported OS or mode.
  * BIOS: BDOS 22h or >=60h, modes 3/4/6 and 0Dh..13h.
- * Hercules (MODE_HERCULES): patched Concurrent XIOS only, capability bit 4.
- * 720x348, colour bit 0 is the pixel, bit 7 requests XOR; 90x43 text cells.
+ * Hercules (MODE_HERCULES): BDOS 22h or >=60h drive the card directly after
+ * detection (the BIOS has no such mode); the patched Concurrent XIOS needs
+ * capability bit 4. 720x348, colour bit 0 is the pixel, bit 7 requests XOR;
+ * 90x43 text cells.
  * XIOS: Concurrent 31h..5Fh, DOS Plus 41h. Modes 3/4/6 require CGA, except
  * patched ccpm86-kernel also supports EGA/VGA. Native modes 0Dh/0Eh/10h and
  * VGA 11h/12h/13h require the matching capability bit; 0Fh is BIOS-only.

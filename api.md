@@ -331,7 +331,7 @@ Graphics modes depend on OS and adapter support; see [graphics.md](graphics.md).
 - `gfx_dac_entry`: index 0..255, RGB components 0..63, modes `0x11`..`0x13`.
 - Both palette-entry functions return 0, or -1 for invalid arguments/mode.
 - `gfx_pixel`: ignores out-of-bounds coordinates; color bit 7 requests XOR except in mode `0x13`. In `MODE_HERCULES` bit 0 is the pixel.
-- `MODE_HERCULES`: 720x348, 90x43 text cells of 8x8; Concurrent DOS 4.1 patched kernel only, otherwise `gfx_mode` returns -1. Palette functions return -1.
+- `MODE_HERCULES`: 720x348, 90x43 text cells of 8x8. BIOS backend (BDOS 22h or >=60h): card driven directly after detection. Patched Concurrent XIOS: capability bit 4. Otherwise, or without a Hercules adapter, `gfx_mode` returns -1. Palette functions return -1.
 - `gfx_text`: Concurrent/DOS Plus cells have black backgrounds; 8x8 normally, 8x14 in `0x10`, 8x16 in `0x11`/`0x12`.
 
 ### Constants

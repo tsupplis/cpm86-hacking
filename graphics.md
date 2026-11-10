@@ -42,7 +42,7 @@ that family. DOS Plus remains on XIOS pending further testing.
 | `11h` | 640x480, 2 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
 | `12h` | 640x480, 16 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
 | `13h` | 320x200, 256 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
-| `7Fh` | 720x348, monochrome (Hercules) | Rejected | Patched CDOS 4.1 XIOS (`ESC a` 7Fh, native C0h), capability bit 4 |
+| `7Fh` | 720x348, monochrome (Hercules) | Card programmed directly after detection | Patched Concurrent XIOS (CCP/M-86, CDOS 4.1): `ESC a` 7Fh, native C0h, capability bit 4 |
 
 A BIOS request still needs a video BIOS and adapter supporting that mode.
 The library does not probe or verify every BIOS mode. On XIOS, unsupported
@@ -63,7 +63,7 @@ its text font.
 | EGA configured as EGA | CGA register programming is insufficient; do not assume compatibility |
 | VGA configured as VGA | Corrupted graphics and incomplete text restoration reproduced in PCE and DOSBox |
 | MDA | Text only through this library; not a CGA graphics target |
-| Hercules | Text only on stock XIOS; graphics only through the CDOS 4.1 kernel extension below |
+| Hercules | Text only on stock XIOS; graphics through the patched Concurrent XIOS, or directly on the BIOS backend (see below) |
 
 For the stock 3.1 XIOS, use `./ccpm86 cga` with the project's PCE launcher.
 Selecting `vga` and requesting a CGA resolution does not substitute for
@@ -111,7 +111,13 @@ an abnormal exit is not guaranteed.
 
 ## Hercules (mode 7Fh)
 
-Project extension of the CDOS 4.1 kernel; not an IBM or Hercules BIOS mode.
+Not an IBM or Hercules BIOS mode. Two paths, one `gfx_mode(MODE_HERCULES)`:
+
+- BIOS backend (CP/M-86 1.1, BDOS >= 60h): the library programs the 6845 and
+  clears the page itself, then restores text through BIOS mode 7.
+- Patched Concurrent XIOS (CCP/M-86, CDOS 4.1): project mode `ESC a` 7Fh,
+  native C0h, capability bit 4.
+
 Only a detected Hercules adapter is accepted. MDA, CGA, EGA and VGA reject it
 without changing the display. The framebuffer is `B000:0000`: four interleaved
 8 KB banks (`(y & 3) * 8192 + (y >> 2) * 90 + (x >> 3)`), 90 bytes per line.
