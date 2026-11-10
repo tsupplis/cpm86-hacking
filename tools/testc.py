@@ -159,7 +159,7 @@ def terminal_console(folder):
 #include <stdio.h>
 #include <string.h>
 static unsigned char output[256];
-static int used, version, system_type, resets, status, video;
+static int used, version, system_type, resets, video;
 static int status_writes;
 static char status_text[14];
 int test_bdos(fn, arg) int fn, arg; {
@@ -169,7 +169,6 @@ int test_bdos(fn, arg) int fn, arg; {
 int osver() { return version; }
 int ostype() { return system_type; }
 int dosplus_crtreset() { resets++; return 0; }
-void xstatline(mode) int mode; { status = mode; }
 int test_video_mode(mode) int mode; { video = mode; return 0; }
 int segread(segs) int *segs; { return 0; }
 int bdosx(fn, arg, es, bx) int fn, arg, *es, *bx; {
@@ -220,14 +219,10 @@ int main() {
         cursor(CURSOR_SAVE); expect("\x1bj", "cursor save");
         cursor(CURSOR_RESTORE); expect("\x1bk", "cursor restore");
         cursor(99); expect("", "unknown cursor command");
-        status = 0;
         statline(STATLINE_ON);
-        expect(version == 0x22 ? "\x1b1" : "", "status on bytes");
-        check(status == (version > 0x31 ? 2 : 0), "status on service");
-        status = 0;
+        expect("\x1b1", "status on bytes");
         statline(STATLINE_OFF);
-        expect(version == 0x22 ? "\x1b0" : "", "status off bytes");
-        check(status == (version > 0x31 ? 1 : 0), "status off service");
+        expect("\x1b0", "status off bytes");
     }
     clrscr(); expect("\x1bE", "clear screen");
     clreos(); expect("\x1bJ", "clear screen tail");

@@ -152,9 +152,7 @@ int main(int argc, char **argv)
 {
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
-    statline(STATLINE_OFF);     /* a mode switch can re-enable the status line */
     if (gfx_mode(MODE_VGA_640X480) < 0) {
-        statline(STATLINE_ON);   
         fprintf(stderr, "Graphics mode unsupported on this system.\n");
         return 1;
     }
@@ -163,6 +161,5 @@ int main(int argc, char **argv)
 
     gfx_mode(MODE_TEXT);
     clrscr();
-    statline(STATLINE_ON);   
     return 0;
 }

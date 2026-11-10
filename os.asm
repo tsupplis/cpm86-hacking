@@ -1092,52 +1092,6 @@ pckey_	proc	near
         ret
 pckey_  endp
 
-	    public	xstatline_
-xstatline_	proc	near
-        push	bp
-        mov 	bp,sp
-        push    es
-        push    ds
-        push    si
-        push    ax
-        push    bx
-        push    cx
-        mov     cl,0Ch
-        int     0E0h
-        push    ax
-        mov     cl,9Ah
-        int     0E0h
-        mov	    cx, word ptr 4[bp]
-        xor     ch,ch
-        pop     ax
-        cmp     ax, 1041h
-        jz      xst_dosplus
-        cmp     ax, 1432h
-        jb      xst_exit
-        push    es
-        pop     ds                       ; SYSDAT before reading system pointers
-        mov     si, word ptr [68h] ;[4Eh] for Dos Plus
-        jmp     xst_call
-xst_dosplus:
-        push    es
-        pop     ds                       ; SYSDAT
-        mov     si, word ptr [4Eh] 
-xst_call:
-        mov     dx,0
-        mov     es, 10h[si]              ; UDA segment from system PD
-        mov     ax,20H 
-        call    dword ptr[28h]
-xst_exit:
-        pop     cx
-        pop     bx
-        pop     ax
-        pop     si
-        pop     ds
-        pop     es
-        pop     bp
-        ret
-xstatline_  endp
-
 ;
 ; ccpseg: locate the CP/M-86 1.1 CCP and check it is the layout we expect.
 ; Returns CF clear and ES = CCP segment, or CF set (do not touch the CCP).

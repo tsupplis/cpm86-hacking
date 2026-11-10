@@ -60,7 +60,7 @@ typedef struct terminal_cfg {
  * Raw byte input has no key decoder or verified terminal key map yet. */
 static terminal_cfg_t terminal = {
     {
-        {"\033m\0330\0331\033q\033t\033u", "\033e\033z"},
+        {"\x1bm\x1b0\x1b1\x1bq\x1bt\x1bu", "\x1be\x1bz"},
         "\x1bE", "\x1bJ", "\x1bK",
         "\x1bL", "\x1bM", "\x1bN",
         {"\x1bm", "\x1be"}, {"\x1bn", "\x1bf"},
@@ -68,8 +68,8 @@ static terminal_cfg_t terminal = {
         "\x1bv", "\x1bw",
         "\x1b1", "\x1b0",
         "\x1by", "\x1bx",
-        "\033Y", 32,
-        "\033j\033b", "\033k"
+        "\x1bY", 32,
+        "\x1bj\x1bb", "\x1bk"
     },
     {0, 0}
 };
@@ -312,19 +312,7 @@ statline(on)
 void statline(int on)
 #endif
 {
-    int os=osver();
-    if(os>0x31) {
-        xstatline(on?2:1);
-        return;
-    }
-    if((ostype() & OSTYPE_MULTIUSER)) {
-        cputs(on?"\0333":"\0330");
-        return;
-    }
-    if(os==0x22) {
-        cputs(on?terminal.output.status_on:terminal.output.status_off);
-        return;
-    }
+    cputs(on?terminal.output.status_on:terminal.output.status_off);
 }
 
 #ifndef __STDC__

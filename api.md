@@ -32,7 +32,6 @@
 | `delay` | `void delay(unsigned int ticks)` | Waits for the requested number of timer ticks. |
 | `bioskey` | `int bioskey(void)` | Reads a key with its character and scan code. |
 | `pckey` | `int pckey(void)` | Reads a raw PC keyboard scan code. |
-| `xstatline` | `void xstatline(int mode)` | Controls the DOS Plus / CCP/M status line (1 = off, 2 = on). |
 | `dpb_load` | `void dpb_load(int drive, dpb_t *dpb)` | Reads disk geometry for `drive` into `*dpb` (0 = `A:`, etc.). |
 | `getftime` | `int getftime(char *fcb)` | Reads an open file's dates, times, and password mode. |
 | `setftime` | `int setftime(char *fcb, char *stamps)` | Sets an open file's creation/access and modification times. |
@@ -170,7 +169,7 @@ Raw console I/O and display control for the PC's VT52-style console.
 
 - `kbhit` returns nonzero for waiting input, but may return zero while `getch` has buffered input.
 - `getch` waits for input, preserves high-bit bytes, and does no editing or key decoding.
-- `statline` supports version `0x22`, Concurrent `0x31` (console escapes `ESC 0`/`ESC 3`) or versions greater than `0x31`; otherwise no effect.
+- `statline` sends the console escapes `ESC 1` (on) / `ESC 0` (off) on every version; there is no XIOS call. `gfx_mode` turns the status line off for graphics modes and back on when returning to text.
 - `textcolor` ignores values below 1; positive values use their low byte.
 - `setstatus` supports CP/M-86 1.1: 14 cells, space-padded, lowercase by default. Tokens: `\u` preserves case, `\l` resumes lowercase, `\s` and `\\` insert spaces. Tokens are case-insensitive; unknown tokens are discarded.
 - `scrmode` supports CP/M-86 1.1 only. Choose one `SCRMODE_*` value; default resets/clears the console.
