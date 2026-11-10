@@ -17,7 +17,8 @@ RM=rm -f
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd mandel.cmd getch.cmd \
-    printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd rose.cmd
+    printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd rose.cmd \
+    bwrose.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com \
     dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
@@ -125,6 +126,12 @@ rose.cmd: rose.o util.lib
 	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
 
 rose.o: rose.c gfx.h
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
+
+bwrose.cmd: bwrose.o util.lib
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
+
+bwrose.o: bwrose.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 	
 ball.cmd: ball.h86
@@ -257,15 +264,6 @@ dostest.img: binaries Makefile
     done
 	mdir -w -i dostest.img ::*.*
 
-ccpmtest.img: binaries cpmtest.img startup.0
-	(cd pce;$(MAKE) binaries)
-	cp cpmtest.img $@
-	rm -f tmp.img
-	python3 tools/cpm86twist.py untwist $@ tmp.img
-	cpmcp -f cpm86-320 tmp.img startup.0 0:
-	python3 tools/cpm86twist.py twist tmp.img $@
-	rm -f tmp.img
-
 cpmtest.img: binaries Makefile test.txt env.dat
 	(cd pce;$(MAKE) binaries)
 	cp cpmbase.img $@
@@ -275,7 +273,8 @@ cpmtest.img: binaries Makefile test.txt env.dat
 	cpmcp -f cpm86-320 tmp.img $(CPM86TOOLS) 0:
 	cpmcp -f cpm86-320 tmp.img $(EXTRAS) 0:
 	cpmcp -f cpm86-320 tmp.img test.txt 0:
-	cpmcp -f cpm86-320 tmp.img *.h *.lib 0:
+	#cpmcp -f cpm86-320 tmp.img *.h *.lib 0:
+	cpmcp -f cpm86-320 tmp.img startup.0 0:
 	cpmcp -f cpm86-320 tmp.img env.dat 0:
 	cpmls -F -f cpm86-320 tmp.img 0:*.*
 	python3 tools/cpm86twist.py twist tmp.img $@
@@ -283,7 +282,7 @@ cpmtest.img: binaries Makefile test.txt env.dat
 
 test: cpmtest
 
-ccpmtest: ccpmtest.img
+ccpmtest: cpmtest.img
 	@./ccpm86
 
 cpmtest: cpmtest.img

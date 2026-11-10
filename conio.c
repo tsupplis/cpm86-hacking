@@ -317,6 +317,10 @@ void statline(int on)
         xstatline(on?2:1);
         return;
     }
+    if((ostype() & OSTYPE_MULTIUSER)) {
+        cputs(on?"\0333":"\0330");
+        return;
+    }
     if(os==0x22) {
         cputs(on?terminal.output.status_on:terminal.output.status_off);
         return;

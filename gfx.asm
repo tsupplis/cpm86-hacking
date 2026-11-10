@@ -141,6 +141,181 @@ cga_store:
             ret
 gfx_cga_byte_ endp
 
+; hgcbyte(offset, mask, bits, xor_pixel): same contract as gfx_cga_byte_
+; on the Hercules page-zero framebuffer at B000:0000.
+            public gfx_hgc_byte_
+gfx_hgc_byte_ proc near
+            push bp
+            mov bp,sp
+            push es
+            push bx
+            mov ax,0B000h
+            mov es,ax
+            mov bx,4[bp]
+            mov al,es:[bx]
+            cmp word ptr 10[bp],0
+            jne hgc_xor
+            mov ah,byte ptr 6[bp]
+            not ah
+            and al,ah
+            or al,byte ptr 8[bp]
+            jmp hgc_store
+hgc_xor:
+            xor al,byte ptr 8[bp]
+hgc_store:
+            mov es:[bx],al
+            pop bx
+            pop es
+            pop bp
+            ret
+gfx_hgc_byte_ endp
+
+; hgcdetect(): 1 if the active display is a Hercules card, else 0. Needs the
+; monochrome CRTC port in the BIOS data area, no EGA/VGA, and a toggling
+; vertical-sync bit (3BAh bit 7), which plain MDA lacks.
+            public gfx_hgc_detect_
+gfx_hgc_detect_ proc near
+            push es
+            push bx
+            push cx
+            push dx
+            push si
+            push di
+            push bp
+            mov ax,40h
+            mov es,ax
+            cmp word ptr es:[63h],03B4h
+            jne hgc_no
+            mov ah,12h
+            mov bx,0FF10h
+            int 10h
+            cmp bh,1
+            jbe hgc_no
+            mov dx,03BAh
+            in al,dx
+            and al,80h
+            mov ah,al
+            mov cx,0FFFFh
+hgc_probe:
+            in al,dx
+            and al,80h
+            cmp al,ah
+            jne hgc_yes
+            loop hgc_probe
+hgc_no:
+            xor ax,ax
+            jmp hgc_det_done
+hgc_yes:
+            mov ax,1
+hgc_det_done:
+            pop bp
+            pop di
+            pop si
+            pop dx
+            pop cx
+            pop bx
+            pop es
+            ret
+gfx_hgc_detect_ endp
+
+; hgcclear(): zero the 32 KB page-zero framebuffer at B000:0000.
+            public gfx_hgc_clear_
+gfx_hgc_clear_ proc near
+            push es
+            push di
+            push cx
+            mov ax,0B000h
+            mov es,ax
+            xor di,di
+            xor ax,ax
+            mov cx,4000h
+            cld
+            rep stosw
+            pop cx
+            pop di
+            pop es
+            ret
+gfx_hgc_clear_ endp
+
+; hgcgraphics(): program the card for 720x348 page-zero graphics, clear the
+; 32 KB framebuffer and enable the display. No BIOS calls. Register values
+; follow the Hercules GB101 manual.
+            public gfx_hgc_graphics_
+gfx_hgc_graphics_ proc near
+            push es
+            push cx
+            push dx
+            push di
+            mov dx,03BFh
+            mov al,1                    ; allow graphics, page zero only
+            out dx,al
+            mov dx,03B8h
+            mov al,2                    ; graphics, display off
+            out dx,al
+            mov dx,03B4h
+            mov ax,3500h
+            out dx,ax
+            mov ax,2D01h
+            out dx,ax
+            mov ax,2E02h
+            out dx,ax
+            mov ax,0703h
+            out dx,ax
+            mov ax,5B04h
+            out dx,ax
+            mov ax,0205h
+            out dx,ax
+            mov ax,5706h
+            out dx,ax
+            mov ax,5707h
+            out dx,ax
+            mov ax,0208h
+            out dx,ax
+            mov ax,0309h
+            out dx,ax
+            mov cx,6                    ; registers 10..15 are zero
+            mov al,10
+hgc_zero:
+            xor ah,ah
+            out dx,ax
+            inc al
+            loop hgc_zero
+            call gfx_hgc_clear_
+            mov dx,03B8h
+            mov al,0Ah                  ; graphics, display enabled
+            out dx,al
+            pop di
+            pop dx
+            pop cx
+            pop es
+            xor ax,ax
+            ret
+gfx_hgc_graphics_ endp
+
+; hgctext(): leave graphics and let the BIOS restore monochrome text mode 7.
+            public gfx_hgc_text_
+gfx_hgc_text_ proc near
+            push bx
+            push cx
+            push dx
+            push si
+            push di
+            push bp
+            mov dx,03BFh
+            xor al,al                   ; graphics disabled again
+            out dx,al
+            mov ax,7
+            int 10h
+            pop bp
+            pop di
+            pop si
+            pop dx
+            pop cx
+            pop bx
+            xor ax,ax
+            ret
+gfx_hgc_text_ endp
+
             public gfx_cga_palette_
 gfx_cga_palette_ proc near
             push bp
@@ -179,7 +354,8 @@ gfx_cga_font_ endp
 
 ; Query only on Concurrent BDOS 31h/41h. The original selector 30 is a no-op:
 ; input BX=0 then returns no capability. Save ES (v1 returns SYSDAT there).
-; Returns BX bits: 1=mode 10h, 2=modes 0Dh/0Eh, 4=VGA 11h/12h/13h and DAC.
+; Returns BX bits: 1=mode 10h, 2=modes 0Dh/0Eh, 4=VGA 11h/12h/13h and DAC,
+; 16=Hercules C0h (ESC a 7Fh). Bit 3 (mode 0Fh) is masked off.
             public gfx_ega_caps_
 gfx_ega_caps_ proc near
             push bx
@@ -195,7 +371,7 @@ gfx_ega_caps_ proc near
             cmp ax,4745h
             jne ega_unavailable
             mov ax,bx
-            and ax,7
+            and ax,17h
             jmp ega_available_done
 ega_unavailable:
             xor ax,ax

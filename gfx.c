@@ -11,6 +11,8 @@
 int gfx_bios_mode(), gfx_bios_palette(), gfx_bios_pixel(), gfx_bios_text();
 int gfx_cga_clear(), gfx_cga_byte(), gfx_cga_palette(), gfx_cga_font();
 int gfx_ega_caps(), gfx_ega_clear(), gfx_ega_byte(), gfx_ega_font();
+int gfx_hgc_byte(), gfx_hgc_detect(), gfx_hgc_graphics(), gfx_hgc_text();
+int gfx_hgc_clear();
 int gfx_vga_clear(), gfx_vga_byte(), gfx_vga_dac();
 int gfx_bios_palette_entry(), gfx_bios_dac();
 
@@ -18,6 +20,7 @@ int gfx_bios_palette_entry(), gfx_bios_dac();
 #define BACKEND_KERNEL  2
 
 static int backend = 0;
+static int hgc_direct = 0;      /* Hercules driven by the program itself */
 static int current_mode = MODE_TEXT;
 static int palette_reg = 0;
 
@@ -25,11 +28,18 @@ static int palette_reg = 0;
 #define CAP_EGA_350     1
 #define CAP_EGA_200     2
 #define CAP_VGA         4
+#define CAP_HERCULES    16
 
 static int is_cga(mode)
     int mode;
 {
     return mode == MODE_CGA_320X200 || mode == MODE_CGA_640X200;
+}
+
+static int is_hgc(mode)
+    int mode;
+{
+    return mode == MODE_HERCULES;
 }
 
 /* Enhanced modes reached through the patched XIOS. 0Fh stays BIOS-only. */
@@ -46,6 +56,8 @@ static int native_cap(mode)
     case MODE_VGA_640X480:
     case MODE_VGA_320X200:
         return CAP_VGA;
+    case MODE_HERCULES:
+        return CAP_HERCULES;
     }
     return 0;
 }
@@ -53,6 +65,8 @@ static int native_cap(mode)
 static int mode_width(mode)
     int mode;
 {
+    if (mode == MODE_HERCULES)
+        return 720;
     return mode == MODE_CGA_320X200 || mode == MODE_EGA_320X200 ||
            mode == MODE_VGA_320X200 ? 320 : 640;
 }
@@ -60,6 +74,8 @@ static int mode_width(mode)
 static int mode_height(mode)
     int mode;
 {
+    if (mode == MODE_HERCULES)
+        return 348;
     if (mode == MODE_EGA_640X350 || mode == MODE_EGA_640X350_MONO)
         return 350;
     if (mode == MODE_VGA_640X480 || mode == MODE_VGA_640X480_MONO)
@@ -116,6 +132,22 @@ static void kernel_palette(value)
         cputc((char)request[i]);
 }
 
+/* Hercules text restore. ESC a cannot do it: the Hercules XIOS accepts only
+ * native text modes 09h and 01h, and no ESC a parameter maps to either. Use
+ * the function-30 back door with CH=0 (set mode). CL must be 01h, not 09h:
+ * the packet goes through BDOS console output, which expands a TAB (09h).
+ */
+static void kernel_hgc_text()
+{
+    int i;
+    static unsigned char request[8] = { 30, 0, 0, 0, 1, 0, 0, 0 };
+
+    cputc((char)27);
+    cputc((char)'!');
+    for (i = 0; i < 8; i++)
+        cputc((char)request[i]);
+}
+
 /* No display changes on unsupported requests. Escape output itself has
  * no acknowledgement: success means the mode request was issued.
  */
@@ -125,25 +157,42 @@ int gfx_mode(mode)
     int selected = select_backend();
     int cap = native_cap(mode);
     int native = selected == BACKEND_KERNEL && cap && enhanced_xios_version();
+    /* CP/M-86 has no Hercules mode in its BIOS: program the card directly. */
+    int direct = is_hgc(mode) && selected == BACKEND_BIOS && gfx_hgc_detect();
 
     if (!selected)
         return -1;
     if (native && !(gfx_ega_caps() & cap))
         return -1;
-    if (mode != MODE_TEXT && !is_cga(mode) && !native &&
+    if (mode != MODE_TEXT && !is_cga(mode) && !native && !direct &&
         !(selected == BACKEND_BIOS && mode >= MODE_EGA_320X200 &&
           mode <= MODE_VGA_320X200))
         return -1;
     if (mode != MODE_TEXT)
         statline(STATLINE_OFF);
     if (selected == BACKEND_BIOS) {
-        gfx_bios_mode(mode);
+        if (direct)
+            gfx_hgc_graphics();
+        else if (hgc_direct)
+            gfx_hgc_text();
+        if (!direct && !(hgc_direct && mode == MODE_TEXT))
+            gfx_bios_mode(mode);
     } else {
-        cputc((char)27);
-        cputc((char)'a');
-        cputc((char)mode);
+        if (mode == MODE_TEXT && is_hgc(current_mode)) {
+            kernel_hgc_text();
+        } else {
+            cputc((char)27);
+            cputc((char)'a');
+            cputc((char)mode);
+        }
         if (mode == MODE_VGA_320X200) {
             gfx_vga_clear();
+        } else if (is_hgc(mode)) {
+            /* The kernel redraws the status line into B000:0F00, inside the
+             * graphics page. Turn it off again, then clear the page.
+             */
+            statline(STATLINE_OFF);
+            gfx_hgc_clear();
         } else if (native) {
             /* Words per plane: 40 or 80 bytes per line. */
             gfx_ega_clear((unsigned)(mode_width(mode) >> 3) *
@@ -156,7 +205,8 @@ int gfx_mode(mode)
     }
     if (mode == MODE_TEXT && current_mode != MODE_TEXT)
         statline(STATLINE_ON);
-    backend = selected;
+    hgc_direct = direct;
+    backend = direct ? BACKEND_KERNEL : selected;
     current_mode = mode;
     return 0;
 }
@@ -252,6 +302,13 @@ void gfx_pixel(x, y, color)
         gfx_vga_byte((unsigned)y * 320 + x, color);
         return;
     }
+    if (is_hgc(current_mode)) {
+        /* Four interleaved 8 KB banks, 90 bytes per line. */
+        shift = 7 - (x & 7);
+        gfx_hgc_byte((y & 3) * 8192 + (y >> 2) * 90 + (x >> 3),
+                     1 << shift, (color & 1) << shift, color & 0x80);
+        return;
+    }
     if (!is_cga(current_mode)) {
         if (current_mode == MODE_VGA_640X480_MONO)
             color &= 0x81;
@@ -299,7 +356,8 @@ void gfx_text(col, row, str, color)
     if (!color)
         color = 15;
     if (current_mode != MODE_VGA_320X200)
-        color &= current_mode == MODE_VGA_640X480_MONO ? 1 : 15;
+        color &= (current_mode == MODE_VGA_640X480_MONO ||
+                  is_hgc(current_mode)) ? 1 : 15;
     while (*str) {
         ch = *str++ & 255;
         if (ch == '\r') {
@@ -319,12 +377,17 @@ void gfx_text(col, row, str, color)
         if (ch >= 128)
             ch = '?';
         for (y = 0; y < height; y++) {
-            if (is_cga(current_mode)) {
+            if (is_cga(current_mode) || is_hgc(current_mode)) {
                 bits = gfx_cga_font(ch, y);
             } else {
                 bits = gfx_ega_font(ch, y, height);
             }
-            if (is_cga(current_mode) || current_mode == MODE_VGA_320X200) {
+            if (is_hgc(current_mode)) {
+                /* Byte-aligned cell: 90 cells of 8 pixels, opaque background. */
+                offset = ((row * 8 + y) & 3) * 8192 +
+                         ((row * 8 + y) >> 2) * 90 + col;
+                gfx_hgc_byte(offset, 255, color ? bits : 0, 0);
+            } else if (is_cga(current_mode) || current_mode == MODE_VGA_320X200) {
                 for (x = 0; x < 8; x++)
                     gfx_pixel(col * 8 + x, row * height + y,
                               (bits & (128 >> x)) ? color : 0);

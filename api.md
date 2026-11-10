@@ -170,7 +170,7 @@ Raw console I/O and display control for the PC's VT52-style console.
 
 - `kbhit` returns nonzero for waiting input, but may return zero while `getch` has buffered input.
 - `getch` waits for input, preserves high-bit bytes, and does no editing or key decoding.
-- `statline` supports version `0x22` or versions greater than `0x31`; otherwise no effect.
+- `statline` supports version `0x22`, Concurrent `0x31` (console escapes `ESC 0`/`ESC 3`) or versions greater than `0x31`; otherwise no effect.
 - `textcolor` ignores values below 1; positive values use their low byte.
 - `setstatus` supports CP/M-86 1.1: 14 cells, space-padded, lowercase by default. Tokens: `\u` preserves case, `\l` resumes lowercase, `\s` and `\\` insert spaces. Tokens are case-insensitive; unknown tokens are discarded.
 - `scrmode` supports CP/M-86 1.1 only. Choose one `SCRMODE_*` value; default resets/clears the console.
@@ -330,7 +330,8 @@ Graphics modes depend on OS and adapter support; see [graphics.md](graphics.md).
 - `gfx_palette_entry`: index 0..15, color 0..63, modes `0x0D`..`0x12`.
 - `gfx_dac_entry`: index 0..255, RGB components 0..63, modes `0x11`..`0x13`.
 - Both palette-entry functions return 0, or -1 for invalid arguments/mode.
-- `gfx_pixel`: ignores out-of-bounds coordinates; color bit 7 requests XOR except in mode `0x13`.
+- `gfx_pixel`: ignores out-of-bounds coordinates; color bit 7 requests XOR except in mode `0x13`. In `MODE_HERCULES` bit 0 is the pixel.
+- `MODE_HERCULES`: 720x348, 90x43 text cells of 8x8; Concurrent DOS 4.1 patched kernel only, otherwise `gfx_mode` returns -1. Palette functions return -1.
 - `gfx_text`: Concurrent/DOS Plus cells have black backgrounds; 8x8 normally, 8x14 in `0x10`, 8x16 in `0x11`/`0x12`.
 
 ### Constants
@@ -349,6 +350,7 @@ Graphics modes depend on OS and adapter support; see [graphics.md](graphics.md).
 #define MODE_VGA_640X480_MONO   17     /* 0x11: 640x480, 2 colors */
 #define MODE_VGA_640X480        18     /* 0x12: 640x480, 16 colors */
 #define MODE_VGA_320X200        19     /* 0x13: 320x200, 256 colors */
+#define MODE_HERCULES           127    /* 0x7F: 720x348, monochrome */
 ```
 
 ---

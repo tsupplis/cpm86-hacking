@@ -42,6 +42,7 @@ that family. DOS Plus remains on XIOS pending further testing.
 | `11h` | 640x480, 2 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
 | `12h` | 640x480, 16 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
 | `13h` | 320x200, 256 colors | Issued to BIOS | Patched XIOS, capability bit 2 (VGA) |
+| `7Fh` | 720x348, monochrome (Hercules) | Rejected | Patched CDOS 4.1 XIOS (`ESC a` 7Fh, native C0h), capability bit 4 |
 
 A BIOS request still needs a video BIOS and adapter supporting that mode.
 The library does not probe or verify every BIOS mode. On XIOS, unsupported
@@ -61,7 +62,8 @@ its text font.
 | Physical CGA or emulator configured as CGA | Matching hardware for modes 4/6 |
 | EGA configured as EGA | CGA register programming is insufficient; do not assume compatibility |
 | VGA configured as VGA | Corrupted graphics and incomplete text restoration reproduced in PCE and DOSBox |
-| MDA/Hercules | Text only through this library; not a CGA graphics target |
+| MDA | Text only through this library; not a CGA graphics target |
+| Hercules | Text only on stock XIOS; graphics only through the CDOS 4.1 kernel extension below |
 
 For the stock 3.1 XIOS, use `./ccpm86 cga` with the project's PCE launcher.
 Selecting `vga` and requesting a CGA resolution does not substitute for
@@ -106,6 +108,17 @@ It does not provide a general application `INT 10h` gateway. It restores
 standard BIOS text modes, not arbitrary custom fonts, row counts or
 application-defined video state. Finish the demo normally; recovery after
 an abnormal exit is not guaranteed.
+
+## Hercules (mode 7Fh)
+
+Project extension of the CDOS 4.1 kernel; not an IBM or Hercules BIOS mode.
+Only a detected Hercules adapter is accepted. MDA, CGA, EGA and VGA reject it
+without changing the display. The framebuffer is `B000:0000`: four interleaved
+8 KB banks (`(y & 3) * 8192 + (y >> 2) * 90 + (x >> 3)`), 90 bytes per line.
+Colour bit 0 is the pixel and bit 7 requests XOR. Text uses the PC ROM 8x8
+font on a 90x43 grid, opaque black background. There is no palette:
+`gfx_palette_entry` and `gfx_dac_entry` return -1. `bwrose.cmd` demonstrates
+it, using line patterns instead of colours.
 
 ## Native EGA/VGA modes
 
