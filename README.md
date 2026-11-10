@@ -44,6 +44,7 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `mandel` | Simple Ascii art demo | - |
 | `sine` | EGA sine wave demo | 640×350 sine plot with axes and labels. BIOS backend, or patched XIOS with EGA (>=128 KB)/VGA. |
 | `rose` | VGA mystic rose demo | Mode 12h (640×480, 16 colours): all 45 chords between 10 points on a circle, coloured by span. BIOS backend, or patched XIOS with VGA. |
+| `bwrose` | Hercules mystic rose demo | (720x348): all 45 chords between 10 points on a circle. |
 | `getch` | Keyboard scanner | `dosgetch.com` is the DOS counterpart. |
 | `zpdump` | Dump the zero page | `pspdump.com` is the DOS counterpart and supports `-c` to call DOS `int 21h` function `26h` before dumping the new PSP. |
 
@@ -134,6 +135,8 @@ Those OSes work incredibly well on PCE on floppy and HD images. This emulator is
 ![SINE demo](images/sine.png)
 
 ![ROSE demo](images/rose.png)
+
+![Black&White ROSE demo](images/bwrose.png)
 
 ![CP/M-86 1.1 Apps](images/cpmapps.png)
 
