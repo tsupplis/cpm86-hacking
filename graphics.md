@@ -19,14 +19,16 @@ not necessarily the version printed in a product banner. Concurrent means
 | --- | --- | --- |
 | `22h` | CP/M-86 family | BIOS |
 | `31h..5Fh` | Concurrent | XIOS |
-| `41h` | Not Concurrent; DOS Plus | XIOS |
+| `41h` | Not Concurrent; DOS Plus | BIOS |
 | `60h` and later | Any, including Concurrent | BIOS |
 | Other combinations | Any | Unsupported; `gfx_mode` returns `-1` |
 
 The `60h` threshold takes precedence over the Concurrent test. Concurrent
 DOS 6.x therefore uses BIOS mode, palette, pixel and text operations. This is
 the selected policy following successful user testing of BIOS graphics on
-that family. DOS Plus remains on XIOS pending further testing.
+that family. DOS Plus also uses the BIOS backend: the XIOS path gave no
+EGA/VGA/Hercules, a wrong CGA palette on VGA and no return to text. With BIOS
+it works for CGA, EGA, VGA and Hercules (user-tested).
 
 ## Available modes
 
@@ -224,12 +226,12 @@ with arbitrary application BIOS calls.
 | Legacy CGA path | Existing direct-register path retained; CGA regression checked separately |
 | Concurrent DOS 3.2 and 4.1 | User reported working XIOS graphics before this extension |
 | Concurrent DOS 6.2 | Earlier user tests passed; current policy selects the BIOS backend |
-| DOS Plus | crtreset tested in PCE VGA across three consecutive runs after scrolling and BIOS output; full XIOS graphics coverage still pending |
+| DOS Plus | BIOS backend, user-tested: CGA, EGA, VGA and Hercules modes work and return to text; crtreset tested in PCE VGA across three consecutive runs after scrolling and BIOS output |
 | Physical EGA/VGA and other video ROMs | Not yet validated |
 | Patched CCP/M-86 3.1, PCE VGA | Modes 0Dh/0Eh/10h/11h/12h/13h: colour bars, edge clipping, XOR, ROM-font text, EGA palette entry and VGA DAC changes, text restoration; ROSE in mode 12h |
 | Patched CCP/M-86 3.1, PCE EGA | Modes 0Dh/0Eh/10h as above; 11h/12h/13h correctly rejected before any display change |
 | CP/M-86 1.1 BIOS backend, PCE VGA | ROSE in mode 12h |
-| Native EGA on other XIOS versions | Not enabled; no compatibility claim for Concurrent 3.2..5.x or DOS Plus |
+| Native EGA on other XIOS versions | Not enabled; no compatibility claim for Concurrent 3.2..5.x |
 
 PCE's EGA cursor renderer currently displays the requested two-scan-line
 cursor as one line because of its end-scan-line handling. That is separate

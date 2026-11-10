@@ -1,7 +1,7 @@
 /*
  * Licensed under the MIT license. See LICENSE in the project root.
- * IBM PC graphics: BIOS on BDOS 22h or >= 60h; console escape modes on
- * Concurrent BDOS 31h..5Fh and non-Concurrent BDOS 41h (DOS Plus).
+ * IBM PC graphics: BIOS on BDOS 22h, >= 60h and non-Concurrent BDOS 41h
+ * (DOS Plus); console escape modes on Concurrent BDOS 31h..5Fh.
  */
 #include <stdio.h>
 #include <conio.h>
@@ -96,10 +96,10 @@ static int select_backend()
     int version = osver();
     int concurrent = ostype() & OSTYPE_MULTIUSER;
 
-    if (version == 0x22 || version >= 0x60)
-        return BACKEND_BIOS;
-    if ((version >= 0x31 && concurrent) ||
+    if (version == 0x22 || version >= 0x60 ||
         (version == 0x41 && !concurrent))
+        return BACKEND_BIOS;
+    if (version >= 0x31 && concurrent)
         return BACKEND_KERNEL;
     return 0;
 }

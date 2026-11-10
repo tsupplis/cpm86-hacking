@@ -225,7 +225,7 @@ incbin IMAGE,128
 
 def check():
     cases = ((0x0022, 0, 0), (0x1431, 1, 0), (0x1432, 1, 0),
-             (0x1441, 1, 0), (0x1041, 1, 0), (0x1450, 1, 0),
+             (0x1441, 1, 0), (0x1041, 0, 0), (0x1450, 1, 0),
              (0x1460, 0, 0), (0x1030, 0, 1), (0x1031, 0, 1))
     with tempfile.TemporaryDirectory(prefix='ball-test-') as td:
         source = Path(td) / 'balltest.asm'

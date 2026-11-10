@@ -21,12 +21,13 @@
 #define MODE_HERCULES           127     /* 0x7F: 720x348, monochrome */
 
 /* gfx_mode returns 0 when issued, -1 for an unsupported OS or mode.
- * BIOS: BDOS 22h or >=60h, modes 3/4/6 and 0Dh..13h.
- * Hercules (MODE_HERCULES): BDOS 22h or >=60h drive the card directly after
+ * BIOS: BDOS 22h, >=60h or non-Concurrent 41h (DOS Plus), modes 3/4/6 and
+ * 0Dh..13h.
+ * Hercules (MODE_HERCULES): the BIOS systems drive the card directly after
  * detection (the BIOS has no such mode); the patched Concurrent XIOS needs
  * capability bit 4. 720x348, colour bit 0 is the pixel, bit 7 requests XOR;
  * 90x43 text cells.
- * XIOS: Concurrent 31h..5Fh, DOS Plus 41h. Modes 3/4/6 require CGA, except
+ * XIOS: Concurrent 31h..5Fh. Modes 3/4/6 require CGA, except
  * patched ccpm86-kernel also supports EGA/VGA. Native modes 0Dh/0Eh/10h and
  * VGA 11h/12h/13h require the matching capability bit; 0Fh is BIOS-only.
  * XIOS text: 8x8 PC ROM in CGA, BIOS-selected ROM font otherwise

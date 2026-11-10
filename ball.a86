@@ -1,7 +1,7 @@
 ; CGA bouncing ball for CP/M-86 and CCP/M-86 on the IBM PC.
 ; No arguments; press a normal key to return to text mode.
-; BIOS modes on BDOS 22h / >=60h; console modes on Concurrent
-; 31h..5Fh and DOS Plus 41h, matching the C graphics library.
+; BIOS modes on BDOS 22h / >=60h and DOS Plus 41h; console modes on
+; Concurrent 31h..5Fh, matching the C graphics library.
 ; Stock CCP/M requires CGA; the patched XIOS also supports EGA/VGA.
 ; Run on the foreground console and exit before switching consoles.
     title   'Bouncing Ball'
@@ -27,8 +27,9 @@
     jb      unsupported
     test    ah, 4               ; Concurrent system
     jnz     kernel_start
-    cmp     al, 41h             ; DOS Plus
-    jnz     unsupported
+    cmp     al, 41h             ; DOS Plus: BIOS modes, XIOS path fails
+    jz      bios_start
+    jmp     unsupported
 kernel_start:
     mov     kernel_mode, 1
     jmp     start
