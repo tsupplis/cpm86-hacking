@@ -325,6 +325,6 @@ check-clock: wait.cmd
 # Rebuild directory clients whenever the shared entry layout changes.
 ls.o rm.o wc.o dirent.o: dirent.h util.h
 
-.PHONY: test-ripple
-test-ripple: ripple.cmd
+.PHONY: check-ripple
+check-ripple: ripple.cmd
 	python3 tools/testrip.py

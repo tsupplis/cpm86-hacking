@@ -90,6 +90,8 @@ int main(void)
 {
     freopen("con:", "r", stdin);
     freopen("con:", "w", stdout);
+    puts("Calculating ripple...");
+    fflush(stdout);
     prepare();
     if (gfx_mode(MODE_VGA_640X480) < 0) {
         fprintf(stderr, "Graphics mode unsupported on this system.\n");
