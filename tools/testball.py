@@ -5,6 +5,7 @@ Checks OS routing, two animated frames, packed pixels, text restoration,
 exit and register/segment preservation across deliberately hostile BDOS calls.
 """
 from pathlib import Path
+import struct
 import subprocess
 import tempfile
 
@@ -224,6 +225,15 @@ incbin IMAGE,128
 
 
 def check():
+    data = (ROOT / 'ball.cmd').read_bytes()
+    # The entry sets SS=CS then SP with MOV SP,imm16. Check the actual CMD
+    # allocation, not host-emulator spare memory beyond the loaded image.
+    entry = data[128+256:128+256+32]
+    stack_setup = entry.index(bytes.fromhex('8ed1bc'))
+    stack_top = struct.unpack_from('<H', entry, stack_setup+3)[0]
+    minimum = struct.unpack_from('<H', data, 5)[0]*16
+    assert 256 < stack_top <= minimum, (stack_top, minimum)
+    assert len(data)-128 >= stack_top, 'stack must be emitted in the CMD image'
     cases = ((0x0022, 0, 0), (0x1431, 1, 0), (0x1432, 1, 0),
              (0x1441, 1, 0), (0x1041, 0, 0), (0x1450, 1, 0),
              (0x1460, 0, 0), (0x1030, 0, 1), (0x1031, 0, 1))

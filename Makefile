@@ -18,7 +18,7 @@ CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
     cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd mandel.cmd getch.cmd \
     printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd rose.cmd \
-    bwrose.cmd
+    bwrose.cmd ripple.cmd
 DOSTOOLS=dosver.com dosenv.com pspdump.com dosmem.com \
     dosgetch.com
 EXTRAS=clsansi.cmd rtctime.cmd rtcinit.cmd
@@ -105,7 +105,7 @@ dump.cmd: dump.o
 	$(LD) $(CPM86_LDFLAGS) -o $@ $<
 
 mandel.cmd: mandel.o util.lib
-	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -mfloat=auto -lm
 
 mandel.o: mandel.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
@@ -117,19 +117,25 @@ ballc.o: ballc.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 sine.cmd: sine.o util.lib
-	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -mfloat=auto -lm
 
 sine.o: sine.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
 rose.cmd: rose.o util.lib
-	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -mfloat=auto -lm
 
 rose.o: rose.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
 
+ripple.cmd: ripple.o util.lib
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -mfloat=auto -lm
+
+ripple.o: ripple.c gfx.h conio.h
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
+
 bwrose.cmd: bwrose.o util.lib
-	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -lm
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^ -mfloat=auto -lm
 
 bwrose.o: bwrose.c gfx.h
 	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
@@ -318,3 +324,7 @@ check-clock: wait.cmd
 
 # Rebuild directory clients whenever the shared entry layout changes.
 ls.o rm.o wc.o dirent.o: dirent.h util.h
+
+.PHONY: test-ripple
+test-ripple: ripple.cmd
+	python3 tools/testrip.py
