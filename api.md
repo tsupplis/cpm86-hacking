@@ -14,6 +14,7 @@
 6. [Date, Time & Epoch (`util.h`)](#6-date-time--epoch-utilh)
 7. [Submit Files & Process Chaining (`sub.h`)](#7-submit-files--process-chaining-subh)
 8. [Debug Utilities (`debug.h`)](#8-debug-utilities-debugh)
+9. [CMD Segment Views (`cmdseg.h`)](#9-cmd-segment-views-cmdsegh)
 
 ---
 
@@ -474,3 +475,113 @@ Builds `$$$.sub` command stacks, expands submit files, and chains programs.
 
 Output goes to `fd`, 16 bytes per row. Nonzero `raw` omits offsets/ASCII.
 Returns the next offset.
+
+---
+
+## 9. CMD Segment Views (`cmdseg.h`)
+
+`cmdseg.c` provides bounded access to loader-owned EXTRA and AUX groups in
+CP/M-86 CMD programs. It is linked into `util.lib`; include the standalone `cmdseg.h` for its
+types, constants and declarations. No additional assembly module is required. This uses the Aztec small-model DATA base page
+and near C buffers. It does not allocate groups or open CMD files from disk.
+Add the groups at build time with `cmdmod`.
+
+### Functions
+
+| Function | Signature | Description |
+|----------|-----------|-------------|
+| `cmdseg_open` | `int cmdseg_open(cmdseg *h, unsigned group, unsigned mode)` | Open `CMD_EXTRA` or `CMD_AUX1` through `CMD_AUX4`, with `CMD_RDONLY` or `CMD_RDWR`. Starts at offset zero. |
+| `cmdseg_slice` | `int cmdseg_slice(cmdseg *h, const cmdseg *parent, unsigned long offset, unsigned long length)` | Create an independent view, relative to the parent's start, inheriting its access mode. |
+| `cmdseg_size` | `unsigned long cmdseg_size(const cmdseg *h)` | Size of this view in bytes. |
+| `cmdseg_tell` | `unsigned long cmdseg_tell(const cmdseg *h)` | Current offset relative to this view. |
+| `cmdseg_seek` | `int cmdseg_seek(cmdseg *h, unsigned long offset)` | Set the cursor; seeking exactly to the end is allowed. |
+| `cmdseg_read` | `long cmdseg_read(cmdseg *h, void *buffer, unsigned count)` | Copy up to `count` bytes, advancing the cursor. Returns bytes copied, zero at end, or a negative error. |
+| `cmdseg_write` | `long cmdseg_write(cmdseg *h, const void *buffer, unsigned count)` | Copy all `count` bytes and advance. Rejects writes exceeding the view or using a read-only handle. |
+| `cmdseg_getc` | `int cmdseg_getc(cmdseg *h)` | Read one byte, returning 0–255, `CMDSEG_EOF`, or a negative error. |
+| `cmdseg_close` | `void cmdseg_close(cmdseg *h)` | Invalidate this handle. Does not release loader-owned memory. |
+
+`open`, `slice` and `seek` return zero on success. Errors are `CMDSEG_ARG`
+(invalid argument), `CMDSEG_CLOSED`, `CMDSEG_RANGE`, `CMDSEG_RDONLY`,
+`CMDSEG_MISSING` and `CMDSEG_LARGE` (group exceeds 64 KiB).
+
+### Bounds and ownership
+
+- Handles are caller-owned. Initialize them with `open`, a successful `slice`,
+  or `close` before use; do not modify their fields. No heap or global cursor
+  is used. Failed `open` leaves its handle closed. Failed `slice` leaves its
+  destination unchanged, so check its return value before using a new handle.
+- Slices can be nested or replace their parent handle. Each has its own cursor;
+  closing the parent does not invalidate its slices. Writes are visible through
+  other views of the same memory. The access mode is an API restriction, not
+  hardware protection.
+- Group capacity includes paragraph padding and reserved space. Resource headers
+  must supply the actual payload length. Validate their magic/version and create
+  slices for their payloads. Neither NUL nor Ctrl-Z terminates a memory read.
+- Groups and views may be exactly **65,536 bytes**. Sizes and cursors are
+  `unsigned long`; each block transfer takes at most 65,535 bytes. Use chunks
+  to transfer a whole 64 KiB group. The near buffer must remain within DS and
+  must not overlap the source/destination group range being copied.
+- Reads can be short at the end. Writes never partially succeed on a bounds
+  error. Errors leave the cursor unchanged. A zero-length copy touches no memory;
+  the handle and write permission are still checked. A null buffer is allowed
+  only when the requested count is zero.
+- `size` and `tell` return zero for closed or null handles. `close(NULL)` and
+  repeated closes are harmless. A group remains valid only during the process's
+  lifetime; this API must not be used on memory released by another allocator.
+
+### Example: read a validated resource payload
+
+```c
+#include <stdio.h>
+#include "cmdseg.h"
+
+int read_payload(unsigned long offset, unsigned long length)
+{
+    cmdseg group, payload;
+    char buffer[128];
+    long count;
+
+    if (cmdseg_open(&group, CMD_EXTRA, CMD_RDONLY) < 0) return -1;
+    /* offset/length come from the application's validated resource header. */
+    if (cmdseg_slice(&payload, &group, offset, length) < 0) {
+        cmdseg_close(&group);
+        return -1;
+    }
+    while ((count = cmdseg_read(&payload, buffer, sizeof buffer)) > 0) {
+        /* Consume exactly count bytes. */
+    }
+    cmdseg_close(&payload);
+    cmdseg_close(&group);
+    return count < 0 ? -1 : 0;
+}
+```
+
+Yacc can use a read-only template slice; Sokoban can keep independent level and
+help slices; vi can use writable yank/screen slices. These applications retain
+their own resource layouts and DOS alternatives; this addition does not migrate
+them automatically.
+
+### Validation
+
+Run `make check-seg` for host boundary tests and compiled Aztec execution in
+`emu2`; no PCE is launched. The host fixture replaces descriptor lookup and
+memory copying at link time. Native tests exercise EXTRA/AUX lookup, far copies,
+zero counts, buffers crossing DS, and the final byte of a 64 KiB group.
+
+The [DRI System Guide, section 2.6](https://www.bitsavers.org/pdf/digitalResearch/cpm-86/CPM-86_System_Guide_Jun81.pdf)
+defines the descriptor length as the last byte offset. Older local `emu2`
+builds wrote byte counts instead. This is corrected in
+`cpm86-crossdev/archive/emu2`; the test now uses descriptors unchanged.
+Set `EMU2=/path/to/emu2 make check-seg` to select a particular build.
+
+A separate PCE check booted the actual CP/M-86 1.1 and CCP/M-86 3.1 images and
+ran the compiled probe **without descriptor normalization**. Both passed the
+native checks above and reported:
+
+| Allocated group | CP/M-86 1.1 | CCP/M-86 3.1 | Older emu2 |
+|---|---|---|---|
+| EXTRA, 65,536 bytes | `00FFFFh` | `00FFFFh` | `010000h` |
+| AUX1, 16 bytes | `00000Fh` | `00000Fh` | `000010h` |
+
+This confirms the last-byte-offset interpretation on both OS loaders. The PCE
+check is separate from `make check-seg`; physical hardware was not tested.

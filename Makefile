@@ -35,7 +35,7 @@ dist: cpm86-lib.zip cpm86-bin.zip pce-bin.zip dos-bin.zip disks.zip
 disks.zip: cpm86-bin.img dos-bin.img
 	zip disks.zip cpm86-bin.img dos-bin.img
 
-cpm86-lib.zip: util.lib
+cpm86-lib.zip: util.lib $(wildcard *.h)
 	rm -f cpm86-lib.zip
 	zip cpm86-lib.zip util.lib *.h
 
@@ -158,7 +158,7 @@ mode.cmd: mode.o util.lib
 more.cmd: more.o
 	$(LD) $(CPM86_LDFLAGS) -o $@ $<
 
-util.lib: spawn.o util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.o subfile.o
+util.lib: cmdseg.o spawn.o util.o conio.o dirent.o dpb.o debug.o time.o os.o gfx.o gfxbios.o sub.o subfile.o
 	rm -f $@
 	$(AR) $@ $^
 
@@ -328,3 +328,9 @@ ls.o rm.o wc.o dirent.o: dirent.h util.h
 .PHONY: check-ripple
 check-ripple: ripple.cmd
 	python3 tools/testrip.py
+
+cmdseg.o: cmdseg.c cmdseg.h
+
+.PHONY: check-seg
+check-seg:
+	python3 tools/testseg.py
