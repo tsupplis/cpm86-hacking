@@ -126,9 +126,10 @@ int sub_close(void)
 int sub_abort(void)
 {
     if (_created) {
+        /* A failed close is harmless only when deletion then succeeds.
+           Otherwise report failure: the CCP may still see queued commands. */
         bdos(16, _fcb);
-        bdos(19, _fcb);
-        return 0;
+        return (bdos(19, _fcb) & 0xFF) == 0xFF ? -1 : 0;
     }
 
     /* drop what was pushed: same as a CCP pop -- lower rc, clear the
