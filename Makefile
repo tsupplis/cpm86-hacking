@@ -15,7 +15,7 @@ RASM86=pcdev_rasm86
 RM=rm -f
 
 CPM86TOOLS=rm.cmd more.cmd copycon.cmd dump.cmd mode.cmd ls.cmd \
-    cls.cmd pause.cmd reboot.cmd tod.cmd ver.cmd touch.cmd wc.cmd \
+    cls.cmd pause.cmd reboot.cmd ver.cmd touch.cmd wc.cmd \
     atinit.cmd attime.cmd ciotest.cmd ball.cmd ballc.cmd mandel.cmd getch.cmd \
     printenv.cmd mem.cmd zpdump.cmd wait.cmd prepoch.cmd sine.cmd rose.cmd \
     bwrose.cmd ripple.cmd
@@ -202,7 +202,6 @@ debug.c: debug.h
 
 rm.c: dirent.h
 
-tod.obj: tod.a86 baselib.a86 tinylib.a86
 
 ver.obj: ver.a86 tinylib.a86
 

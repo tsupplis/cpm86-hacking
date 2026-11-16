@@ -585,3 +585,37 @@ native checks above and reported:
 
 This confirms the last-byte-offset interpretation on both OS loaders. The PCE
 check is separate from `make check-seg`; physical hardware was not tested.
+
+### Delay experiment (Turbo Pascal)
+
+`tdelay.pas` is a standalone Turbo Pascal 3 experiment for IBM PC CP/M-86.
+It compares `Delay(1000)` with an inline 8086 `BiosWait(18)`, printing the
+number of BIOS ticks elapsed for each. Build and run separately:
+
+```sh
+cpm86_tp3 tdelay.pas
+```
+
+Run `TDELAY` on the target system. The inline routine reads `INT 1Ah/AH=00h`,
+executes `STI; HLT` between checks, and compares elapsed ticks with the requested
+count. It saves/restores the registers it uses and the caller's flags. Other
+interrupts can wake HLT; elapsed timer ticks, not wakeups, determine completion.
+
+The existing C `delay(unsigned ticks)` in `os.asm` is **not milliseconds**:
+on CP/M-86 1.1 it polls the BIOS timer; on later versions its current backend
+uses BDOS 141 with three scheduler ticks per requested tick. This experiment
+does not change that API, the Turbo runtime, or Ladder.
+
+Limits of this experiment:
+
+- BIOS ticks are about 54.9 ms; 18 tick transitions take approximately
+  0.93–0.99 seconds depending on the starting phase, plus scheduling overhead.
+- Run with normal timer interrupts enabled. A halted CPU needs an interrupt
+  to wake it; this is an IBM PC BIOS experiment, not a portable CP/M routine.
+- The short-delay arithmetic handles low-word wrap, but not the BIOS clock's
+  midnight reset. Do not treat it as the final production delay implementation.
+- For Concurrent CP/M, prefer the scheduler's BDOS delay for normal application
+  waiting; HLT halts the CPU until an interrupt rather than yielding this process.
+- Do not substitute this tick delay for Ladder's `Delay(1)`. Game pacing should
+  use elapsed time; preserving its 7–100 ms movement intervals needs a decision
+  about timer resolution and achievable rendering speed.

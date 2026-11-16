@@ -10,7 +10,7 @@ A couple of experiments for fun with CP/M-86. The focus is on IBM XT CP/M-86 and
 
 The source for CP/M-86 doc, sources and binaries is http://www.cpm.z80.de.
 
-A cleaned-up distribution and kernel is available at https://github.com/tsupplis/cpm86-kernel. This distribution is working well in virtual environments, patched with all known patches, 'y2k' friendly (it contains the version of tod which sources are in this project) and AT friendly.
+A cleaned-up distribution and kernel is available at https://github.com/tsupplis/cpm86-kernel. This distribution is working well in virtual environments, patched with all known patches and AT friendly.
 
 ## Tools
 
@@ -36,7 +36,6 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `cls` | Clear the screen | `cls` targets VT52; `clsansi` targets VT100/ANSI terminals. |
 | `pause` | Wait for a keystroke | CP/M-86 submit tool. |
 | `wait` | Wait for n seconds (1-9) | BIOS timer on BDOS `22h`; BDOS delay on later CP/M-family systems, including Concurrent. |
-| `tod` | Replacement date/time utility | Removes the 78-99 year constraint and validates dates, including leap years. CP/M-86 1.1 for PC/XT only. |
 | `ver` | Display BDOS and operating-system version | Identifies the CP/M-86 family; `dosver.com` is the DOS-family PC-MODE counterpart, including DR DOS and Concurrent DOS probes. |
 | `mem` | Display available and system memory | DOS PC-MODE counterparts: `dosmem.com` uses the DOS 2+ resize-allocation probe when available, with a PSP fallback for DOS 1. Both show the BIOS conventional-memory total. |
 | `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. CP/M-86 1.1 and DOS Plus use BIOS mode setup; CCP/M-86 3.1 and later Concurrent releases use XIOS console modes, BDOS keyboard/delay calls and CGA framebuffer drawing. Stock XIOS requires CGA; the patched CCP/M kernel also supports EGA/VGA. Press a normal key to exit. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
@@ -164,8 +163,7 @@ reporting. The date tests execute routines extracted from both clock sources;
 the wait tests execute the built command. PCE clock include changes rebuild
 both `pcetime` and `pceinit`.
 
-`make check-asm` also checks TOD date validation throughout 2000-2099,
-BIOS keyboard routing and register preservation, and register/stack
+`make check-asm` also checks BIOS keyboard routing and register preservation, and register/stack
 preservation when program chaining fails. `bioskey()` returns -1 on
 MP/M and Concurrent systems instead of invoking their unavailable BIOS
 keyboard interrupt; use console input on those systems.
@@ -199,7 +197,7 @@ Despite being a very primitive OS (in some cases actually enjoyably primitive...
 - Microsoft Basic (http://www.retroarchive.org/cpm/lang/lang.htm) and Personal Basic Interpreters (http://www.cpm.z80.de/binary.html)
 - PL/M-86 (Only cross compilation from DOS)
 
-The big cool thing with this tiny OS is how small it is. I never configure more than 128K on my PCE VM and a single person can play as a hobbyist with it. As mention earlier it works also super well with the Just4Fun V20-MBC SBC (https://hackaday.io/project/170924-v20-mbc-a-v20-8088-8080-cpu-homebrew-computer). Cool other thing: it is Y2K compliant with TOD replacement above and a small visual hack. Yep no date management ...
+The big cool thing with this tiny OS is how small it is. I never configure more than 128K on my PCE VM and a single person can play as a hobbyist with it. As mention earlier it works also super well with the Just4Fun V20-MBC SBC (https://hackaday.io/project/170924-v20-mbc-a-v20-8088-8080-cpu-homebrew-computer).
 
 It makes The early sources of MS-DOS as attractive. MS-DOS 2.X is far more flexible and has a bigger ecosystem than CP/M-86. This makes it more of a challenge ;-) 
 

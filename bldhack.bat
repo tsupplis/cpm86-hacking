@@ -60,7 +60,5 @@ rasm86 cls $ pz sz
 link86 cls[$sz]
 rasm86 pause $ pz sz
 link86 pause[$sz]
-rasm86 tod $ pz sz
-link86 tod[$sz]
 rasm86 reboot $ pz sz
 link86 reboot[$sz]

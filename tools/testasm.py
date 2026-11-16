@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Execute source-derived TOD and OS wrapper routines in emu2."""
-from datetime import date
+"""Execute source-derived OS wrapper routines in emu2."""
 from pathlib import Path
 import re
 import tempfile
@@ -16,51 +15,6 @@ def routine(source, name):
     text = re.sub(r"\b(?:word|byte)\s+ptr\s+", "", match[1])
     text = re.sub(r"\b(\d+)\[bp\]", r"[bp+\1]", text)
     return name + ":\n" + text.replace("offset ", "")
-
-
-def tod(folder, source_path=ROOT / "tod.a86"):
-    source = source_path.read_text()
-    body = source[source.index("check_date:"):source.index("cpm_set_time:")]
-    body = re.sub(r"\b(byte|word) ptr ([\w+]+)", r"\1 [\2]", body)
-    body = body.replace("ptr ", "")
-    body = body.replace("offset ", "")
-    table = source[source.index("month_siz       db"):].splitlines()[0]
-    cases = []
-    for year in range(100):
-        for month in range(1, 13):
-            for day in (0, 28, 29, 30, 31):
-                try:
-                    date(2000 + year, month, day)
-                    invalid = 0
-                except ValueError:
-                    invalid = 1
-                cases.append(f' db "{month:02}/{day:02}/{year:02}",{invalid}')
-    execute(folder, """
- mov si,cases
- mov bp,6000
-next_case:
- mov di,tmz_date
- mov cx,8
- cld
- rep movsb
- lodsb
- xor ah,ah
- push ax
- call check_date
- pop dx
- cmp ax,dx
- jne failed
- cmp byte [month_siz+3],31
- jne failed
- dec bp
- jnz next_case
- jmp ok
-""" + EXIT + body + "\n" + table + """
-tmz_date times 8 db 0
-tmz_time db "23:59:59"
-cases:
-""" + "\n".join(cases))
-    print("PASS: 6000 TOD date checks, years 2000-2099, month boundaries and repeated calls")
 
 
 def keyboard(folder, source):
@@ -215,7 +169,6 @@ def check():
     source = (ROOT / "os.asm").read_text()
     with tempfile.TemporaryDirectory(prefix="asm-test-") as td:
         folder = Path(td)
-        tod(folder)
         keyboard(folder, source)
         chain(folder, source)
 
