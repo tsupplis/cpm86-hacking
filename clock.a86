@@ -12,20 +12,91 @@ IF ATCLOCK
                 call    print_str
                 call    quit
 at_time_read:
-                mov     ah, 02h
-                clc
+                ; Unsupported BIOS calls may leave registers/flags unchanged.
+                mov     cx,0ffffh
+                mov     dx,0ffffh
+                mov     ah,02h
+                stc
                 int     01Ah
-                jc      int_err
-                cmp     cx, 2359h
-                jl      time_dec
-                cmp     dh, 59h
-                ja      time_read
-time_dec:
+                jnc     at_check_1
+                jmp     int_err
+at_check_1:
+                mov     al,ch
+                call    at_bcd_valid
+                jnc     at_check_2
+                jmp     int_err
+at_check_2:
+                cmp     al,23h
+                jbe     at_check_3
+                jmp     int_err
+at_check_3:
+                mov     al,cl
+                call    at_bcd_valid
+                jnc     at_check_4
+                jmp     int_err
+at_check_4:
+                cmp     al,59h
+                jbe     at_check_5
+                jmp     int_err
+at_check_5:
+                mov     al,dh
+                call    at_bcd_valid
+                jnc     at_check_6
+                jmp     int_err
+at_check_6:
+                cmp     al,59h
+                jbe     at_check_7
+                jmp     int_err
+at_check_7:
                 call    decode_at_time
-                mov     ah, 04h
-                clc
+                mov     cx,0ffffh
+                mov     dx,0ffffh
+                mov     ah,04h
+                stc
                 int     01Ah
-	            jc	    int_err
+                jnc     at_check_8
+                jmp     int_err
+at_check_8:
+                mov     al,ch
+                call    at_bcd_valid
+                jnc     at_check_9
+                jmp     int_err
+at_check_9:
+                cmp     al,19h
+                jae     at_check_10
+                jmp     int_err
+at_check_10:
+                mov     al,cl
+                call    at_bcd_valid
+                jnc     at_check_11
+                jmp     int_err
+at_check_11:
+                mov     al,dh
+                call    at_bcd_valid
+                jnc     at_check_12
+                jmp     int_err
+at_check_12:
+                cmp     al,1
+                jae     at_check_13
+                jmp     int_err
+at_check_13:
+                cmp     al,12h
+                jbe     at_check_14
+                jmp     int_err
+at_check_14:
+                mov     al,dl
+                call    at_bcd_valid
+                jnc     at_check_15
+                jmp     int_err
+at_check_15:
+                cmp     al,1
+                jae     at_check_16
+                jmp     int_err
+at_check_16:
+                cmp     al,31h
+                jbe     at_check_17
+                jmp     int_err
+at_check_17:
                 call    decode_at_date
 ELSE
                 call    read_rtc_clock
@@ -92,6 +163,25 @@ print_time:
                 ret
 
 IF ATCLOCK
+; AL packed BCD; carry set for an invalid digit. Other registers preserved.
+at_bcd_valid:
+                push    ax
+                and     al,0fh
+                cmp     al,9
+                ja      at_bcd_bad
+                pop     ax
+                push    ax
+                and     al,0f0h
+                cmp     al,90h
+                ja      at_bcd_bad
+                pop     ax
+                clc
+                ret
+at_bcd_bad:
+                pop     ax
+                stc
+                ret
+
 decode_at_time:
                 push    ax
                 push    bx

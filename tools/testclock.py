@@ -90,9 +90,9 @@ def rtc(folder):
     # Select the ATCLOCK branch of the source's conditional assembly.
     prefix = re.sub(r"ELSE.*?ENDIF", "", prefix, flags=re.S)
     prefix = re.sub(r"(?m)^(?:IF ATCLOCK|ENDIF)\s*$", "", prefix)
-    decode = source[source.index("decode_at_time:"):source.index("\nELSE", source.index("decode_at_time:"))]
+    decode = source[source.index("at_bcd_valid:"):source.index("\nELSE", source.index("decode_at_time:"))]
     bcd = source[source.index("bcd_conv_byte:"):source.index("leap_days:")]
-    for failure in (0, 2, 4):
+    for failure in (0, 2, 4, 6, 8):
         execute(folder, """
  mov dx,bdos
  mov ax,25e0h
@@ -103,9 +103,20 @@ def rtc(folder):
  jmp time_read
 """ + EXIT + f"""
 bios:
+ cmp byte [scenario],6
+ je bios_noop
  push bp
  mov bp,sp
  and word [bp+6],0fffeh
+ cmp byte [scenario],8
+ jne bios_check
+ xor cx,cx
+ xor dx,dx
+ pop bp
+ iret
+bios_noop:
+ iret
+bios_check:
  cmp ah,{failure}
  jne bios_good
  or word [bp+6],1
@@ -153,6 +164,7 @@ quit:
 msg_at_unsupported db 0
 msg_86err db 0
 msg_interr db 0
+scenario db {failure}
 error db 0
 printed db 0
 tm_buffer times 8 db 0
@@ -170,7 +182,7 @@ tm_buffer times 8 db 0
  jne failed
  jmp ok
 """ + EXIT + "tm_buffer times 8 db 0\n" + asm(decode + "\n" + bcd))
-    print("PASS: RTC success, both BIOS carry failures and decoder register preservation")
+    print("PASS: 5 RTC scenarios (valid, two carry errors, no-op BIOS, zero fields) and decoder preservation")
 
 
 def wait(folder):
