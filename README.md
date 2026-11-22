@@ -36,6 +36,7 @@ A cleaned-up distribution and kernel is available at https://github.com/tsupplis
 | `cls` | Clear the screen | `cls` targets VT52; `clsansi` targets VT100/ANSI terminals. |
 | `pause` | Wait for a keystroke | CP/M-86 submit tool. |
 | `wait` | Wait for n seconds (1-9) | BIOS timer on BDOS `22h`; BDOS delay on later CP/M-family systems, including Concurrent. |
+| `qdemo` | Native message queue demo | Build with `make qdemo.cmd` (Aztec C 4.3 toolchain). Run `QDEMO` under CCP/M-86 3.1 or Concurrent DOS 4.1 (BDOS `1431h` or `1441h`). |
 | `ver` | Display BDOS and operating-system version | Identifies the CP/M-86 family; `dosver.com` is the DOS-family PC-MODE counterpart, including DR DOS and Concurrent DOS probes. |
 | `mem` | Display available and system memory | DOS PC-MODE counterparts: `dosmem.com` uses the DOS 2+ resize-allocation probe when available, with a PSP fallback for DOS 1. Both show the BIOS conventional-memory total. |
 | `ball` | CGA bouncing-ball demo | CP/M-86 assembly source in `ball.a86`; built with `asm86`, then `gencmd 8080`. CP/M-86 1.1 and DOS Plus use BIOS mode setup; CCP/M-86 3.1 and later Concurrent releases use XIOS console modes, BDOS keyboard/delay calls and CGA framebuffer drawing. Stock XIOS requires CGA; the patched CCP/M kernel also supports EGA/VGA. Press a normal key to exit. Based on https://www.z80cpu.eu/mirrors/klaw/bouncy.zip. |
@@ -61,6 +62,14 @@ for the OS routing, required adapters, supported modes and test coverage.
 Graphics memory is shared: exit the graphics application before switching
 consoles. A normal key exits `ballc`, `sine`, `rose` and `ripple` and restores text mode.
 `ball.cmd` is the separate assembly demo and does not use the C library.
+
+`QDEMO` uses the same queue block layouts as the MP/M-86 MPMSTAT resident
+process. It creates and opens a regular one-slot queue named `QDEMO41`, checks
+empty and full responses, verifies the eight-byte payload after reading it
+back, then deletes the queue and checks that it can no longer be opened.
+Run one instance at a time. The demo uses conditional queue I/O so that empty
+and full queues return immediately. The MP/M resident command dispatch and
+console handoff are separate from these queue operations.
 
 ### Clock and Emulator Tools
 

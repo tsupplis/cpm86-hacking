@@ -89,6 +89,12 @@ ls.cmd: ls.o util.lib
 ciotest.cmd: ciotest.o util.lib
 	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
+qdemo.cmd: qdemo.o qcall.o
+	$(LD) $(CPM86_LDFLAGS) -o $@ $^
+
+qcall.o: qcall.asm
+	$(CC) $(CPM86_CFLAGS) -c -o $@ $<
+
 cp.cmd: cp.o util.lib
 	$(LD) $(CPM86_LDFLAGS) -o $@ $^
 
@@ -255,7 +261,7 @@ dosver.obj: dosver.asm
 	[ -f "$@" ]
 
 clean:
-	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(CPM86TOOLS) $(DOSTOOLS) util.lib
+	$(RM) *.o *.h86 *.log *.sym *.prn *.lst *.obj $(CPM86TOOLS) $(DOSTOOLS) qdemo.cmd util.lib
 	$(RM) dosver.exe $(EXTRAS)
 	$(RM) cpmtest.img ccpmtest.img cpm86-bin.img dostest.img dos-bin.img
 	(cd pce;$(MAKE) clean)
