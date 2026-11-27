@@ -149,6 +149,7 @@ Raw console I/O and display control for the PC's VT52-style console.
 |----------|-----------|-------------|
 | `kbhit` | `int kbhit(void)` | Checks whether console input is waiting. |
 | `getch` | `int getch(void)` | Reads a console character without echo. |
+| `conout_direct` | `void conout_direct(int enabled)` | When enabled, routes console output through BDOS 6. Default output uses BDOS 2. |
 | `cputc` | `int cputc(char c)` | Writes one console character; returns OS output status. |
 | `cputs` | `int cputs(char *str)` | Writes a NUL-terminated console string. Returns 0. |
 | `gotoxy` | `void gotoxy(int x, int y)` | Positions the cursor at zero-based row `x`, column `y`. Coordinates must fit the screen. |
@@ -168,7 +169,8 @@ Raw console I/O and display control for the PC's VT52-style console.
 
 ### Usage notes
 
-- `kbhit` returns nonzero for waiting input, but may return zero while `getch` has buffered input.
+- `kbhit` returns nonzero for either library-buffered input or input waiting at the console.
+- Enable `conout_direct(1)` when pairing screen updates with direct input on CP/M-86 1.1. This bypasses the normal output path's input lookahead and TAB expansion. Bytes FEh and FFh still use BDOS 2 because they select input operations in BDOS 6.
 - `getch` waits for input, preserves high-bit bytes, and does no editing or key decoding.
 - `statline` sends the console escapes `ESC 1` (on) / `ESC 0` (off) on every version; there is no XIOS call. `gfx_mode` turns the status line off for graphics modes and back on when returning to text.
 - `textcolor` ignores values below 1; positive values use their low byte.
@@ -379,13 +381,13 @@ Times are treated as UTC.
 - File operations require an open FCB. `getfdatetime`: `which=0` selects creation/access, nonzero selects modification; returns 0 or -1 on failure/unsupported.
 - `setfdatetime`: NULL preserves a time. Requires version >= `0x41`; returns 0..3 on success, -1 for read failure, or `0xFF` for write failure/unsupported.
 - `epoch`/`epoch_now`: return `EPOCH_ERR` on failure. `epoch` rejects NULL, invalid dates, years outside 1970..2099, and overflow. With 32-bit `long`, the last supported instant is 2038-01-19 03:14:07 UTC.
-- `gettime`/`settime`: require version > `0x22`. `gettime` returns BCD seconds or -1; `settime` returns 0 or -1. Setting seconds is supported only on DOS Plus; elsewhere they become zero.
+- `gettime`/`settime`: require version > `0x22`. `gettime` returns BCD seconds or -1; `settime` returns 0 or -1. Clock writes have minute resolution on the tested Concurrent CP/M, Concurrent DOS and DOS Plus 1.2 guests. On DOS Plus 1.2, writing 23:59:37 and reading immediately returned 23:59:00.
 
 ### Date formats
 
 Packed stamps contain a little-endian 16-bit day count (1 = 1978-01-01),
-then BCD hour and minute. Clock buffers reserve a fifth byte for DOS Plus
-BCD seconds. File-stamp buffers contain two four-byte stamps: create/access,
+then BCD hour and minute. Supply five bytes for clock calls. Read seconds
+from the return value of `gettime`. DOS Plus 1.2 left the fifth byte untouched. File-stamp buffers contain two four-byte stamps: create/access,
 then update. Prefer the `sysdt` functions unless packed data is needed.
 
 ### Structures & Constants

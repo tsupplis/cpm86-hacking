@@ -75,13 +75,26 @@ static terminal_cfg_t terminal = {
 };
 
 
-int kbhit() {   
-    return bdos(6,254);
-}
-
 #define GETCH_BUFLEN (64)
 
 static char getch_buffer[GETCH_BUFLEN];
+static int getch_count, getch_head;
+static int direct_output;
+
+int kbhit()
+{
+    return getch_count ? 255 : bdos(6, 254);
+}
+
+#ifdef __STDC__
+void conout_direct(int enabled)
+#else
+conout_direct(enabled)
+    int enabled;
+#endif
+{
+    direct_output = enabled;
+}
 
 #ifndef __STDC__
 int cputc(c)
@@ -90,7 +103,9 @@ int cputc(c)
 int cputc(char c)
 #endif
 {
-	return bdos(2,c);
+	/* BDOS 6 reserves FE and FF for console input operations. */
+    unsigned char byte = c;
+    return bdos(direct_output && byte < 254 ? 6 : 2, byte);
 }
 
 #ifndef __STDC__
@@ -101,29 +116,25 @@ int cputs(char *str)
 #endif
 {
 	while (*str) {
-		bdos(2,*str++);
+		cputc(*str++);
     }
 	return 0;
 }
 
 int getch()
 {
-    int i,c,d;
-    static int s=0;
-    static int o=0;
-
-    if(s>0) {
-        c=(unsigned char)getch_buffer[o];s--;o++;
-        o=o%GETCH_BUFLEN;
+    int c, d;
+    if (getch_count) {
+        c = (unsigned char)getch_buffer[getch_head];
+        --getch_count;
+        getch_head = (getch_head + 1) % GETCH_BUFLEN;
         return c;
     }
-    while(!(c=bdos(6,255))) 
-        continue;
-    while(s<GETCH_BUFLEN && (d=bdos(6,255))) {
-        if(1) { 
-            getch_buffer[(o+s)%GETCH_BUFLEN]=d;
-            s++;
-        }
+    while (!(c = bdos(6, 255)))
+        ;
+    while (getch_count < GETCH_BUFLEN && (d = bdos(6, 255))) {
+        getch_buffer[(getch_head + getch_count) % GETCH_BUFLEN] = d;
+        ++getch_count;
     }
     return c;
 }

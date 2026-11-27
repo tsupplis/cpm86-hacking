@@ -181,9 +181,9 @@ setftime_	endp
 ;   DW  day     ; day 1 = 1 January 1978, little endian
 ;   DB  hour    ; packed BCD
 ;   DB  minute  ; packed BCD
-;   DB  second  ; packed BCD, DOS Plus only: T_GET stores it and T_SET reads it
-; so the buffer must be 5 bytes. Elsewhere the seconds are not in the stamp:
-; T_GET returns them in AL, and T_SET resets them to zero.
+;   DB  reserved ; keep a five-byte clock buffer for compatibility
+; T_GET returns seconds in AL. On DOS Plus 1.2, T_GET leaves byte five
+; untouched and T_SET resets seconds to zero.
 ;
 ; int gettime(char *stamp)  -- seconds (packed BCD, 0..59h) or -1 if unsupported
 ; int settime(char *stamp)  -- 0 or -1 if unsupported

@@ -43,6 +43,7 @@ textcolor();
 setstatus();
 int cputs();
 int cputc();
+conout_direct();
 scrmode();
 #else
 int kbhit();
@@ -62,6 +63,7 @@ void textcolor(int fg);
 void setstatus(char * s);
 int cputs(char *);
 int cputc(char);
+void conout_direct(int enabled);
 void scrmode(int);
 #endif
 

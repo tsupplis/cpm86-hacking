@@ -162,8 +162,10 @@ static unsigned char output[256];
 static int used, version, system_type, resets, video;
 static int status_writes;
 static char status_text[14];
+static int last_fn;
 int test_bdos(fn, arg) int fn, arg; {
-    if (fn == 2) output[used++] = arg;
+    last_fn = fn;
+    if (fn == 2 || fn == 6) output[used++] = arg;
     return 0;
 }
 int osver() { return version; }
@@ -225,6 +227,14 @@ int main() {
         expect("\x1b0", "status off bytes");
     }
     clrscr(); expect("\x1bE", "clear screen");
+    check(last_fn == 2, "normal output by default");
+    conout_direct(1);
+    gotoxy(3, 7); expect(position, "direct cursor positioning");
+    check(last_fn == 6, "direct output bypasses console input lookahead");
+    cputc((char)255);
+    check(last_fn == 2 && used == 1, "reserved direct input byte uses normal output");
+    used = 0;
+    conout_direct(0);
     clreos(); expect("\x1bJ", "clear screen tail");
     clreol(); expect("\x1bK", "clear line tail");
     insline(); expect("\x1bL", "insert line");
@@ -281,6 +291,9 @@ def keyboard(folder):
             body = function(text[text.index("int getch()"):], "getch")
         else:
             body = function(text, "getch", last=True)
+        if name == "conio.c":
+            declaration += "\nstatic int getch_count, getch_head;"
+            body += "\n" + function(text, "kbhit")
         body = body.replace("malloc(", "test_malloc(")
         (folder / "test.c").write_text(r'''
 #include <stdio.h>
@@ -314,6 +327,13 @@ int main() {
     return 0;
 }
 ''')
+        if name == "conio.c":
+            path = folder / "test.c"
+            path.write_text(path.read_text().replace(
+                'check(getch()==0x41,"direct byte");',
+                'check(getch()==0x41,"direct byte");\n'
+                '        check(kbhit()!=0 && pos==(i+1)*5,"kbhit sees buffered bytes");',
+            ))
         # Rename only the source's BDOS calls, not the C runtime's console I/O.
         path = folder / "test.c"
         path.write_text(re.sub(r"\bbdos\(", "test_bdos(", path.read_text()))
